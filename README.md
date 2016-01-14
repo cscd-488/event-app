@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cscd-488/event-app.svg?branch=master)](https://travis-ci.org/cscd-488/event-app)
+
 # event!
 Check-in at local events, earn badges, and redeem them for real rewards.
 
