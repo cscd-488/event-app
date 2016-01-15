@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp">
+
+    <!-- List Row Way-Point Element -->
+    <LinearLayout
+        android:id="@+id/event"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dip"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dip">
+
+        <!-- Thumbnail Image -->
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:src="@drawable/spokane"/>
+
+    </LinearLayout>
+
+    <!-- Title of Event -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/event"
+        android:layout_toRightOf="@+id/event"
+        android:text="Spokane Art Walk"
+        android:textSize="15dip"
+        android:textStyle="bold" />
+
+    <!-- Description of Event -->
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:textSize="10dip"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@id/event"
+        android:text="Art Crawl in Downtown Spokane"
+        />
+
+
+</RelativeLayout>
