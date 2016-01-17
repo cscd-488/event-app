@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 
@@ -33,12 +34,16 @@ public class GPSFragment extends Fragment implements LocationListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final double BUFFER = 0.00100000;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private double Lat = 47.48300354;
+    private double Long = -117.57133897;
 
     public GPSFragment() {
         // Required empty public constructor
@@ -71,7 +76,7 @@ public class GPSFragment extends Fragment implements LocationListener {
         }
 
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
+        setRetainInstance(true);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -120,12 +125,20 @@ public class GPSFragment extends Fragment implements LocationListener {
     public void onLocationChanged(Location location) {
         double latitude = (location.getLatitude());
         double longitude = (location.getLongitude());
+        Button button = (Button)getActivity().findViewById(R.id.collectButton);
 
         TextView tv = (TextView)getActivity().findViewById(R.id.latitude);
         tv.setText(Double.toString(latitude));
 
         tv = (TextView)getActivity().findViewById(R.id.longitude);
         tv.setText(Double.toString(longitude));
+
+        if(button != null) {
+            if (latitude - BUFFER < Lat && Lat < latitude + BUFFER && longitude - BUFFER < Long && Long < longitude + BUFFER)
+                button.setVisibility(View.VISIBLE);
+            else
+                button.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
