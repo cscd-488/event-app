@@ -13,6 +13,13 @@ public class CheckPoint {
     private String mImageSrc;
     private double[] mCoordinates; //todo: implement getter / setter for longitude and latitude
 
+    public CheckPoint(String title, String description, String image, double[] coordinates) {
+        this.mTitle = title;
+        this.mDescription = description;
+        this.mImageSrc = image;
+        this.mCoordinates = coordinates;
+    }
+
     public String getmTitle() {
         return mTitle;
     }
