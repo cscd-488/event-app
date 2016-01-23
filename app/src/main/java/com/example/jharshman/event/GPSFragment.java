@@ -1,24 +1,21 @@
 package com.example.jharshman.event;
 
 import android.Manifest;
-import android.app.Application;
+import android.app.Fragment;
 import android.content.Context;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,7 +25,7 @@ import android.widget.TextView;
  * Use the {@link GPSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GPSFragment extends Fragment implements LocationListener {
+public class GPSFragment extends Fragment implements LocationListener{//}, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,6 +41,12 @@ public class GPSFragment extends Fragment implements LocationListener {
 
     private double Lat = 47.48300354;
     private double Long = -117.57133897;
+
+
+    /*
+    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
+    */
 
     public GPSFragment() {
         // Required empty public constructor
@@ -78,15 +81,10 @@ public class GPSFragment extends Fragment implements LocationListener {
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         setRetainInstance(true);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
         }
+
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
 
@@ -133,6 +131,8 @@ public class GPSFragment extends Fragment implements LocationListener {
         tv = (TextView)getActivity().findViewById(R.id.longitude);
         tv.setText(Double.toString(longitude));
 
+        Toast.makeText(getActivity(), "" + latitude, Toast.LENGTH_LONG).show();
+
         if(button != null) {
             if (latitude - BUFFER < Lat && Lat < latitude + BUFFER && longitude - BUFFER < Long && Long < longitude + BUFFER)
                 button.setVisibility(View.VISIBLE);
@@ -156,22 +156,6 @@ public class GPSFragment extends Fragment implements LocationListener {
 
     }
 
-    public boolean hasPermission(String permission)
-    {
-        try {
-            PackageInfo info = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), PackageManager.GET_PERMISSIONS);
-            if (info.requestedPermissions != null) {
-                for (String p : info.requestedPermissions) {
-                    if (p.equals(permission)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
