@@ -7,7 +7,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,10 +21,9 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FrameLayout frameLayout = (FrameLayout) findViewById(R.id.FragmentHolder);
-                GPSFragment mainFragment = GPSFragment.newInstance("Main Fragment", "Main");
-
-                getFragmentManager().beginTransaction().add(frameLayout.getId(), mainFragment).commit();
+                GpsTracker.Event event = new GpsTracker.Event("Home", "This is my home", 47.48300354, -117.57133897);
+                GpsTracker.create(view.getContext());
+                GpsTracker.addLocation(event);
             }
         });
     }
