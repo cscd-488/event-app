@@ -49,8 +49,19 @@ public class ViewPagerFragment extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            //todo: build sliderfragment
-            return new SliderFragment();
+
+            // case statement
+            switch (position) {
+                case 0:
+                    return new SliderFragment();
+                case 1:
+                    return new DifferentFragment();
+                case 2:
+                    return new SliderFragment();
+                default:
+                    return new SliderFragment();
+            }
+
         }
 
         @Override
@@ -61,5 +72,3 @@ public class ViewPagerFragment extends Fragment {
 
 
 }
-
-// todo: build new sliderfragment which will be content for the viewpager fragment to show
