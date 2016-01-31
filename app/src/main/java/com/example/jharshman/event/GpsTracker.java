@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -73,10 +74,11 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         }
     }
 
-    private static final double buffer = 0.00100000;
+    private static final double buffer = 0.00065000;
     private static GpsTracker gpsTracker = null;
     private static Context context;
     private static GoogleApiClient googleApiClient;
+    private static boolean notificationsEnabled = false;
 
     private ArrayList<Event> locations;
     private Event inRange;
@@ -98,6 +100,9 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
 
         return gpsTracker;
     }
+
+    public static void enableNotifications(){notificationsEnabled = true;}
+    public static void disableNotifications(){notificationsEnabled = false;}
 
     private static void setupGps(){
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -121,7 +126,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
             LocationRequest locationRequest = LocationRequest.create();
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
             locationRequest.setInterval(30 * 1000);
-            locationRequest.setFastestInterval(5 * 1000);
+            locationRequest.setFastestInterval(15 * 1000);
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(locationRequest);
 
@@ -207,8 +212,6 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
             }
         }
 
-        Toast.makeText(context, _lat + " : " + coord[0], Toast.LENGTH_SHORT).show();
-
         return null;
     }
 
@@ -219,6 +222,9 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         NotificationCompat.Builder mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(details[0])
                 .setContentText(details[1]);
+
+        mBuilder.setVibrate(new long[]{1000,1000,1000,1000,1000});
+        mBuilder.setLights(Color.CYAN, 3000, 3000);
 
         Intent notIntent = new Intent(context, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
@@ -253,7 +259,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         Event event = inRange(latitude, longitude);
 
         if(event != null){
-            if(!event.wasDisplayed()) {
+            if(notificationsEnabled && !event.wasDisplayed()) {
                 sendNotification(context);
                 event.displayed();
             }

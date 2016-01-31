@@ -22,10 +22,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 GpsTracker.Event event = new GpsTracker.Event("Home", "This is my home", 47.48300354, -117.57133897);
+                GpsTracker.Event event2 = new GpsTracker.Event("CEB", "You've arrived at the CEB", 47.48967, -117.585313);
                 GpsTracker.create(view.getContext());
-                GpsTracker.addLocation(event);
+                GpsTracker.addLocation(event, event2);
             }
         });
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        GpsTracker.enableNotifications();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        GpsTracker.disableNotifications();
     }
 
     @Override
