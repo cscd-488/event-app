@@ -1,7 +1,5 @@
 package com.example.jharshman.event;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -11,7 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
@@ -26,7 +25,8 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
-    public static final int READ_QR_INTENT_REQUEST_CODE = 0;
+
+    public static final int READ_QR_INTENT_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // get main content image view
-        ImageView mainImage = (ImageView) findViewById(R.id.main_image);
+//        ImageView mainImage = (ImageView) findViewById(R.id.main_image);
 
         // generate bitmap
 //        Bitmap bitmap = generateQRCode("Hello World!");
@@ -48,69 +48,44 @@ public class MainActivity extends AppCompatActivity {
 //        File file = new File(Environment.getExternalStorageDirectory(), "QRCode.bmp");
 //        writeBitmapToFile(bitmap, file);
 
-        // read QR code via Intent
-//        readQRCodeIntent();
+        Button scanButton = (Button) findViewById(R.id.main_scan_button);
 
-        // read QR code via ScanFragment
-        readQRCodeScan();
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // read QR code
+                readQRCodeScanActivity();
+            }
+        });
     }
 
     /**
-     * Opens ScanFragment
-     *
-     * QR code String representation returned in Fragment callback
+     * Read QR code with ScanActivity
      */
-    private void readQRCodeScan() {
+    private void readQRCodeScanActivity() {
 
-        // get fragment manager
-        FragmentManager fragmentManager = getFragmentManager();
-        // try to find fragment, if it exists
-        ScanFragment fragment =  (ScanFragment) fragmentManager.findFragmentByTag("scan_fragment");
-        // if fragment does not exist, create a new one
-        if(fragment == null) {
-            fragment = new ScanFragment();
-        }
+        // Create new intent for Scan Activity
+        Intent intent = new Intent(this, ScanActivity.class);
 
-        // fragment transaction
-
-        final String FRAGMENT_SCAN_TAG = "fragment_scan_tag";
-
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if(fragmentManager.findFragmentById(R.id.main_frame) == null) {
-            fragmentTransaction.add(R.id.main_frame, fragment, FRAGMENT_SCAN_TAG);
-        } else {
-            fragmentTransaction.replace(R.id.main_frame, fragment, FRAGMENT_SCAN_TAG);
-        }
-        fragmentTransaction.commit();
-    }
-
-    /**
-     * Read QR Code via Intent
-     *
-     * Result is recieved in onActivityResult
-     */
-    private void readQRCodeIntent() {
-
-        // launch intent to scan
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
+        // Launch Intent for result
         startActivityForResult(intent, READ_QR_INTENT_REQUEST_CODE);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (resultCode == RESULT_OK) {
+
+            // process string scan result
             if (requestCode == READ_QR_INTENT_REQUEST_CODE) {
 
-                // get scan result
-                String result = intent.getStringExtra("SCAN_RESULT");
-                // get scan format
-                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+                // get string result from intent
+                String result = intent.getStringExtra(ScanActivity.SCAN_RESULT);
 
-                // update text view with data read
-                TextView mainText = (TextView) findViewById(R.id.main_text);
-                mainText.setText(result);
+                Log.i(TAG, "Scan Result: " + result);
+
+                // set text view with result
+                TextView textView = (TextView) findViewById(R.id.main_scan_result_text);
+                textView.setText(result);
             }
         }
     }
