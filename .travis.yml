@@ -1,12 +1,39 @@
 language: android 
+jdk: openjdk7
+sudo: false
+
+# Specify OS environment
+os:
+    - linux
+
+# blacklist
+branches:
+    except:
+        - /^legacy-.*$/
+        - /^poc-.*$/
+
 android:
   components:
+
+    # Latest revision of Android SDK Tools
     - platform-tools
+    - tools
+
+    # BuildTools version
     - build-tools-23.0.1
+
+    # SDK version
     - android-23
 
-notifications:
-  email: false
+    # Additional components
+    - extra-android-m2repository
+    - extra-google-m2repository
 
+
+# Setup notifications
+notifications:
+    slack: cscd-488:2uwpZGdpikeZyr31e9uozhhK#github
+
+# Execute Build
 script:
   - ./gradlew clean build
