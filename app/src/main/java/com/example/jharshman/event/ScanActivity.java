@@ -18,6 +18,7 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.PlanarYUVLuminanceSource;
@@ -73,6 +74,15 @@ public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusC
 
         // get an instance of the camera
         mCamera = getCameraInstance();
+
+        // if camera is already in use or does not exist, abort
+        if(mCamera == null) {
+            // notify user
+            Toast.makeText(ScanActivity.this, "Camera Unavailable", Toast.LENGTH_SHORT).show();
+            // finish activity
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+        }
 
         // assign camera to preview
         mPreview = new CameraPreview(this, mCamera);
