@@ -1,17 +1,14 @@
 package com.example.jharshman.event;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -22,11 +19,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ScanFragment.OnScanFragmentInteraction, ButtonFragment.OnButtonFragmentInteraction {
 
     public static final String TAG = "MainActivity";
 
-    public static final int READ_QR_INTENT_REQUEST_CODE = 1;
+    private static final String BUTTON_FRAGMENT_TAG = "button_fragment";
+    private static final String SCAN_FRAGMENT_TAG = "scan_fragment";
+    private static final String CURRENT_FRAGMENT = "current_fragment";
+
+    private String mCurrentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,58 +36,32 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // get main content image view
-//        ImageView mainImage = (ImageView) findViewById(R.id.main_image);
 
-        // generate bitmap
-//        Bitmap bitmap = generateQRCode("Hello World!");
+        // load fragment into main frame
+        Fragment fragment;
 
-        // set image view to bitmap
-//        mainImage.setImageBitmap(bitmap);
+        // check for and load current fragment
+        if(savedInstanceState != null) {
+            mCurrentFragment = savedInstanceState.getString(CURRENT_FRAGMENT);
 
-        // write bitmap to file
-//        File file = new File(Environment.getExternalStorageDirectory(), "QRCode.bmp");
-//        writeBitmapToFile(bitmap, file);
+            fragment = getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
 
-        Button scanButton = (Button) findViewById(R.id.main_scan_button);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_frame, fragment, mCurrentFragment)
+                    .commit();
 
-        scanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // read QR code
-                readQRCodeScanActivity();
+        }
+        else {
+            // load button fragment
+            fragment = getSupportFragmentManager().findFragmentByTag(BUTTON_FRAGMENT_TAG);
+            if (fragment == null) {
+                fragment = new ButtonFragment();
             }
-        });
-    }
+            mCurrentFragment = BUTTON_FRAGMENT_TAG;
 
-    /**
-     * Read QR code with ScanActivity
-     */
-    private void readQRCodeScanActivity() {
-
-        // Create new intent for Scan Activity
-        Intent intent = new Intent(this, ScanActivity.class);
-
-        // Launch Intent for result
-        startActivityForResult(intent, READ_QR_INTENT_REQUEST_CODE);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
-        if (resultCode == RESULT_OK) {
-
-            // process string scan result
-            if (requestCode == READ_QR_INTENT_REQUEST_CODE) {
-
-                // get string result from intent
-                String result = intent.getStringExtra(ScanActivity.SCAN_RESULT);
-
-                Log.i(TAG, "Scan Result: " + result);
-
-                // set text view with result
-                TextView textView = (TextView) findViewById(R.id.main_scan_result_text);
-                textView.setText(result);
-            }
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_frame, fragment, BUTTON_FRAGMENT_TAG)
+                    .commit();
         }
     }
 
@@ -180,5 +155,61 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Scan Fragment Interaction will be called with the
+     * String representation of the decoded QR code
+     *
+     * @param code The String representation of the QR code
+     */
+    @Override
+    public void onScanFragmentInteraction(String code) {
+
+        // get button fragment
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(BUTTON_FRAGMENT_TAG);
+        if(fragment == null) {
+            fragment = new ButtonFragment();
+        }
+        mCurrentFragment = BUTTON_FRAGMENT_TAG;
+
+        // set the text to the fragment
+        Bundle bundle = new Bundle();
+        bundle.putString("code", code);
+        fragment.setArguments(bundle);
+
+        // swap current fragment for button fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_frame, fragment, BUTTON_FRAGMENT_TAG)
+                .commit();
+    }
+
+    /**
+     * Handle button click
+     *
+     * @param clicked Button was clicked
+     */
+    @Override
+    public void onButtonFragmentInteraction(boolean clicked) {
+
+        // get scan fragment
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT_TAG);
+        if(fragment == null) {
+            fragment = new ScanFragment();
+        }
+        mCurrentFragment = SCAN_FRAGMENT_TAG;
+
+        // swap the current fragment for the button fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_frame, fragment, SCAN_FRAGMENT_TAG)
+                .commit();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save current fragment tag
+        outState.putString(CURRENT_FRAGMENT, mCurrentFragment);
     }
 }
