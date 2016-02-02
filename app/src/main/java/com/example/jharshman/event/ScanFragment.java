@@ -2,7 +2,7 @@
 /**
  * @author Bruce Emehiser
  *
- * Scan Activity used for scanning QR codes
+ * Scan Fragment used for scanning QR codes
  *
  * This uses ZXing technology to decoded images
  * captured with the device camera.
@@ -10,13 +10,15 @@
 
 package com.example.jharshman.event;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -27,12 +29,12 @@ import com.google.zxing.common.HybridBinarizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusCallback, Camera.PreviewCallback, DecodeImageTask.Callback {
-
-    /**
-     * Intent result key for retrieving intent data
-     */
-    public static final String SCAN_RESULT = "SCAN_RESULT";
+/**
+ * Scan Fragment used to scan QR codes
+ * and decode the string value contained
+ * in them
+ */
+public class ScanFragment extends Fragment implements Camera.AutoFocusCallback, Camera.PreviewCallback, DecodeImageTask.Callback {
 
     /**
      * Image capture period in milliseconds
@@ -55,21 +57,44 @@ public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusC
     private Timer mTimer;
 
     /**
-     * Set layout to activity_scan.xml
-     *
-     * @param savedInstanceState Bundled saved instance data
+     * Scan Fragment Interaction listener to notify
+     * when scan completes
      */
+    private OnScanFragmentInteraction mListener;
+
+    public ScanFragment() {
+        // Required empty public constructor
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scan);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_scan, container, false);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // required check for implementation of interface
+        if (context instanceof OnScanFragmentInteraction) {
+            mListener = (OnScanFragmentInteraction) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement OnScanFragmentInteraction");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     /**
      * Starts scan timer
      */
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         // get an instance of the camera
@@ -78,17 +103,14 @@ public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusC
         // if camera is already in use or does not exist, abort
         if(mCamera == null) {
             // notify user
-            Toast.makeText(ScanActivity.this, "Camera Unavailable", Toast.LENGTH_SHORT).show();
-            // finish activity
-            setResult(Activity.RESULT_CANCELED);
-            finish();
+            Toast.makeText(getContext(), "Camera Unavailable", Toast.LENGTH_SHORT).show();
         }
 
         // assign camera to preview
-        mPreview = new CameraPreview(this, mCamera);
+        mPreview = new CameraPreview(getContext(), mCamera);
 
         // add preview to frame layout
-        FrameLayout preview = (FrameLayout) findViewById(R.id.scan_frame);
+        FrameLayout preview = (FrameLayout) getActivity().findViewById(R.id.scan_frame);
         preview.addView(mPreview);
 
         // timer to take pictures on a schedule
@@ -109,7 +131,7 @@ public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusC
      * timer, camera, and preview
      */
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
 
         // stop timer
@@ -221,6 +243,22 @@ public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusC
     }
 
     /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow fragment to pass data to the activity.
+     */
+    public interface OnScanFragmentInteraction {
+
+        /**
+         * Scan Fragment Interaction will be called with the
+         * String representation of the decoded QR code
+         *
+         * @param code The String representation of the QR code
+         */
+        void onScanFragmentInteraction(String code);
+    }
+
+
+    /**
      * On Post Execute is called by the Async Task when it successfully finishes
      * You should set yourself as a listener before executing task, or else it may
      * finish before you are added.
@@ -230,10 +268,13 @@ public class ScanActivity extends AppCompatActivity implements Camera.AutoFocusC
     @Override
     public void onTaskCompleted(String code) {
 
-        // return data via intent
-        Intent result = new Intent();
-        result.putExtra(SCAN_RESULT, code);
-        setResult(Activity.RESULT_OK, result);
-        finish();
+        // return data to listener
+        if(mListener != null) {
+            try {
+                mListener.onScanFragmentInteraction(code);
+            } catch (NullPointerException e) {
+                // listener has died
+            }
+        }
     }
 }
