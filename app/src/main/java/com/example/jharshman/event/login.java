@@ -1,7 +1,12 @@
 package com.example.jharshman.event;
 
 /* standard android libraries */
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -9,19 +14,47 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-/* facebook library */
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
+/* google gms libraries */
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.Status;
 
-public class login extends Fragment {
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 
-    private LoginButton mLoginButton;
-    private CallbackManager mCallbackManager;
+import de.hdodenhof.circleimageview.CircleImageView;
+
+public class login extends Fragment implements
+        GoogleApiClient.OnConnectionFailedListener,
+        View.OnClickListener {
+
+    private static final String TAG = "LoginFragment";
+    private static final int RC_SIGN_IN = 9001;
+
+    private GoogleApiClient mGoogleApiClient;
+    private ProgressDialog mProgressDialog;
+    private String mPersonName;
+    private Uri mPersonPhoto;
+
+    private CircleImageView mProfileImage;
+    private ImageView mMainLogo;
+    private TextView mWelcomeText;
+    private SignInButton mSignInButton;
 
     public login() {
         // Required empty public constructor
@@ -50,9 +83,6 @@ public class login extends Fragment {
             Log.e("LoginFragment","Hide Action Bar",npe);
         }
 
-        FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
-        mCallbackManager = CallbackManager.Factory.create();
-
     }
 
     @Override
@@ -61,35 +91,79 @@ public class login extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
+        // request user id, email address, and basic profile
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                .requestProfile()
+                .requestEmail()
+                .build();
+
+        // create GoogleApiClient object
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .enableAutoManage(getActivity() /* Fragment Activity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+
         // register button
-        mLoginButton = (LoginButton)view.findViewById(R.id.login_facebook);
+        mSignInButton = (SignInButton) view.findViewById(R.id.loginButton);
+        mSignInButton.setSize(SignInButton.SIZE_WIDE);
+        mSignInButton.setScopes(gso.getScopeArray());
 
-        //todo: is excluding this call impairing functionality?
-        //mLoginButton.setFragment(this);
+        // register other elements
+        mMainLogo = (ImageView) view.findViewById(R.id.mainLogo);
+        mProfileImage = (CircleImageView) view.findViewById(R.id.profilePicture);
+        mWelcomeText = (TextView) view.findViewById(R.id.welcomeText);
 
-        // register callback
-        mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.i("onSuccess","successful login");
-            }
 
-            @Override
-            public void onCancel() {
-                Log.i("onCancel","canceled login");
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.i("onError","error login");
-            }
-        });
+        // register OnClickListener
+        view.findViewById(R.id.loginButton).setOnClickListener(this);
 
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //connects client to google play services
+        //if(mGoogleApiClient != null)
+        //    mGoogleApiClient.connect();
+
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if(opr.isDone()) {
+            // if the users cached creds are still valid, OptionalPendingResult will be done and sign in
+            // is available instantly
+            Log.d(TAG,"Got cached sign in");
+            GoogleSignInResult result = opr.get();
+            handleSignInResult(result);
+        } /*else {
+            // if the user has not previously signed in on this device, or the sign-in has expired
+            // this async branch with attempt to sign in the user silently
+            // cross device single sign-on will occur in this branch
+            showProgressDialog();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(GoogleSignInResult googleSignInResult) {
+                    hideProgressDialog();
+                    handleSignInResult(googleSignInResult);
+                }
+            });
+        }*/
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        mGoogleApiClient.stopAutoManage(getActivity());
+
+        //disconnects client to google play services
+        //if(mGoogleApiClient != null && mGoogleApiClient.isConnected())
+        //    mGoogleApiClient.disconnect();
+    }
+
     /**
-     * hands off to Facebook's Callback Manager
      *
      * @param   requestCode integer code corresponding to request
      * @param   resultCode  integer code indicating result
@@ -98,6 +172,138 @@ public class login extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+
+        // result from launching sign-in api intent
+        if(requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
     }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        // Log the result
+        Log.d(TAG, "onConnectionFailed" + connectionResult);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.loginButton:
+                // execute sign in
+                signIn();
+                break;
+            // ...
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        if(result.isSuccess()) {
+            // sign in success, show authed UI
+            GoogleSignInAccount account = result.getSignInAccount();
+            mPersonName = account.getDisplayName();
+            mPersonPhoto = account.getPhotoUrl();
+            updateUI(true);
+        } else {
+            // show un-authed UI
+            updateUI(false);
+        }
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(Status status) {
+                updateUI(false);
+            }
+        });
+    }
+
+    private void showProgressDialog() {
+        if(mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(getContext());
+            mProgressDialog.setMessage(getString(R.string.loading));
+            mProgressDialog.setIndeterminate(true);
+        }
+        mProgressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        if(mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
+    }
+
+    private void updateUI(boolean signedIn) {
+        View view = getView();
+
+        if(signedIn) {
+
+            // update profile picture and text view
+            new LoadImage(mProfileImage).execute(mPersonPhoto.toString());
+            mWelcomeText.setText(getString(R.string.Welcome, mPersonName.split("\\s+")));
+
+            // set un-authed elements invisible
+            mSignInButton.setVisibility(View.GONE);
+            mMainLogo.setVisibility(View.GONE);
+
+            // set authed elements visible
+            mProfileImage.setVisibility(View.VISIBLE);
+            mWelcomeText.setVisibility(View.VISIBLE);
+
+            // drop profile picture in with animation
+            Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.image_zoom);
+            mProfileImage.startAnimation(animation);
+
+        } else {
+
+            // set authed elements invisible
+            mProfileImage.setVisibility(View.GONE);
+            mWelcomeText.setVisibility(View.GONE);
+
+            // set un-authed elements visible
+            mSignInButton.setVisibility(View.VISIBLE);
+            mMainLogo.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+    /**
+     * */
+    private class LoadImage extends AsyncTask<String, Void, Bitmap> {
+        CircleImageView profileImage;
+
+        public LoadImage(CircleImageView profileImage) {
+            this.profileImage = profileImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urlDisplay = urls[0];
+            Bitmap bitmap = null;
+            try {
+                InputStream inputStream = new java.net.URL(urlDisplay).openStream();
+                bitmap = BitmapFactory.decodeStream(inputStream);
+            } catch(MalformedURLException mue) {
+                Log.e(TAG, mue.getMessage());
+            } catch(IOException ioe) {
+                Log.e(TAG, ioe.getMessage());
+            }
+
+            return bitmap;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            profileImage.setImageBitmap(result);
+        }
+
+    }
+
 }
+
+
