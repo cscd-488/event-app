@@ -1,14 +1,19 @@
 package com.example.jharshman.event;
 
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.support.design.widget.FloatingActionButton;
+=======
+>>>>>>> refs/remotes/origin/master
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Fragment mPagerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+<<<<<<< HEAD
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -27,6 +33,20 @@ public class MainActivity extends AppCompatActivity {
                 GpsTracker.addLocation(event, event2);
             }
         });
+=======
+
+        if(findViewById(R.id.FragmentContainer)!=null) {
+            if(savedInstanceState!=null)
+                return;
+
+            // todo: apply logic so this is only done on first run
+            mPagerFragment = new ViewPagerFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.FragmentContainer, mPagerFragment)
+                    .commit();
+        }
+
+>>>>>>> refs/remotes/origin/master
     }
 
     @Override
@@ -61,5 +81,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        int count = getFragmentManager().getBackStackEntryCount();
+        if(count == 0) {
+            super.onBackPressed();
+        } else {
+            getFragmentManager().popBackStack();
+        }
     }
 }

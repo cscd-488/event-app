@@ -1,8 +1,15 @@
 <resources>
     <string name="app_name">Event!</string>
     <string name="action_settings">Settings</string>
+<<<<<<< HEAD
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">GPS Fragment</string>
     <string name="CollectButton">Collect</string>
+=======
+    <string name="facebook_app_id">457159574473893</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+>>>>>>> refs/remotes/origin/master
 </resources>
