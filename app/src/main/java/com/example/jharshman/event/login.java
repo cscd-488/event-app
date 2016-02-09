@@ -32,6 +32,7 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
+import com.koushikdutta.ion.Ion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,8 +95,7 @@ public class login extends Fragment implements
         // request user id, email address, and basic profile
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                .requestProfile()
-                .requestEmail()
+                .requestIdToken(getString(R.string.OAuth_client_ID))
                 .build();
 
         // create GoogleApiClient object
@@ -204,6 +204,9 @@ public class login extends Fragment implements
             GoogleSignInAccount account = result.getSignInAccount();
             mPersonName = account.getDisplayName();
             mPersonPhoto = account.getPhotoUrl();
+
+            /* todo: Pass Token To Backend Server using HTTPS POST */
+
             updateUI(true);
         } else {
             // show un-authed UI
@@ -246,7 +249,16 @@ public class login extends Fragment implements
         if(signedIn) {
 
             // update profile picture and text view
-            new LoadImage(mProfileImage).execute(mPersonPhoto.toString());
+
+            /* something along these lines for image loading
+            * can replace the async LoadImage class */
+            Ion.with(view.getContext())
+                    .load(mPersonPhoto.toString())
+                    .withBitmap()
+                    .animateIn(R.anim.image_zoom)
+                    .intoImageView(mProfileImage);
+
+            //new LoadImage(mProfileImage).execute(mPersonPhoto.toString());
             mWelcomeText.setText(getString(R.string.Welcome, mPersonName.split("\\s+")));
 
             // set un-authed elements invisible

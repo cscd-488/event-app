@@ -30,6 +30,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+
+    //todo: target specific version of ION to increase stability
+    compile 'com.koushikdutta.ion:ion:2.+'
 }
 
 apply plugin: 'com.google.gms.google-services'

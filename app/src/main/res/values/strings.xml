@@ -4,4 +4,5 @@
     <string name="loading">Signing in...</string>
     <string name="Welcome">Hello %1$s!</string>
     <string name="swipe_to_learn">Swipe to Learn More ></string>
+    <string name="OAuth_client_ID">170378995036-99ob67o6p5871kn02omq6bh5blb25070.apps.googleusercontent.com</string>
 </resources>
