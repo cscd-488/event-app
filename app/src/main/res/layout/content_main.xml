@@ -17,17 +17,15 @@
     -->
 
     <FrameLayout
-<<<<<<< HEAD
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
         android:id="@+id/FragmentHolder"></FrameLayout>
-=======
+    <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/FragmentContainer"></FrameLayout>
->>>>>>> refs/remotes/origin/master
 </RelativeLayout>

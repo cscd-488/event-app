@@ -27,16 +27,10 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.android.support:support-v4:23.1.1'
-<<<<<<< HEAD
-<<<<<<< HEAD
     compile 'com.google.android.gms:play-services:8.4.0'
-=======
     compile 'com.facebook.android:facebook-android-sdk:4.6.0'
->>>>>>> refs/remotes/origin/master
-=======
     compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
->>>>>>> refs/remotes/origin/master
 }
 
 apply plugin: 'com.google.gms.google-services'
