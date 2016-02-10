@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jharshman.event.GPSFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/hello_blank_fragment" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/CollectButton"
+        android:id="@+id/collectButton"
+        android:layout_gravity="center_horizontal|top"
+        android:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/longitude"
+        android:layout_alignStart="@+id/longitude" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/longitude"
+        android:layout_gravity="right|center_vertical"
+        android:text="Longitude"
+        android:layout_marginTop="26dp"
+        android:layout_below="@+id/latitude"
+        android:layout_alignLeft="@+id/latitude"
+        android:layout_alignStart="@+id/latitude" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/latitude"
+        android:layout_gravity="center_vertical"
+        android:text="Latitude"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp" />
+
+</RelativeLayout>
