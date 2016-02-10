@@ -156,7 +156,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         double[] coord = {};
 
         for(CheckPoint CheckPoint : gpsTracker.locations){
-            coord = CheckPoint.getmCoordinates();
+            coord = CheckPoint.getCoordinates();
 
             if(_lat - buffer < coord[0] && coord[0] < _lat + buffer && _longi - buffer < coord[1] && coord[1] < _longi + buffer) {
                 gpsTracker.inRange = CheckPoint;
@@ -168,7 +168,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     }
 
     private void sendNotification(Context context){
-        Notification.create(context, -1, inRange.getmTitle(), inRange.getmDescription(), 1000, 1000, 1000, 1000);
+        Notification.create(context, -1, inRange.getTitle(), inRange.getDescription(), 1000, 1000, 1000, 1000);
     }
 
     @Override
