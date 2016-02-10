@@ -2,14 +2,21 @@ package com.example.jharshman.event;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,14 +37,51 @@ import java.util.ArrayList;
  */
 public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    public static class Event implements Comparable<Event>{
+        private String name;
+        private String notification;
+
+        private double lat;
+        private double longi;
+        private boolean displayed = false;
+
+        public Event(String _name, String _notification, double _lat, double _longi){
+            this.name = _name;
+            this.notification = _notification;
+            this.lat = _lat;
+            this.longi = _longi;
+        }
+
+        public void displayed(){
+            this.displayed = true;
+        }
+
+        public boolean wasDisplayed(){return this.displayed;}
+
+        public String[] getStrings(){
+            return new String[] {this.name, this.notification};
+        }
+
+        public double[] getCoordinate(){
+            return new double[] {this.lat, this.longi};
+        }
+
+        @Override
+        public int compareTo(Event another) {
+            if(this.longi == another.longi && this.lat == another.lat)
+                return 0;
+            return -1;
+        }
+    }
+
     private static final double buffer = 0.00065000;
     private static GpsTracker gpsTracker = null;
     private static Context context;
     private static GoogleApiClient googleApiClient;
     private static boolean notificationsEnabled = false;
 
-    private ArrayList<CheckPoint> locations;
-    private CheckPoint inRange;
+    private ArrayList<Event> locations;
+    private Event inRange;
 
     private GpsTracker(){
         this.inRange = null;
@@ -64,7 +108,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            ActivityCompat.requestPermissions((Activity)context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
         }
 
@@ -123,23 +167,27 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         }
     }
 
-    public static void addLocation(CheckPoint ... location){
-        for(CheckPoint loc : location)
+    public static void addLocation(String _name, String _notification, double _lat, double _longi){
+        addLocation(new Event(_name , _notification, _lat, _longi));
+    }
+
+    public static void addLocation(Event ... location){
+        for(Event loc : location)
             gpsTracker.locations.add(loc);
     }
 
-    public static void addLocation(CheckPoint location){
+    public static void addLocation(Event location){
         gpsTracker.locations.add(location);
     }
 
-    public static void removeLocation(CheckPoint ... locations) {
-        for(CheckPoint loc : locations)
+    public static void removeLocation(Event ... locations) {
+        for(Event loc : locations)
             removeLocation(loc);
     }
-    public static boolean removeLocation(CheckPoint location){
-        CheckPoint toRemove = null;
+    public static boolean removeLocation(Event location){
+        Event toRemove = null;
 
-        for(CheckPoint loc : gpsTracker.locations){
+        for(Event loc : gpsTracker.locations){
             if(loc.compareTo(location) == 0) {
                 toRemove = loc;
                 break;
@@ -150,17 +198,17 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         return (toRemove != null);
     }
 
-    public static CheckPoint getCheckPointInRange(){return gpsTracker.inRange;}
+    public static Event getEventInRange(){return gpsTracker.inRange;}
 
-    private static CheckPoint inRange(double _lat, double _longi){
+    private static Event inRange(double _lat, double _longi){
         double[] coord = {};
 
-        for(CheckPoint CheckPoint : gpsTracker.locations){
-            coord = CheckPoint.getmCoordinates();
+        for(Event event : gpsTracker.locations){
+            coord = event.getCoordinate();
 
             if(_lat - buffer < coord[0] && coord[0] < _lat + buffer && _longi - buffer < coord[1] && coord[1] < _longi + buffer) {
-                gpsTracker.inRange = CheckPoint;
-                return CheckPoint;
+                gpsTracker.inRange = event;
+                return event;
             }
         }
 
@@ -168,7 +216,30 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     }
 
     private void sendNotification(Context context){
-        Notification.create(context, -1, inRange.getmTitle(), inRange.getmDescription(), 1000, 1000, 1000, 1000);
+        int mId = 0;
+        String[] details = inRange.getStrings();
+
+        NotificationCompat.Builder mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(context).setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(details[0])
+                .setContentText(details[1]);
+
+        mBuilder.setVibrate(new long[]{1000,1000,1000,1000,1000});
+        mBuilder.setLights(Color.CYAN, 3000, 3000);
+
+        Intent notIntent = new Intent(context, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(notIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(mId, mBuilder.build());
     }
 
     @Override
@@ -185,12 +256,12 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     public void onLocationChanged(Location location) {
         double latitude = (location.getLatitude());
         double longitude = (location.getLongitude());
-        CheckPoint CheckPoint = inRange(latitude, longitude);
+        Event event = inRange(latitude, longitude);
 
-        if(CheckPoint != null){
-            if(notificationsEnabled && !CheckPoint.wasDisplayed()) {
+        if(event != null){
+            if(notificationsEnabled && !event.wasDisplayed()) {
                 sendNotification(context);
-                CheckPoint.setmDisplayed();
+                event.displayed();
             }
         }
     }
