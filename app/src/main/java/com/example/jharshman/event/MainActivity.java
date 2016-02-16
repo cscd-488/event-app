@@ -23,11 +23,15 @@ public class MainActivity extends AppCompatActivity {
             if(savedInstanceState!=null)
                 return;
 
+
             // todo: apply logic so this is only done on first run
             mPagerFragment = new ViewPagerFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.FragmentContainer, mPagerFragment)
                     .commit();
+
+            // todo: go into rest of application
+
         }
 
     }

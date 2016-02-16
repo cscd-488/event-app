@@ -32,6 +32,7 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
+import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ public class login extends Fragment implements
 
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
+    private String mOauth2Token;
     private String mPersonName;
     private Uri mPersonPhoto;
 
@@ -95,7 +97,8 @@ public class login extends Fragment implements
         // request user id, email address, and basic profile
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                .requestIdToken(getString(R.string.OAuth_client_ID))
+                .requestServerAuthCode(getString(R.string.OAuth_client_ID, false))
+                .requestProfile()
                 .build();
 
         // create GoogleApiClient object
@@ -204,8 +207,22 @@ public class login extends Fragment implements
             GoogleSignInAccount account = result.getSignInAccount();
             mPersonName = account.getDisplayName();
             mPersonPhoto = account.getPhotoUrl();
+            mOauth2Token = account.getServerAuthCode();
+
+            Log.i(TAG, mOauth2Token);
 
             /* todo: Pass Token To Backend Server using HTTPS POST */
+            Ion.with(getContext())
+                    .load(getString(R.string.magpie_server_login))
+                    .setBodyParameter("code", mOauth2Token)
+                    .asString()
+                    .setCallback(new FutureCallback<String>() {
+                        @Override
+                        public void onCompleted(Exception e, String result) {
+                            /* todo: check result */
+                        }
+                    });
+            /* end post request */
 
             updateUI(true);
         } else {
@@ -249,16 +266,7 @@ public class login extends Fragment implements
         if(signedIn) {
 
             // update profile picture and text view
-
-            /* something along these lines for image loading
-            * can replace the async LoadImage class */
-            Ion.with(view.getContext())
-                    .load(mPersonPhoto.toString())
-                    .withBitmap()
-                    .animateIn(R.anim.image_zoom)
-                    .intoImageView(mProfileImage);
-
-            //new LoadImage(mProfileImage).execute(mPersonPhoto.toString());
+            new LoadImage(mProfileImage).execute(mPersonPhoto.toString());
             mWelcomeText.setText(getString(R.string.Welcome, mPersonName.split("\\s+")));
 
             // set un-authed elements invisible
