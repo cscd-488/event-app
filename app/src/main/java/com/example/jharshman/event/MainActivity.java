@@ -1,15 +1,17 @@
 package com.example.jharshman.event;
 
-import android.support.v4.app.Fragment;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationMapFragment.OnFragmentInteractionListener {
 
-    private Fragment mPagerFragment;
+    private LocationMapFragment mPagerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,17 +19,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        GpsTracker.create(this);
 
         if(findViewById(R.id.FragmentContainer)!=null) {
             if(savedInstanceState!=null)
                 return;
 
-            // todo: apply logic so this is only done on first run
+            /*/ todo: apply logic so this is only done on first run
             mPagerFragment = new ViewPagerFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.FragmentContainer, mPagerFragment)
-                    .commit();
+                    .commit();*/
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            mPagerFragment = new LocationMapFragment();
+            transaction.add(R.id.FragmentContainer, mPagerFragment);
+            transaction.commit();
+
+            this.mPagerFragment.addLocations(new CheckPoint[]{new CheckPoint("Test", "Discription", "Image", new double[]{0.0, 0.0})});
         }
 
     }
@@ -62,5 +71,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getFragmentManager().popBackStack();
         }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

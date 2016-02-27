@@ -38,8 +38,10 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
 
     private ArrayList<CheckPoint> locations;
     private CheckPoint inRange;
+    private double[] curCoords;
 
     private GpsTracker(){
+        this.curCoords = new double[2];
         this.inRange = null;
         this.locations = new ArrayList<>();
     }
@@ -59,6 +61,11 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
 
     public static void enableNotifications(){notificationsEnabled = true;}
     public static void disableNotifications(){notificationsEnabled = false;}
+    public static double[] getCoords(){
+        if(gpsTracker.curCoords == null)
+            return new double[]{0.0,0.0};
+        return gpsTracker.curCoords;
+    }
 
     private static void setupGps(){
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -183,9 +190,9 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
 
     @Override
     public void onLocationChanged(Location location) {
-        double latitude = (location.getLatitude());
-        double longitude = (location.getLongitude());
-        CheckPoint CheckPoint = inRange(latitude, longitude);
+        this.curCoords[0] = (location.getLatitude());
+        this.curCoords[1] = (location.getLongitude());
+        CheckPoint CheckPoint = inRange(this.curCoords[0], this.curCoords[1]);
 
         if(CheckPoint != null){
             if(notificationsEnabled && !CheckPoint.wasDisplayed()) {
