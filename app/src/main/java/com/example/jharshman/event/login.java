@@ -34,6 +34,8 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -265,21 +267,35 @@ public class login extends Fragment implements
 
         if(signedIn) {
 
-            // update profile picture and text view
-            new LoadImage(mProfileImage).execute(mPersonPhoto.toString());
-            mWelcomeText.setText(getString(R.string.Welcome, mPersonName.split("\\s+")));
-
             // set un-authed elements invisible
             mSignInButton.setVisibility(View.GONE);
             mMainLogo.setVisibility(View.GONE);
 
-            // set authed elements visible
-            mProfileImage.setVisibility(View.VISIBLE);
-            mWelcomeText.setVisibility(View.VISIBLE);
 
-            // drop profile picture in with animation
-            Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.image_zoom);
-            mProfileImage.startAnimation(animation);
+            mWelcomeText.setText(getString(R.string.Welcome, mPersonName.split("\\s+")));
+
+            // Load image using Picasso
+            Picasso.with(getContext())
+                    .load(mPersonPhoto.toString())
+                    .into(mProfileImage, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            mProfileImage.setVisibility(View.VISIBLE);
+                            mWelcomeText.setVisibility(View.VISIBLE);
+
+                            // drop profile picture in with animation
+                            Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.image_zoom);
+                            mProfileImage.startAnimation(animation);
+
+                        }
+
+                        @Override
+                        public void onError() {
+                            // display some sort of error
+
+                        }
+                    });
+
 
         } else {
 
@@ -292,36 +308,6 @@ public class login extends Fragment implements
             mMainLogo.setVisibility(View.VISIBLE);
 
         }
-    }
-
-    /**
-     * */
-    private class LoadImage extends AsyncTask<String, Void, Bitmap> {
-        CircleImageView profileImage;
-
-        public LoadImage(CircleImageView profileImage) {
-            this.profileImage = profileImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urlDisplay = urls[0];
-            Bitmap bitmap = null;
-            try {
-                InputStream inputStream = new java.net.URL(urlDisplay).openStream();
-                bitmap = BitmapFactory.decodeStream(inputStream);
-            } catch(MalformedURLException mue) {
-                Log.e(TAG, mue.getMessage());
-            } catch(IOException ioe) {
-                Log.e(TAG, ioe.getMessage());
-            }
-
-            return bitmap;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            profileImage.setImageBitmap(result);
-        }
-
     }
 
 }

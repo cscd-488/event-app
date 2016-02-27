@@ -30,6 +30,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 
     //todo: target specific version of ION to increase stability
     compile 'com.koushikdutta.ion:ion:2.+'
