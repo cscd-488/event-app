@@ -3,10 +3,7 @@ package com.example.jharshman.event;
 /* standard android libraries */
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -32,14 +29,11 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
+
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -100,7 +94,6 @@ public class login extends Fragment implements
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                 .requestServerAuthCode(getString(R.string.OAuth_client_ID, false))
-                .requestProfile()
                 .build();
 
         // create GoogleApiClient object
@@ -270,7 +263,6 @@ public class login extends Fragment implements
             // set un-authed elements invisible
             mSignInButton.setVisibility(View.GONE);
             mMainLogo.setVisibility(View.GONE);
-
 
             mWelcomeText.setText(getString(R.string.Welcome, mPersonName.split("\\s+")));
 
