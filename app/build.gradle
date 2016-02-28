@@ -31,9 +31,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
 
-    //todo: target specific version of ION to increase stability
-    compile 'com.koushikdutta.ion:ion:2.+'
 }
 
 apply plugin: 'com.google.gms.google-services'

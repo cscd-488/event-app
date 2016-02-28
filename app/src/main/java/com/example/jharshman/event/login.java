@@ -30,12 +30,19 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class login extends Fragment implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -43,6 +50,7 @@ public class login extends Fragment implements
 
     private static final String TAG = "LoginFragment";
     private static final int RC_SIGN_IN = 9001;
+    private static final MediaType MEDIA_TYPE = MultipartBody.FORM;
 
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
@@ -206,24 +214,50 @@ public class login extends Fragment implements
 
             Log.i(TAG, mOauth2Token);
 
-            /* todo: Pass Token To Backend Server using HTTPS POST */
-            Ion.with(getContext())
-                    .load(getString(R.string.magpie_server_login))
-                    .setBodyParameter("code", mOauth2Token)
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            /* todo: check result */
-                        }
-                    });
-            /* end post request */
+            // make post request
+            try {
+                postData();
+            } catch(IOException ioe) {
+                ioe.printStackTrace();
+            }
+
 
             updateUI(true);
         } else {
             // show un-authed UI
             updateUI(false);
         }
+    }
+
+    private String postData() throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        // create formBody
+        RequestBody formBody = new MultipartBody.Builder()
+                .setType(MEDIA_TYPE)
+                .addFormDataPart("code", mOauth2Token)
+                .build();
+
+        // request builder
+        Request request = new Request.Builder()
+                .url(getString(R.string.magpie_server_login))
+                .post(formBody)
+                .build();
+
+        // async call
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i(TAG,"POST exception");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Log.i(TAG, response.body().toString());
+            }
+        });
+
+        return null;
     }
 
     private void signIn() {
