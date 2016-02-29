@@ -2,7 +2,9 @@ package com.example.jharshman.event;
 
 /* standard android libraries */
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,12 +32,14 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 
+/* Picasso */
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
-
+/* Circle Image View */
 import de.hdodenhof.circleimageview.CircleImageView;
+
+/* OkHttp */
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -43,6 +47,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+/* Exceptions */
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.IOException;
+
 
 public class login extends Fragment implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -63,22 +73,14 @@ public class login extends Fragment implements
     private TextView mWelcomeText;
     private SignInButton mSignInButton;
 
+    private SharedPreferences mSharedPreferences;
+
     public login() {
         // Required empty public constructor
     }
 
-    // todo: remove if no use found
-    /*
-    public static login newInstance() {
-        login fragment = new login();
-        //Bundle args = new Bundle();
-        //args.putString(ARG_PARAM1, param1);
-        //args.putString(ARG_PARAM2, param2);
-        //fragment.setArguments(args);
-        return fragment;
-    }
-    */
-
+    /**
+     * */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +94,8 @@ public class login extends Fragment implements
 
     }
 
+    /**
+     * */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -128,6 +132,8 @@ public class login extends Fragment implements
         return view;
     }
 
+    /**
+     * */
     @Override
     public void onStart() {
         super.onStart();
@@ -158,6 +164,8 @@ public class login extends Fragment implements
         }*/
     }
 
+    /**
+     * */
     @Override
     public void onStop() {
         super.onStop();
@@ -186,12 +194,16 @@ public class login extends Fragment implements
         }
     }
 
+    /**
+     * */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         // Log the result
         Log.d(TAG, "onConnectionFailed" + connectionResult);
     }
 
+    /**
+     * */
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
@@ -203,6 +215,8 @@ public class login extends Fragment implements
         }
     }
 
+    /**
+     * */
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if(result.isSuccess()) {
@@ -229,42 +243,16 @@ public class login extends Fragment implements
         }
     }
 
-    private String postData() throws IOException {
-        OkHttpClient client = new OkHttpClient();
 
-        // create formBody
-        RequestBody formBody = new MultipartBody.Builder()
-                .setType(MEDIA_TYPE)
-                .addFormDataPart("code", mOauth2Token)
-                .build();
-
-        // request builder
-        Request request = new Request.Builder()
-                .url(getString(R.string.magpie_server_login))
-                .post(formBody)
-                .build();
-
-        // async call
-        client.newCall(request).enqueue(new okhttp3.Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i(TAG,"POST exception");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Log.i(TAG, response.body().toString());
-            }
-        });
-
-        return null;
-    }
-
+    /**
+     * */
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    /**
+     * */
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
@@ -274,6 +262,8 @@ public class login extends Fragment implements
         });
     }
 
+    /**
+     * */
     private void showProgressDialog() {
         if(mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(getContext());
@@ -283,12 +273,16 @@ public class login extends Fragment implements
         mProgressDialog.show();
     }
 
+    /**
+     * */
     private void hideProgressDialog() {
         if(mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }
     }
 
+    /**
+     * */
     private void updateUI(boolean signedIn) {
         View view = getView();
 
@@ -313,6 +307,8 @@ public class login extends Fragment implements
                             Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.image_zoom);
                             mProfileImage.startAnimation(animation);
 
+                            // todo: present user with a continue button and then kill this fragment
+
                         }
 
                         @Override
@@ -336,6 +332,64 @@ public class login extends Fragment implements
         }
     }
 
+    /**
+     * */
+    private void postData() throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        // create formBody
+        RequestBody formBody = new MultipartBody.Builder()
+                .setType(MEDIA_TYPE)
+                .addFormDataPart("code", mOauth2Token)
+                .build();
+
+        // request builder
+        Request request = new Request.Builder()
+                .url(getString(R.string.magpie_server_login))
+                .post(formBody)
+                .build();
+
+        // async call
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i(TAG, "POST exception");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                Log.i(TAG, "Response Received");
+
+                /* Response contains JSON token
+                * Extract and save to app data */
+                try {
+                    String jwtToken = extractToken(response.body().string());
+                    // save jwtToken to shared preferences
+                    saveToSharedPreferences(jwtToken);
+                } catch (JSONException je) {
+                    je.printStackTrace();
+                }
+
+            }
+        });
+
+    }
+
+    /**
+     * */
+    private String extractToken(String responseBody) throws JSONException {
+        JSONObject jsonObject = new JSONObject(responseBody);
+        return jsonObject.getString("token");
+    }
+
+    /**
+     * */
+    private void saveToSharedPreferences(String jwtToken) {
+        mSharedPreferences = this.getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(getString(R.string.jwt_server_token), jwtToken);
+        editor.apply();
+    }
+
 }
-
-
