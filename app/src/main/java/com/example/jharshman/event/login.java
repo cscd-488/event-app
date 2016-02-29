@@ -1,5 +1,19 @@
 package com.example.jharshman.event;
 
+/**
+ * @login.java
+ * @author Joshua D. Harshman
+ * @date 2016 01 26
+ * @date 2016 02 29
+ *
+ * This fragment is part of the initial log-in flow.  It is created by the ViewPager Fragment
+ * and works to provide login functionality for Magpie by allowing users to sign-in using their
+ * existing Google Plus accounts.  The fragment is able to fetch and forward the user's OAuth2
+ * token provided by Google to the Magpie backend server(s) where it is then processed for validity.
+ * This fragment will then receive a JWT token from a Magpie server as a result.  This JWT token is
+ * then stored in app data to be used as a method of authentication to the server for future requests.
+ * */
+
 /* standard android libraries */
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -15,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -53,7 +68,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 
-
+/**
+ * This class consists of all the code needed to inflate the login fragment and provide
+ * a sign-in option to the user.  It initializes, hides, and reveals UI elements based on
+ * whether a user has opted to sign-in or not and based on whether that sign-in was successful.
+ * */
 public class login extends Fragment implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
@@ -72,6 +91,7 @@ public class login extends Fragment implements
     private ImageView mMainLogo;
     private TextView mWelcomeText;
     private SignInButton mSignInButton;
+    private Button mContinueButton;
 
     private SharedPreferences mSharedPreferences;
 
@@ -80,6 +100,15 @@ public class login extends Fragment implements
     }
 
     /**
+     * Fragment Called to do initial creation of a fragment. This is called after onAttach(Activity)
+     * and before onCreateView(LayoutInflater, ViewGroup, Bundle).  Note that this can be called
+     * while the fragment's activity is still in the process of being created.
+     * As such, you can not rely on things like the activity's content view hierarchy being
+     * initialized at this point. If you want to do work once the activity itself is created,
+     * see onActivityCreated(Bundle).
+     *
+     * @param savedInstanceState If the fragment is being re-created from a previous saved state, this is the state.
+     *
      * */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,6 +124,18 @@ public class login extends Fragment implements
     }
 
     /**
+     * Called to have the fragment instantiate its user interface view. This is optional,
+     * and non-graphical fragments can return null (which is the default implementation).
+     * This will be called between onCreate(Bundle) and onActivityCreated(Bundle).
+     * If you return a View from here, you will later be called in onDestroyView when the
+     * view is being released.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     *                  The fragment should not add the view itself, but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here.
+     *
+     * @return View for fragment's UI, or null
      * */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -115,15 +156,16 @@ public class login extends Fragment implements
                 .build();
 
 
-        // register button
+        // register google sign-in button
         mSignInButton = (SignInButton) view.findViewById(R.id.loginButton);
         mSignInButton.setSize(SignInButton.SIZE_WIDE);
         mSignInButton.setScopes(gso.getScopeArray());
 
-        // register other elements
+        // register UI elements
         mMainLogo = (ImageView) view.findViewById(R.id.mainLogo);
         mProfileImage = (CircleImageView) view.findViewById(R.id.profilePicture);
         mWelcomeText = (TextView) view.findViewById(R.id.welcomeText);
+        mContinueButton = (Button) view.findViewById(R.id.continue_button);
 
 
         // register OnClickListener
@@ -133,6 +175,8 @@ public class login extends Fragment implements
     }
 
     /**
+     * Called when the Fragment is visible to the user.
+     * This is generally tied to Activity.onStart of the containing Activity's lifecycle.
      * */
     @Override
     public void onStart() {
@@ -165,6 +209,8 @@ public class login extends Fragment implements
     }
 
     /**
+     * Called when the Fragment is visible to the user.
+     * This is generally tied to Activity.onStart of the containing Activity's lifecycle.
      * */
     @Override
     public void onStop() {
@@ -179,9 +225,15 @@ public class login extends Fragment implements
 
     /**
      *
-     * @param   requestCode integer code corresponding to request
-     * @param   resultCode  integer code indicating result
-     * @param   data        operation intent data
+     * Receive the result from a previous call to startActivityForResult(Intent, int).
+     * This follows the related Activity API as described there in Activity.onActivityResult(int, int, Intent).
+     *
+     *
+     * @param requestCode The integer request code originally supplied to startActivityForResult(),
+     *                    allowing you to identify who this result came from.
+     * @param resultCode The integer result code returned by the child activity through its setResult().
+     * @param data An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
+     *
      * */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -195,6 +247,9 @@ public class login extends Fragment implements
     }
 
     /**
+     * Implementation of onConnectionFailed in interface OnConnectionFailedListener
+     *
+     * @param connectionResult Result of connection
      * */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -203,6 +258,10 @@ public class login extends Fragment implements
     }
 
     /**
+     * View.OnClickListener Called when a view has been clicked.
+     * Implementation of onClick in interface OnClickListener
+     *
+     * @param v The view that was clicked
      * */
     @Override
     public void onClick(View v) {
@@ -216,6 +275,10 @@ public class login extends Fragment implements
     }
 
     /**
+     * Handles sign in result forwarded from onActivityResult method.
+     * Modifies UI based on the status of the result.
+     *
+     * @param result GoogleSignInResult passed from onActivityResult.
      * */
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
@@ -228,7 +291,7 @@ public class login extends Fragment implements
 
             Log.i(TAG, mOauth2Token);
 
-            // make post request
+            // make POST request
             try {
                 postData();
             } catch(IOException ioe) {
@@ -245,6 +308,7 @@ public class login extends Fragment implements
 
 
     /**
+     * Launches GoogleSignInApi sign-in intent.
      * */
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
@@ -252,6 +316,7 @@ public class login extends Fragment implements
     }
 
     /**
+     * Requests GoogleSignInApi sign-out
      * */
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
@@ -263,6 +328,7 @@ public class login extends Fragment implements
     }
 
     /**
+     * Show progress dialog
      * */
     private void showProgressDialog() {
         if(mProgressDialog == null) {
@@ -274,6 +340,7 @@ public class login extends Fragment implements
     }
 
     /**
+     * Hide progress dialog
      * */
     private void hideProgressDialog() {
         if(mProgressDialog != null && mProgressDialog.isShowing()) {
@@ -282,13 +349,19 @@ public class login extends Fragment implements
     }
 
     /**
+     * Update UI to either hide or un-hide UI elements
+     *
+     * @param signedIn boolean value indicating sign-in status
      * */
     private void updateUI(boolean signedIn) {
-        View view = getView();
 
         if(signedIn) {
 
-            // set un-authed elements invisible
+            /* If the user is signed in,
+            * 1. set un-authenticated UI elements invisible
+            * 2. pull data for authenticated UI elements
+            * 3. set authenticated UI elements visible */
+
             mSignInButton.setVisibility(View.GONE);
             mMainLogo.setVisibility(View.GONE);
 
@@ -302,13 +375,11 @@ public class login extends Fragment implements
                         public void onSuccess() {
                             mProfileImage.setVisibility(View.VISIBLE);
                             mWelcomeText.setVisibility(View.VISIBLE);
+                            mContinueButton.setVisibility(View.VISIBLE);
 
                             // drop profile picture in with animation
                             Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.image_zoom);
                             mProfileImage.startAnimation(animation);
-
-                            // todo: present user with a continue button and then kill this fragment
-
                         }
 
                         @Override
@@ -321,11 +392,14 @@ public class login extends Fragment implements
 
         } else {
 
-            // set authed elements invisible
+            /* If the user is NOT signed in,
+            * 1. ensure authenticated UI elements are invisible
+            * 2. set un-authenticated UI elements visible */
+
             mProfileImage.setVisibility(View.GONE);
             mWelcomeText.setVisibility(View.GONE);
+            mContinueButton.setVisibility(View.GONE);
 
-            // set un-authed elements visible
             mSignInButton.setVisibility(View.VISIBLE);
             mMainLogo.setVisibility(View.VISIBLE);
 
@@ -333,6 +407,9 @@ public class login extends Fragment implements
     }
 
     /**
+     * Leverage OkHttp to send POST data to magpie server(s)
+     * Receives JWT token from server in response
+     * Throws IOException
      * */
     private void postData() throws IOException {
         OkHttpClient client = new OkHttpClient();
@@ -365,7 +442,6 @@ public class login extends Fragment implements
                 * Extract and save to app data */
                 try {
                     String jwtToken = extractToken(response.body().string());
-                    // save jwtToken to shared preferences
                     saveToSharedPreferences(jwtToken);
                 } catch (JSONException je) {
                     je.printStackTrace();
@@ -377,6 +453,9 @@ public class login extends Fragment implements
     }
 
     /**
+     * Extract JWT token from JSON reply from server
+     *
+     * @param responseBody JSON string reply from server
      * */
     private String extractToken(String responseBody) throws JSONException {
         JSONObject jsonObject = new JSONObject(responseBody);
@@ -384,6 +463,9 @@ public class login extends Fragment implements
     }
 
     /**
+     * Write JWT token to shared preferences
+     *
+     * @param jwtToken value to write to shared preferences
      * */
     private void saveToSharedPreferences(String jwtToken) {
         mSharedPreferences = this.getActivity().getPreferences(Context.MODE_PRIVATE);
