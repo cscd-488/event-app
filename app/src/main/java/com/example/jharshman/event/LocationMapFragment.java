@@ -16,7 +16,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -36,9 +38,11 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final float METERS_TO_FEET = 3.28084f;
 
     private MapView mapView;
     private GoogleMap map;
+    private List<Marker> markers = new ArrayList<>();
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -116,6 +120,19 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         }
     }
 
+    public float distanceFromUserMeter(CheckPoint checkPoint){
+        float[] results = new float[1];
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getmCoordinates()[0], checkPoint.getmCoordinates()[1], results);
+        return results[0];
+    }
+
+    public float distanceFromUserFeet(CheckPoint checkPoint){
+        float[] results = new float[1];
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getmCoordinates()[0], checkPoint.getmCoordinates()[1], results);
+        results[0] *= METERS_TO_FEET;
+        return results[0];
+    }
+
     @Override
     public void onLowMemory() {
         super.onLowMemory();
@@ -145,6 +162,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         for (CheckPoint c : checkPoints) {
             this.checkPointList.add(c);
         }
+        if(this.map != null)
+            this.setupCheckPoints();
     }
 
     @Override
@@ -156,16 +175,25 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         this.map.setMyLocationEnabled(true);
 
         this.setupCheckPoints();
+
+        this.map.setOnMyLocationChangeListener(this.myLocationChangeListener);
     }
 
     private void setupCheckPoints(){
         double[] coords;
+        float hue;
         for (CheckPoint c : this.checkPointList) {
+            if (c.wasDisplayed())
+                hue = BitmapDescriptorFactory.HUE_GREEN;
+            else
+                hue = BitmapDescriptorFactory.HUE_RED;
+
             coords = c.getmCoordinates();
-            map.addMarker(new MarkerOptions()
+            markers.add(map.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
-                    .title(c.getmTitle()));
+                    .title(c.getmTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
         }
+        this.checkPointList.clear();
     }
 
     /**
