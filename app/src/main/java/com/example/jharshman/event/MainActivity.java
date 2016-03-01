@@ -1,15 +1,19 @@
 package com.example.jharshman.event;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
     private Fragment mPagerFragment;
+    SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,15 +23,26 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
+
         if(findViewById(R.id.FragmentContainer)!=null) {
-            if(savedInstanceState!=null)
+            if (savedInstanceState != null)
                 return;
 
-            // todo: apply logic so this is only done on first run
+            /* todo: insert fragment(s) for rest of application... */
+
+        }
+
+        // check if application is in first use...
+        mSharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        boolean firstUse = mSharedPreferences.getBoolean(getString(R.string.first_use), true);
+        if(firstUse) {
             mPagerFragment = new ViewPagerFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.FragmentContainer, mPagerFragment)
+                    .addToBackStack(null)
                     .commit();
+
+            mSharedPreferences.edit().putBoolean(getString(R.string.first_use), false).apply();
         }
 
     }
@@ -62,5 +77,16 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getFragmentManager().popBackStack();
         }
+    }
+
+    /**
+     * Called from login fragment in login flow.
+     * Indicates user's continuation into rest of the application.
+     * Calls onBackPressed to pop the login flow fragment off the stack.
+     *
+     * @param view The view that was clicked
+     * */
+    public void endLoginFlow(View view) {
+        onBackPressed();
     }
 }

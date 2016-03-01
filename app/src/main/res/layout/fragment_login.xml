@@ -51,6 +51,19 @@
         android:layout_below="@+id/profilePicture"
         android:layout_centerHorizontal="true" />
 
+    <!-- Continue To Application Button -->
+    <Button
+        android:id="@+id/continue_button"
+        android:onClick="endLoginFlow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="15sp"
+        android:layout_below="@+id/welcomeText"
+        android:layout_centerHorizontal="true"
+        android:text="@string/Continue"
+        android:visibility="gone"/>
 
     <!-- Swipe to learn more -->
     <TextView
