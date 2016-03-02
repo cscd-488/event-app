@@ -10,10 +10,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements
+        CheckPointFragment.OnFragmentInteractionListener,
+        EventFragment.OnEventInteraction {
+
+    public static final String PAGER_FRAGMENT = "PAGER_FRAGMENT";
+    public static final String EVENT_FRAGMENT = "EVENT_FRAGMENT";
+    public static final String CHECK_POINT_FRAGMENT = "CHECK_POINT_FRAGMENT";
 
     private Fragment mPagerFragment;
     SharedPreferences mSharedPreferences;
+
+    // private Fragment mEventFragment;
+    // private Fragment mCollectionsFragment;
+
+
+    ArrayList<CheckPoint> mCheckPoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,12 +37,12 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-
         if(findViewById(R.id.FragmentContainer)!=null) {
             if (savedInstanceState != null)
                 return;
 
             /* todo: insert fragment(s) for rest of application... */
+
 
         }
 
@@ -38,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         if(firstUse) {
             mPagerFragment = new ViewPagerFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.FragmentContainer, mPagerFragment)
+                    .add(R.id.FragmentContainer, mPagerFragment, PAGER_FRAGMENT)
                     .addToBackStack(null)
                     .commit();
 
@@ -89,4 +103,44 @@ public class MainActivity extends AppCompatActivity {
     public void endLoginFlow(View view) {
         onBackPressed();
     }
+
+    /**
+     * */
+    @Override
+    public void onCheckPointInteraction(int id) {
+        // todo implement method to handle click based on id
+
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(EVENT_FRAGMENT);
+        if(fragment == null) {
+            fragment = new EventFragment();
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.FragmentContainer, new EventFragment())
+                .addToBackStack(EVENT_FRAGMENT)
+                .commit();
+    }
+
+    /**
+     * */
+    @Override
+    public void onEventInteraction(int id) {
+        // todo implement method to choose fragment based on id
+
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(CHECK_POINT_FRAGMENT);
+        if(fragment == null) {
+            fragment = CheckPointFragment.newInstance(id);
+        }
+        else {
+            Bundle args = new Bundle();
+            args.putInt(CheckPointFragment.EVENT_ID_KEY, id);
+            fragment.setArguments(args);
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.FragmentContainer, fragment)
+                .addToBackStack(CHECK_POINT_FRAGMENT)
+                .commit();
+    }
+
 }
