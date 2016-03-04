@@ -39,7 +39,7 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
     /**
      * Listener for click events
      */
-    View.OnClickListener mListener;
+    OnCheckPointClickListener mListener;
 
     /**
      * Constructor
@@ -75,25 +75,28 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
             holder.mSharing = (ImageButton) convertView.findViewById(R.id.fragment_check_point_card_share_button);
 
             // set holder on convert view
-            convertView.setTag(holder);
+            convertView.setTag(R.id.fragment_check_point_card_view, holder);
         }
         else {
-            holder = (CheckPointViewHolder) convertView.getTag();
+            holder = (CheckPointViewHolder) convertView.getTag(R.id.fragment_check_point_card_view);
         }
-        // get checkpoint and set views with the data it contains
+        // get checkpoint and set view data
         CheckPoint checkPoint = mCheckPoints.get(position);
 
         holder.mTitle.setText(checkPoint.getTitle());
-
         Picasso.with(getContext())
                 .load(checkPoint.getImageSrc())
                 .into(holder.mImage);
-
         holder.mDescription.setText(checkPoint.getDescription());
 
-//        holder.mCamera.setOnClickListener(this); // todo camera button
+        // set tags and listeners for clicks
+        holder.mCheckIn.setTag(R.id.fragment_check_point_card_list, checkPoint);
+        holder.mSharing.setTag(R.id.fragment_check_point_card_list, checkPoint);
+        // todo add camera button
+
         holder.mCheckIn.setOnClickListener(this);
         holder.mSharing.setOnClickListener(this);
+        // todo add camera button
 
         return convertView;
     }
@@ -103,7 +106,7 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
      *
      * @param listener Listener to notify of view click
      */
-    public void setOnClickListener(View.OnClickListener listener) {
+    public void setOnCheckPointClickListener(OnCheckPointClickListener listener) {
         mListener = listener;
     }
 
@@ -119,10 +122,30 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
 
         if(mListener != null) {
             try {
-                mListener.onClick(view);
+                // todo notify listener that view was clicked
+                Event event = (Event) view.getTag(R.id.fragment_check_point_card_list);
+                mListener.onCheckPointClick(view, event);
+
             } catch (NullPointerException e) {
                 Log.e(TAG, e.getClass() + " Unable to notify listener");
             }
         }
+    }
+
+
+    /**
+     * Interface that will be called to notify the class
+     * that contains the EventAdapter that check point has
+     * been clicked on
+     */
+    interface OnCheckPointClickListener {
+
+        /**
+         * Notify listener that check point has been clicked
+         *
+         * @param view The view which has been clicked
+         * @param event The Event
+         */
+        void onCheckPointClick(View view, Event event);
     }
 }

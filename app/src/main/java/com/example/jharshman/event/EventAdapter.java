@@ -58,18 +58,20 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
             // todo get progress bar
 
             // set holder on view for later use
-            convertView.setTag(holder);
+            convertView.setTag(R.id.fragment_event_list_view, holder);
         }
         else {
             // set the view based on the resources in the holder
-            holder = (EventViewHolder) convertView.getTag();
+            holder = (EventViewHolder) convertView.getTag(R.id.fragment_event_list_view);
         }
 
-        holder.mTitle.setText(mEvents.get(position).getTitle());
-        holder.mDescription.setText(mEvents.get(position).getDescription());
+        // get Event and set Views with its values
+        Event event = mEvents.get(position);
 
-        // set event id as tag on add/delete button so we can get the ID when notifying of a click
-        holder.mAddDeleteButton.setTag(mEvents.get(position).getID());
+        holder.mTitle.setText(event.getTitle());
+        holder.mDescription.setText(event.getDescription());
+        // set event id as tag on add/delete button so we can get the EVENT_TAG_KEY when notifying of a click
+        holder.mAddDeleteButton.setTag(R.id.fragment_collections_add_delete_button, event);
         holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
         holder.mAddDeleteButton.setOnClickListener(this);
 
@@ -99,8 +101,8 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
 
         if(mListener != null) {
             try {
-                int id = (int) view.getTag();
-                mListener.onEventClick(view, id);
+                Event event = (Event) view.getTag(R.id.fragment_collections_add_delete_button);
+                mListener.onEventClick(view, event);
 
             } catch (NullPointerException e) {
                 Log.e(TAG, e.getClass() + " Unable to notify listener");
@@ -119,8 +121,8 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
          * Notify listener that event has been clicked
          *
          * @param view The view which has been clicked
-         * @param eventId The id of the event for the view that has been clicked
+         * @param event The event
          */
-        void onEventClick(View view, int eventId);
+        void onEventClick(View view, Event event);
     }
 }

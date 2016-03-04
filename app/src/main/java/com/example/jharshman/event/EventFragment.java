@@ -230,13 +230,13 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
     /**
      * Notify listener that event has been clicked
      *
-     * @param view    The view which has been clicked
-     * @param eventId The id of the event for the view that has been clicked
+     * @param view The view which has been clicked
+     * @param event The Event
      */
     @Override
-    public void onEventClick(View view, int eventId) {
+    public void onEventClick(View view, Event event) {
 
-        Log.i(TAG, String.format("onEventClick(%d, %d)", view.getId(), eventId));
+        Log.i(TAG, String.format("onEventClick(%d, %s)", view.getId(), event.getTitle()));
 
         if(view.getId() == R.id.fragment_collections_add_delete_button) {
             // todo add or remove event from list of current events
