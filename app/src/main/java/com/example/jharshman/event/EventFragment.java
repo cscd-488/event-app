@@ -1,6 +1,7 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -10,8 +11,24 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,15 +36,20 @@ import java.util.List;
  * {@link OnEventInteraction} interface
  * to handle interaction events.
  */
-public class EventFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, Callback {
 
     private static final String TAG = "EventFragment";
+
+    private final OkHttpClient mClient = new OkHttpClient();
+    private final Gson mGson = new Gson();
 
     private OnEventInteraction mListener;
 
     private List<Event> mEvents;
 
     private ListView mListView;
+    private EventAdapter mEventAdapter;
+    private SharedPreferences mSharedPreferences;
 
     public EventFragment() {
         // Required empty public constructor
@@ -38,28 +60,132 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event, container, false);
 
-//        NestedScrollView nestedScrollView = (NestedScrollView) view.findViewById(R.id.fragment_collections_card_view);
         mListView = (ListView) view.findViewById(R.id.fragment_event_list_view);
 
-        // todo pull data from web service to put into list view
         mEvents = new ArrayList<>();
-        // add blah data
-        for(int i = 0; i < 10; i ++) {
-            Event event = new Event();
-            event.mID = i;
-            event.mDescription = "Eastern Treasure Hunt";
-            event.mTitle = "EWU " + i;
-            event.mPosition = 2;
-            mEvents.add(event);
+
+        mSharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String token = mSharedPreferences.getString(getString(R.string.jwt_server_token), null);
+
+        Log.i(TAG, "Token:" + token);
+
+        try {
+            getEventData();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         // create adapter
-        EventAdapter eventAdapter = new EventAdapter(view.getContext(), R.layout.fragment_event_card, mEvents);
+        mEventAdapter = new EventAdapter(view.getContext(), R.layout.fragment_event_card, mEvents);
         // set adapter on collection
-        mListView.setAdapter(eventAdapter);
+        mListView.setAdapter(mEventAdapter);
 
         mListView.setOnItemClickListener(this);
 
         return view;
+    }
+
+    /**
+     * Get event data from the server
+     *
+     * @throws Exception exception
+     */
+    public void getEventData() throws Exception {
+
+        Log.i(TAG, "getEventData()");
+
+        mSharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String token = mSharedPreferences.getString(getString(R.string.jwt_server_token), "");
+
+        Request request = new Request.Builder()
+                .url(getString(R.string.magpie_server_event_data))
+                .addHeader(getString(R.string.jwt_server_token), token)
+                .build();
+
+        mClient.newCall(request).enqueue(this);
+    }
+
+    /**
+     * Called when the request could not be executed due to cancellation, a connectivity problem or
+     * timeout. Because networks can fail during an exchange, it is possible that the remote server
+     * accepted the request before the failure.
+     *
+     * @param call call
+     * @param e exception
+     */
+    @Override
+    public void onFailure(Call call, IOException e) {
+
+        try {
+            Log.e(TAG, "onFailure()");
+        } catch (Exception f) {
+            // fragment no longer loaded
+        }
+    }
+
+    /**
+     * Called when the HTTP response was successfully returned by the remote server. The callback may
+     * proceed to read the response body with {@link Response#body}. The response is still live until
+     * its response body is closed with {@code response.body().close()}. The recipient of the callback
+     * may even consume the response body on another thread.
+     * <p/>
+     * <p>Note that transport-layer success (receiving a HTTP response code, headers and body) does
+     * not necessarily indicate application-layer success: {@code response} may still indicate an
+     * unhappy HTTP response code like 404 or 500.
+     *
+     * @param call call
+     * @param response response
+     */
+    @Override
+    public void onResponse(Call call, Response response) throws IOException {
+
+        Log.i(TAG, "onResponse()");
+
+        if (!response.isSuccessful()) {
+            throw new IOException("Unexpected code " + response);
+        }
+
+        Headers responseHeaders = response.headers();
+        for (int i = 0; i < responseHeaders.size(); i++) {
+            System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+        }
+
+        Gson gson = new Gson();
+        JsonParser parser = new JsonParser();
+        JsonArray jArray = parser.parse(response.body().string()).getAsJsonArray();
+
+        // if the events array list is not null, we can't overwrite it because it is being used by the array adapter
+        if(mEvents == null) {
+            mEvents = new ArrayList<Event>();
+        }
+        else {
+            mEvents.clear();
+        }
+
+        // this parses out the json array. the Events and Checkpoints must have @SerializedName("id") notation
+        for(JsonElement obj : jArray )
+        {
+            Event event = gson.fromJson( obj , Event.class);
+            mEvents.add(event);
+        }
+
+        // save all the data out to storage for use by CheckPointFragment
+        File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(cachedEventData));
+        objectOutputStream.writeObject(mEvents);
+
+        // updating the list adapter must be done from the UI Thread
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mEventAdapter.notifyDataSetChanged();
+            }
+        });
+
+        // testing log
+        for(Event e : mEvents) {
+            Log.i(TAG, e.toString());
+        }
     }
 
     @Override
@@ -94,7 +220,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         Log.i(TAG, "Item Clicked " + position);
 
         if(mListener != null) {
-            mListener.onEventInteraction(mEvents.get(position).mID);
+            mListener.onEventInteraction(mEvents.get(position).getID());
         }
     }
 

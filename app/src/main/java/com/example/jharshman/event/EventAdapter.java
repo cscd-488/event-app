@@ -53,8 +53,8 @@ class EventAdapter extends ArrayAdapter<Event> {
             holder = (EventViewHolder) convertView.getTag();
         }
 
-        holder.mTitle.setText(mEvents.get(position).mTitle);
-        holder.mDescription.setText(mEvents.get(position).mDescription);
+        holder.mTitle.setText(mEvents.get(position).getTitle());
+        holder.mDescription.setText(mEvents.get(position).getDescription());
         // todo set progress bar based on position
 
         return convertView;

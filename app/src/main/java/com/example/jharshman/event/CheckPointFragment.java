@@ -18,7 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class CheckPointFragment extends Fragment {
 
@@ -86,14 +91,37 @@ public class CheckPointFragment extends Fragment {
             // get Event ID
             eventID = getArguments().getInt(EVENT_ID_KEY);
         }
+        else {
+            Log.e(TAG, "Event id must be set");
+            return;
+        }
 
         Log.i(TAG, "Event ID passed in " + eventID);
 
-        // todo pull check points from web service based on event id
-        mCheckPoints = new ArrayList<>();
-        for(int i = 0; i < 20; i ++) {
-            CheckPoint checkPoint = new CheckPoint(42, "title " + i, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", "http://eridem.net/wp-content/uploads/2014/06/Android-Wallpaper-By-Scoobsti-1024x576.png", 49.0, 60.0);
-            mCheckPoints.add(checkPoint);
+        // read all the event data from the cache file
+        File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
+        ArrayList<Event> events = null;
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(cachedEventData));
+
+            events = (ArrayList<Event>) objectInputStream.readObject();
+
+        } catch (IOException e) {
+            Log.e(TAG, "error reading file for loading event data, IOException");
+            return;
+        } catch (ClassNotFoundException f) {
+            Log.e(TAG, "error reading file for loading event data, ClassNotFound");
+            return;
+        }
+
+        // find checkpoints for passed event id
+        CheckPoint checkPoints[] = null;
+        boolean found = false;
+        for(int i = 0; i < events.size(); i ++) {
+            if(events.get(i).getID() == eventID) {
+                mCheckPoints = new ArrayList<>();
+                mCheckPoints.addAll(Arrays.asList(events.get(i).getCheckPoints()));
+            }
         }
     }
 

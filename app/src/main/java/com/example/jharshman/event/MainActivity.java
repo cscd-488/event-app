@@ -2,8 +2,8 @@ package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -43,7 +43,15 @@ public class MainActivity extends AppCompatActivity implements
 
             /* todo: insert fragment(s) for rest of application... */
 
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(EVENT_FRAGMENT);
+            if(fragment == null) {
+                fragment = new EventFragment();
+            }
 
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.FragmentContainer, fragment, EVENT_FRAGMENT)
+                    .addToBackStack(null)
+                    .commit();
         }
 
         // check if application is in first use...
@@ -52,13 +60,12 @@ public class MainActivity extends AppCompatActivity implements
         if(firstUse) {
             mPagerFragment = new ViewPagerFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.FragmentContainer, mPagerFragment, PAGER_FRAGMENT)
+                    .replace(R.id.FragmentContainer, mPagerFragment, PAGER_FRAGMENT)
                     .addToBackStack(null)
                     .commit();
 
             mSharedPreferences.edit().putBoolean(getString(R.string.first_use), false).apply();
         }
-
     }
 
     @Override
@@ -142,5 +149,4 @@ public class MainActivity extends AppCompatActivity implements
                 .addToBackStack(CHECK_POINT_FRAGMENT)
                 .commit();
     }
-
 }
