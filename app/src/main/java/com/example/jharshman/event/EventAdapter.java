@@ -2,6 +2,7 @@
  * @file EventAdapter.java
  * @author Bruce Emehiser
  * @date 2016 02 16
+ * @date 2016 03 03
  *
  * Array Adapter for Collections
  */
@@ -9,6 +10,8 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +20,18 @@ import android.widget.TextView;
 
 import java.util.List;
 
-class EventAdapter extends ArrayAdapter<Event> {
+class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
 
     private static final String TAG = "EventAdapter";
 
+    /**
+     * Listener for click events
+     */
+    OnEventClickListener mListener;
+
+    /**
+     * List of events
+     */
     List<Event> mEvents;
 
     public EventAdapter(Context context, int resource, List<Event> events) {
@@ -43,6 +54,7 @@ class EventAdapter extends ArrayAdapter<Event> {
 
             holder.mTitle = (TextView) convertView.findViewById(R.id.fragment_event_card_title);
             holder.mDescription = (TextView) convertView.findViewById(R.id.fragment_event_card_short_description);
+            holder.mAddDeleteButton = (FloatingActionButton) convertView.findViewById(R.id.fragment_collections_add_delete_button);
             // todo get progress bar
 
             // set holder on view for later use
@@ -55,25 +67,60 @@ class EventAdapter extends ArrayAdapter<Event> {
 
         holder.mTitle.setText(mEvents.get(position).getTitle());
         holder.mDescription.setText(mEvents.get(position).getDescription());
+
+        // set event id as tag on add/delete button so we can get the ID when notifying of a click
+        holder.mAddDeleteButton.setTag(mEvents.get(position).getID());
+        holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        holder.mAddDeleteButton.setOnClickListener(this);
+
         // todo set progress bar based on position
 
         return convertView;
     }
 
     /**
-     * Notify user of which item was clicked
+     * Set listener to notify when View is clicked
      *
-     * todo make users be able to click add/delete floating action button
+     * @param listener Listener to notify of view click
      */
-    public interface OnItemClickListener {
+    public void setOnEventClickListener(OnEventClickListener listener) {
+        mListener = listener;
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param view The view that was clicked.
+     */
+    @Override
+    public void onClick(View view) {
+
+        Log.i("CheckPointAdapter", "button clicked");
+
+        if(mListener != null) {
+            try {
+                int id = (int) view.getTag();
+                mListener.onEventClick(view, id);
+
+            } catch (NullPointerException e) {
+                Log.e(TAG, e.getClass() + " Unable to notify listener");
+            }
+        }
+    }
+
+    /**
+     * Interface that will be called to notify the class
+     * that contains the EventAdapter that an event has
+     * been clicked on
+     */
+    interface OnEventClickListener {
 
         /**
-         * Notify listener that an event was clicked
-         * and pass it the clicked event
+         * Notify listener that event has been clicked
          *
-         * @param view The view which was clicked
-         * @param clicked The event which was clicked
+         * @param view The view which has been clicked
+         * @param eventId The id of the event for the view that has been clicked
          */
-        void onItemClicked(View view, Event clicked);
+        void onEventClick(View view, int eventId);
     }
 }

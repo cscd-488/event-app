@@ -2,7 +2,9 @@ package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,7 +38,7 @@ import okhttp3.Response;
  * {@link OnEventInteraction} interface
  * to handle interaction events.
  */
-public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, Callback {
+public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, Callback, EventAdapter.OnEventClickListener {
 
     private static final String TAG = "EventFragment";
 
@@ -80,6 +82,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         // set adapter on collection
         mListView.setAdapter(mEventAdapter);
 
+        mEventAdapter.setOnEventClickListener(this);
         mListView.setOnItemClickListener(this);
 
         return view;
@@ -221,6 +224,29 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
 
         if(mListener != null) {
             mListener.onEventInteraction(mEvents.get(position).getID());
+        }
+    }
+
+    /**
+     * Notify listener that event has been clicked
+     *
+     * @param view    The view which has been clicked
+     * @param eventId The id of the event for the view that has been clicked
+     */
+    @Override
+    public void onEventClick(View view, int eventId) {
+
+        Log.i(TAG, String.format("onEventClick(%d, %d)", view.getId(), eventId));
+
+        if(view.getId() == R.id.fragment_collections_add_delete_button) {
+            // todo add or remove event from list of current events
+
+            // set image to be green and add button
+            FloatingActionButton floatingActionButton = (FloatingActionButton) view;
+
+            // todo set image and color based on event enrollment
+            floatingActionButton.setImageResource(android.R.drawable.ic_input_add);
+            floatingActionButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.addButton)));
         }
     }
 

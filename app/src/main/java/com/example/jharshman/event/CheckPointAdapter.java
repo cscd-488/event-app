@@ -29,10 +29,17 @@ import java.util.List;
  */
 public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.OnClickListener {
 
+    private static final String TAG = "CheckPointAdapter";
+
     /**
      * List of card objects currently being displayed in list view
      */
     List<CheckPoint> mCheckPoints;
+
+    /**
+     * Listener for click events
+     */
+    View.OnClickListener mListener;
 
     /**
      * Constructor
@@ -92,6 +99,15 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
     }
 
     /**
+     * Set listener to notify when View is clicked
+     *
+     * @param listener Listener to notify of view click
+     */
+    public void setOnClickListener(View.OnClickListener listener) {
+        mListener = listener;
+    }
+
+    /**
      * Called when a view has been clicked.
      *
      * @param view The view that was clicked.
@@ -100,5 +116,13 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
     public void onClick(View view) {
 
         Log.i("CheckPointAdapter", "button clicked");
+
+        if(mListener != null) {
+            try {
+                mListener.onClick(view);
+            } catch (NullPointerException e) {
+                Log.e(TAG, e.getClass() + " Unable to notify listener");
+            }
+        }
     }
 }
