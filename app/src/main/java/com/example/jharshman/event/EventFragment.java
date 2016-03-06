@@ -2,9 +2,7 @@ package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,8 +17,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,11 +71,24 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
 
         Log.i(TAG, "Token:" + token);
 
+
+        // todo do this more elegantly
         try {
-            getEventData();
-        } catch (Exception e) {
-            e.printStackTrace();
+            // read cached data if there is any
+            mEvents = readCachedData();
+
+        } catch (NullPointerException e) {
+            Log.i(TAG, "There was no cached data");
+            try {
+
+                // read data from server
+                getEventData();
+
+            } catch (Exception f) {
+                Log.e(TAG, "Could not get event data from server");
+            }
         }
+
 
         // create adapter
         mEventAdapter = new EventAdapter(view.getContext(), R.layout.fragment_event_card, mEvents);
@@ -172,10 +185,8 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
             mEvents.add(event);
         }
 
-        // save all the data out to storage for use by CheckPointFragment
-        File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(cachedEventData));
-        objectOutputStream.writeObject(mEvents);
+        // save the data for later use
+//        writeCachedData(mEvents);
 
         // updating the list adapter must be done from the UI Thread
         getActivity().runOnUiThread(new Runnable() {
@@ -188,6 +199,53 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         // testing log
         for(Event e : mEvents) {
             Log.i(TAG, e.toString());
+        }
+    }
+
+    /**
+     * Read cached event data if it exists
+     *
+     * @return Data found/not found
+     */
+    private List<Event> readCachedData() {
+
+        // read all the event data from the cache file
+        File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
+
+        // if file does not exist, then return false
+        if(! cachedEventData.exists()) {
+            throw new NullPointerException("There is no cached data");
+        }
+
+        ArrayList<Event> events = null;
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(cachedEventData));
+
+            events = (ArrayList<Event>) objectInputStream.readObject();
+
+        } catch (IOException e) {
+            Log.e(TAG, "error reading file for loading event data, IOException");
+            throw new NullPointerException("There is no cached data");
+        } catch (ClassNotFoundException f) {
+            Log.e(TAG, "error reading file for loading event data, ClassNotFound");
+            throw new NullPointerException("There is no cached data");
+        }
+        if(events == null) {
+            throw new NullPointerException("There is no cached data");
+        }
+        return events;
+    }
+
+    private void writeCachedData(List<Event> events) {
+
+        try {
+            // save all the data out to storage for use by CheckPointFragment
+            File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(cachedEventData));
+            objectOutputStream.writeObject(events);
+
+        } catch (IOException e) {
+            Log.i(TAG, "Error writing cached data");
         }
     }
 
@@ -239,14 +297,11 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         Log.i(TAG, String.format("onEventClick(%d, %s)", view.getId(), event.getTitle()));
 
         if(view.getId() == R.id.fragment_collections_add_delete_button) {
-            // todo add or remove event from list of current events
 
-            // set image to be green and add button
-            FloatingActionButton floatingActionButton = (FloatingActionButton) view;
+            // update subscription state
+            event.setSubscribed(! event.getSubscribed());
 
-            // todo set image and color based on event enrollment
-            floatingActionButton.setImageResource(android.R.drawable.ic_input_add);
-            floatingActionButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.addButton)));
+            mEventAdapter.notifyDataSetChanged();
         }
     }
 
@@ -262,5 +317,13 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
          * @param id The Event Event Key
          */
         void onEventInteraction(int id);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // save the current events list which contains subscriptions etc
+        writeCachedData(mEvents);
     }
 }

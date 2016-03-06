@@ -48,6 +48,69 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private boolean mCollected;
     private boolean mWasDisplayed;
 
+    /**
+     * Build new instance of a CheckPoint
+     */
+    public class Builder {
+
+        public CheckPoint build() {
+            //todo finish builder
+            throw new NullPointerException("Method build() not yet implimented");
+        }
+
+        public void setID(int id) {
+            mID = id;
+        }
+
+        public void setEventID(int eventID) {
+            mEventID = eventID;
+        }
+
+        public void setTitle(String title) {
+            mTitle = title;
+        }
+
+        public void setDescription(String description) {
+            mDescription = description;
+        }
+
+        public void setImageSrc(String imageSrc) {
+            mImageSrc = imageSrc;
+        }
+
+        public void setCoordinates(String coordinates) {
+            mCoordinates = coordinates;
+        }
+
+        public void setLat(double lat) {
+            mLat = lat;
+        }
+
+        public void setLon(double lon) {
+            mLon = lon;
+        }
+
+        public void setQR(String qr) {
+            mQR = qr;
+        }
+
+        public void setTimeCreated(String timeCreated) {
+            mTimeCreated = timeCreated;
+        }
+
+        public void setTimeUpdated(String timeUpdated) {
+            mTimeUpdated = timeUpdated;
+        }
+
+        public void setCollected(boolean collected) {
+            mCollected = collected;
+        }
+
+        public void setWasDisplayed(boolean displayed) {
+            mWasDisplayed = displayed;
+        }
+    }
+
     public CheckPoint(int id, int eventID, String title, String description, String image, double lat, double lon, String timeCreated, String timeUpdated, boolean collected) {
         mID = id;
         mEventID = eventID;

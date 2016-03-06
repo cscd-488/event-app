@@ -33,6 +33,7 @@ public class Event implements Serializable {
     private String mTimeUpdated;
 
     private boolean mRedeemed;
+    private boolean mSubscribed;
 
     @SerializedName("locations")
     private CheckPoint[] mCheckPoints;
@@ -49,6 +50,7 @@ public class Event implements Serializable {
         mTimeUpdated = timeUpdated;
         mRedeemed = redeemed;
         mCheckPoints = checkPoints;
+        mSubscribed = false;
     }
 
     public void setTimeUpdated(String timeUpdated) {
@@ -57,6 +59,10 @@ public class Event implements Serializable {
 
     public void setRedeemed(boolean redeemed) {
         mRedeemed = redeemed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        mSubscribed = subscribed;
     }
 
     public int getID() {
@@ -89,6 +95,10 @@ public class Event implements Serializable {
 
     public boolean isRedeemed() {
         return mRedeemed;
+    }
+
+    public boolean getSubscribed() {
+        return mSubscribed;
     }
 
     public CheckPoint[] getCheckPoints() {

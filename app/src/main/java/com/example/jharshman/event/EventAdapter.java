@@ -10,6 +10,7 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -71,8 +72,15 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         holder.mTitle.setText(event.getTitle());
         holder.mDescription.setText(event.getDescription());
         // set event id as tag on add/delete button so we can get the EVENT_TAG_KEY when notifying of a click
-        holder.mAddDeleteButton.setTag(R.id.fragment_collections_add_delete_button, event);
-        holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        holder.mAddDeleteButton.setTag(R.layout.fragment_event, event);
+        if(! event.getSubscribed()) {
+            holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_add);
+            holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.addButton)));
+        }
+        else {
+            holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+            holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.deleteButton)));
+        }
         holder.mAddDeleteButton.setOnClickListener(this);
 
         // todo set progress bar based on position
@@ -101,7 +109,7 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
 
         if(mListener != null) {
             try {
-                Event event = (Event) view.getTag(R.id.fragment_collections_add_delete_button);
+                Event event = (Event) view.getTag(R.layout.fragment_event);
                 mListener.onEventClick(view, event);
 
             } catch (NullPointerException e) {
