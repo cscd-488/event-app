@@ -54,7 +54,7 @@
             <FrameLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
+                android:layout_height="75dp"
                 android:background="#464646"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
@@ -65,7 +65,7 @@
                     android:layout_height="100dp"
                     android:id="@+id/fragment_check_point_check_in_button"
                     android:layout_weight="1"
-                    android:src="@drawable/abc_btn_check_to_on_mtrl_015"
+                    android:src="@drawable/i100x100"
                     android:scaleType="center"
                     android:adjustViewBounds="false"
                     android:baselineAlignBottom="false"
@@ -78,7 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/fragment_check_point_map_button"
-                    android:src="@drawable/abc_btn_rating_star_off_mtrl_alpha"
+                    android:src="@drawable/i72x72"
                     android:scaleType="center"
                     android:layout_gravity="right|center_vertical"
                     android:layout_weight="1"
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/fragment_check_point_card_share_button"
                     android:scaleType="center"
-                    android:src="@drawable/abc_ic_menu_share_mtrl_alpha"
+                    android:src="@drawable/i72x72"
                     android:layout_weight="1"
                     android:contentDescription="Share"
                     android:layout_alignBottom="@+id/fragment_check_point_check_in_button"
@@ -122,7 +122,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
         android:tint="@color/colorPrimary"
         android:background="@color/colorPrimary" />
 

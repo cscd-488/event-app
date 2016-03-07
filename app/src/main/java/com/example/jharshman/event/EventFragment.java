@@ -35,7 +35,7 @@ import okhttp3.Response;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnEventInteraction} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
 public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, Callback, EventAdapter.OnEventClickListener {
@@ -45,7 +45,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
     private final OkHttpClient mClient = new OkHttpClient();
     private final Gson mGson = new Gson();
 
-    private OnEventInteraction mListener;
+    private OnFragmentInteractionListener mListener;
 
     private List<Event> mEvents;
 
@@ -252,10 +252,10 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnEventInteraction) {
-            mListener = (OnEventInteraction) context;
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement OnEventInteraction");
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -309,7 +309,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
      * This interface must be implemented by activities that contain
      * Event fragments
      */
-    public interface OnEventInteraction {
+    public interface OnFragmentInteractionListener {
 
         /**
          * Interaction from Event. Load proper

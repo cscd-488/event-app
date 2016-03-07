@@ -9,20 +9,11 @@
 
 package com.example.jharshman.event;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
 
 public class CheckPointFragment extends Fragment {
 
@@ -30,44 +21,43 @@ public class CheckPointFragment extends Fragment {
      * Final Keys/Tags
      */
     private static final String TAG = "CheckPointFragment";
-    public static final String EVENT_ID_KEY = "event_id_key";
-    private static final String CHECK_POINT_KEY = "check_point_key";
+    public static final String CHECK_POINT_KEY = "check_point_key";
 
     /**
-     * List view used to display contents of mCheckPoints
-     * via mListAdapter
+     * Singleton getInstance of fragment
      */
-    ListView mListView;
+    private static CheckPointFragment mInstance;
 
     /**
-     * Fragment transaction listener for returning data
-     * from fragment
+     * Check point we are representing and handling in the fragment
      */
-    private OnFragmentInteractionListener mListener;
+    private CheckPoint mCheckPoint;
 
     public CheckPointFragment() {
         // required empty constructor
     }
 
     /**
-     * Factory method for creating new instance of the
-     * fragment
+     * Factory method for creating or getting new singleton
+     * getInstance of the fragment
      *
-     * @param id ID of the Event the checkpoints of whom we wish to display :P
+     * @param checkPoint The checkpoint to display
      *
-     * @return A new instance of fragment CheckPointFragment.
+     * @return A new getInstance of fragment CheckPointFragment.
      */
-    public static CheckPointFragment newInstance(int id) {
+    public static CheckPointFragment newInstance(CheckPoint checkPoint) {
 
         // create check points fragment
-        CheckPointFragment fragment = new CheckPointFragment();
+        if(mInstance == null) {
+             mInstance = new CheckPointFragment();
+        }
 
         // set check point arguments on fragment
         Bundle args = new Bundle();
-        args.putInt(EVENT_ID_KEY, id);
-        fragment.setArguments(args);
+        args.putSerializable(CHECK_POINT_KEY, checkPoint);
+        mInstance.setArguments(args);
 
-        return fragment;
+        return mInstance;
     }
 
     @Override
@@ -78,29 +68,10 @@ public class CheckPointFragment extends Fragment {
         int eventID = -1;
         if (getArguments() != null) {
             // get Event ID
-            eventID = getArguments().getInt(EVENT_ID_KEY);
+            mCheckPoint = (CheckPoint) getArguments().getSerializable(CHECK_POINT_KEY);
         }
         else {
-            Log.e(TAG, "Event id must be set");
-            return;
-        }
-
-        Log.i(TAG, "Event ID passed in " + eventID);
-
-        // read all the event data from the cache file
-        File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
-        ArrayList<Event> events = null;
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(cachedEventData));
-
-            events = (ArrayList<Event>) objectInputStream.readObject();
-
-        } catch (IOException e) {
-            Log.e(TAG, "error reading file for loading event data, IOException");
-            return;
-        } catch (ClassNotFoundException f) {
-            Log.e(TAG, "error reading file for loading event data, ClassNotFound");
-            return;
+            throw new NullPointerException("Check point must be set using Key CheckPointFragment.CHECK_POINT_KEY");
         }
     }
 
@@ -109,43 +80,8 @@ public class CheckPointFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_point, container, false);
 
-
+        // todo load up the views with data
 
         return view;
-    }
-
-    public void onButtonPressed(int id) {
-        if (mListener != null) {
-            mListener.onCheckPointInteraction(id);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement OnEventInteraction");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities which contain this fragment.
-     */
-    public interface OnFragmentInteractionListener {
-
-        /**
-         * Check Point was clicked
-         *
-         * @param id The id of the item clicked
-         */
-        void onCheckPointInteraction(int id);
     }
 }

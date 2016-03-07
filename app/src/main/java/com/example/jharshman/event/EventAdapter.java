@@ -105,7 +105,7 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
     @Override
     public void onClick(View view) {
 
-        Log.i("CheckPointAdapter", "button clicked");
+        Log.i("CheckPointListAdapter", "button clicked");
 
         if(mListener != null) {
             try {
