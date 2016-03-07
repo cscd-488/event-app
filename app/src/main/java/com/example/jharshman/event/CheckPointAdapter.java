@@ -71,7 +71,7 @@ public class CheckPointAdapter extends ArrayAdapter<CheckPoint> implements View.
             holder.mTitle = (TextView) convertView.findViewById(R.id.fragment_check_point_card_title_text);
             holder.mImage = (ImageView) convertView.findViewById(R.id.fragment_check_point_card_title_image);
             holder.mDescription = (TextView) convertView.findViewById(R.id.fragment_check_point_card_description_text);
-            holder.mCheckIn = (ImageButton) convertView.findViewById(R.id.fragment_check_point_card_check_in_button);
+            holder.mCheckIn = (ImageButton) convertView.findViewById(R.id.fragment_check_point_check_in_button);
             holder.mSharing = (ImageButton) convertView.findViewById(R.id.fragment_check_point_card_share_button);
 
             // set holder on convert view

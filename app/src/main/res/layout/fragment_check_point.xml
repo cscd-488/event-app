@@ -1,11 +1,129 @@
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".CheckPointFragment"
-    android:id="@+id/fragment_check_point_card_list"
-    android:divider="@null">
+    android:layout_height="match_parent">
+
+    <LinearLayout
+
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight=".5">
 
-</ListView>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/fragment_check_point_title_image"
+                android:src="@drawable/placeholder_logo"
+                android:scaleType="centerCrop"
+                android:contentDescription="Title Image View"
+                android:layout_alignParentBottom="true" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center_vertical|center_horizontal"
+                android:background="#afd5fc"
+                android:id="@+id/relativeLayout"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="Event Card Title"
+                    android:id="@+id/fragment_check_point_title_text"
+                    android:textColor="#ffffff" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight=".5">
+
+            <FrameLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="#464646"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:id="@+id/frameLayout">
+
+                <ImageButton
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:id="@+id/fragment_check_point_check_in_button"
+                    android:layout_weight="1"
+                    android:src="@drawable/abc_btn_check_to_on_mtrl_015"
+                    android:scaleType="center"
+                    android:adjustViewBounds="false"
+                    android:baselineAlignBottom="false"
+                    android:contentDescription="Check In"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center"
+                    android:elevation="10dp" />
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fragment_check_point_map_button"
+                    android:src="@drawable/abc_btn_rating_star_off_mtrl_alpha"
+                    android:scaleType="center"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_weight="1"
+                    android:contentDescription="Camera"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fragment_check_point_card_share_button"
+                    android:scaleType="center"
+                    android:src="@drawable/abc_ic_menu_share_mtrl_alpha"
+                    android:layout_weight="1"
+                    android:contentDescription="Share"
+                    android:layout_alignBottom="@+id/fragment_check_point_check_in_button"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_gravity="left|center_vertical" />
+
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description Text"
+                android:id="@+id/fragment_check_point_description_text"
+                android:layout_weight=".5"
+                android:layout_below="@+id/frameLayout"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_check_point_fab_menu_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+        android:tint="@color/colorPrimary"
+        android:background="@color/colorPrimary" />
+
+</FrameLayout>
