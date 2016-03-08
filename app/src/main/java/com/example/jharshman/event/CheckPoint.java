@@ -25,17 +25,20 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
      * Event Attributes
      */
     @SerializedName("id")
-    private int mID;
+    private int mCheckPointID;
     @SerializedName("event_id")
     private int mEventID;
     @SerializedName("title")
     private String mTitle;
+    // todo add Artist from database
+    private String mArtist;
     @SerializedName("description")
     private String mDescription;
     @SerializedName("image_src")
     private String mImageSrc;
     @SerializedName("coordinates")
     private String mCoordinates;
+    // todo switch from coordinates to lat and lon
     private double mLat;
     private double mLon;
     // todo add QR functionality
@@ -59,7 +62,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         }
 
         public void setID(int id) {
-            mID = id;
+            mCheckPointID = id;
         }
 
         public void setEventID(int eventID) {
@@ -112,9 +115,10 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public CheckPoint(int id, int eventID, String title, String description, String image, double lat, double lon, String timeCreated, String timeUpdated, boolean collected) {
-        mID = id;
+        mCheckPointID = id;
         mEventID = eventID;
         mTitle = title;
+        mArtist = ""; // todo
         mDescription = description;
         mImageSrc = image;
         mLat = lat;
@@ -125,26 +129,12 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         mCollected = collected;
     }
 
-    public CheckPoint(int id, int eventID, String title, String description, String image, String qr, String timeCreated, String timeUpdated, boolean collected) {
-        mID = id;
-        mEventID = eventID;
-        mTitle = title;
-        mDescription = description;
-        mImageSrc = image;
-        mLat = -1;
-        mLon = -1;
-        mQR = qr;
-        mTimeCreated = timeCreated;
-        mTimeUpdated = timeUpdated;
-        mCollected = collected;
-    }
-
     public void setDisplayed() {
         mWasDisplayed = true;
     }
 
-    public int getID() {
-        return mID;
+    public int getCheckPointID() {
+        return mCheckPointID;
     }
 
     public int getEventID() {
@@ -153,6 +143,10 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
 
     public String getTitle() {
         return mTitle;
+    }
+
+    public String getArtist() {
+        return mArtist;
     }
 
     public void setCollected(boolean collected) {
@@ -203,11 +197,11 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     public int compareTo(@NonNull CheckPoint that) {
 
         // compare based on ID
-        return mID - that.getID();
+        return mCheckPointID - that.getCheckPointID();
     }
 
     @Override
     public String toString() {
-        return String.format("%d %d %s %s %s %f %f %s %s %s %b %b", mID, mEventID, mTitle, mDescription, mImageSrc, mLat, mLon, mQR, mTimeCreated, mTimeUpdated, mCollected, mWasDisplayed);
+        return String.format("%d %d %s %s %s %f %f %s %s %s %b %b", mCheckPointID, mEventID, mTitle, mDescription, mImageSrc, mLat, mLon, mQR, mTimeCreated, mTimeUpdated, mCollected, mWasDisplayed);
     }
 }

@@ -1,120 +1,119 @@
-
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/tools">
 
-    <LinearLayout
-
-        android:orientation="vertical"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
+        android:layout_height="wrap_content">
         <RelativeLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight=".5">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/fragment_check_point_title_image"
-                android:src="@drawable/placeholder_logo"
-                android:scaleType="centerCrop"
-                android:contentDescription="Title Image View"
-                android:layout_alignParentBottom="true" />
+            android:layout_height="wrap_content">
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center_vertical|center_horizontal"
-                android:background="#afd5fc"
-                android:id="@+id/relativeLayout"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true">
+                android:layout_height="match_parent"
+                android:id="@+id/relativeLayout2">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Event Card Title"
-                    android:id="@+id/fragment_check_point_title_text"
-                    android:textColor="#ffffff" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:id="@+id/fragment_check_point_title_image"
+                    android:src="@drawable/placeholder_logo"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Title Image View" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:background="@color/colorAccent"
+                    android:id="@+id/relativeLayout"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:text="Event Card Title"
+                        android:id="@+id/fragment_check_point_title_text"
+                        android:textColor="#ffffff" />
+                </RelativeLayout>
+
             </RelativeLayout>
 
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight=".5">
+            <!--todo make this text view scrollable-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ligula justo vitae maecenas eum suspendisse posuere? Orci! Commodo! Cubilia in, mattis, sollicitudin beatae deleniti assumenda blandit nullam, lacus taciti, voluptates iusto laboris eleifend! Dolorum eos ultrices cupidatat, quidem harum sem perspiciatis, vestibulum semper inceptos placeat, similique error cras inventore nibh incidunt, pariatur netus, curabitur aute curae torquent, lacus quisque a inceptos fuga quod tellus lacus, nesciunt quas viverra iaculis, fames nostrum condimentum commodo, aut nibh, eleifend distinctio, mauris parturient sodales purus expedita labore pariatur felis! Quisque adipiscing eleifend animi qui aliquet nostrum enim! Sequi hendrerit ornare repellendus. Est reiciendis! Tempus posuere voluptate eos anim integer aspernatur tenetur interdum dictum. Ligula justo vitae maecenas eum suspendisse posuere? Orci! Commodo! Cubilia in, mattis, sollicitudin beatae deleniti assumenda blandit nullam, lacus taciti, voluptates iusto laboris eleifend! Dolorum eos ultrices cupidatat, quidem harum sem perspiciatis, vestibulum semper inceptos placeat, similique error cras inventore nibh incidunt, pariatur netus, curabitur aute curae torquent, lacus quisque a inceptos fuga quod tellus lacus, nesciunt quas viverra iaculis, fames nostrum condimentum commodo, aut nibh, eleifend distinctio, mauris parturient sodales purus expedita labore pariatur felis! Quisque adipiscing eleifend animi qui aliquet nostrum enim! Sequi hendrerit ornare repellendus. Est reiciendis! Tempus posuere voluptate eos anim integer aspernatur tenetur interdum dictum."
+                android:id="@+id/fragment_check_point_description_text"
+                android:maxLines = "50"
+                android:scrollbars = "vertical"
+                android:layout_below="@+id/fragment_check_point_author_text"
+                android:layout_alignLeft="@+id/fragment_check_point_author_text"
+                android:layout_alignStart="@+id/fragment_check_point_author_text" />
 
             <FrameLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
                 android:background="#464646"
+                android:id="@+id/frameLayout"
+                android:layout_below="@+id/relativeLayout2"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:id="@+id/frameLayout">
+                android:layout_alignParentStart="true">
 
-                <ImageButton
+                <ImageView
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:id="@+id/fragment_check_point_check_in_button"
-                    android:layout_weight="1"
                     android:src="@drawable/i100x100"
                     android:scaleType="center"
                     android:adjustViewBounds="false"
                     android:baselineAlignBottom="false"
                     android:contentDescription="Check In"
-                    android:layout_centerHorizontal="true"
-                    android:layout_gravity="center"
-                    android:elevation="10dp" />
+                    android:layout_gravity="center" />
 
-                <ImageButton
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/fragment_check_point_map_button"
                     android:src="@drawable/i72x72"
                     android:scaleType="center"
-                    android:layout_gravity="right|center_vertical"
-                    android:layout_weight="1"
-                    android:contentDescription="Camera"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true" />
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginRight="30dp" />
 
-                <ImageButton
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/fragment_check_point_card_share_button"
                     android:scaleType="center"
                     android:src="@drawable/i72x72"
-                    android:layout_weight="1"
                     android:contentDescription="Share"
-                    android:layout_alignBottom="@+id/fragment_check_point_check_in_button"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_gravity="left|center_vertical" />
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_marginLeft="30dp" />
 
             </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Description Text"
-                android:id="@+id/fragment_check_point_description_text"
-                android:layout_weight=".5"
+                android:text="Author Text"
+                android:id="@+id/fragment_check_point_author_text"
                 android:layout_below="@+id/frameLayout"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                android:layout_margin="20dp"
+                android:textSize="@dimen/abc_text_size_medium_material" />
 
         </RelativeLayout>
 
-    </LinearLayout>
+    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fragment_check_point_fab_menu_button"
@@ -122,7 +121,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:tint="@color/colorPrimary"
-        android:background="@color/colorPrimary" />
+        android:background="@color/colorPrimary"
+        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+        android:scaleType="fitXY" />
 
 </FrameLayout>

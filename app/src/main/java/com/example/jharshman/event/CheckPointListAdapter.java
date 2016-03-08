@@ -62,6 +62,7 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
 
             // set views in view holder
             holder.mTitle = (TextView) convertView.findViewById(R.id.check_point_card_title);
+            holder.mAuthor = (TextView) convertView.findViewById(R.id.check_point_card_author);
             holder.mImage = (ImageView) convertView.findViewById(R.id.check_point_card_image);
             holder.mTime = (TextView) convertView.findViewById(R.id.check_point_card_time_text);
             holder.mDistance = (TextView) convertView.findViewById(R.id.check_point_card_distance_text);
@@ -76,16 +77,14 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
         CheckPoint checkPoint = mCheckPoints.get(position);
 
         holder.mTitle.setText(checkPoint.getTitle());
+        holder.mAuthor.setText(checkPoint.getArtist());
         Picasso.with(getContext())
                 .load(checkPoint.getImageSrc())
                 .into(holder.mImage);
 
-        // todo set author text
         // todo set time text
         // todo set distance text
 
         return convertView;
     }
-
-    // todo make methods to handle clicks
 }

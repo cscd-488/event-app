@@ -21,6 +21,8 @@ public class Event implements Serializable {
     private int mID;
     @SerializedName("title")
     private String mTitle;
+    // todo add Author from Database
+    private String mAuthor;
     @SerializedName("description")
     private String mDescription;
     @SerializedName("image_src")
