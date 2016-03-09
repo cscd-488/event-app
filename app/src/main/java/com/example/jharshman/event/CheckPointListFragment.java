@@ -19,12 +19,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 public class CheckPointListFragment extends Fragment implements AdapterView.OnItemClickListener {
 
@@ -38,7 +34,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
     /**
      * Check points for list card view
      */
-    ArrayList<CheckPoint> mCheckPoints;
+    List<CheckPoint> mCheckPoints;
 
     /**
      * List adapter for card view
@@ -98,7 +94,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int eventID = -1;
+        int eventID;
         if (getArguments() != null) {
             // get Event ID
             eventID = getArguments().getInt(EVENT_ID_KEY);
@@ -110,31 +106,12 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
 
         Log.i(TAG, "Event ID passed in " + eventID);
 
-        // read all the event data from the cache file
-        File cachedEventData = new File(getActivity().getCacheDir(), getString(R.string.event_data_cache_file));
-        ArrayList<Event> events = null;
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(cachedEventData));
-
-            events = (ArrayList<Event>) objectInputStream.readObject();
-
-        } catch (IOException e) {
-            Log.e(TAG, "error reading file for loading event data, IOException");
-            return;
-        } catch (ClassNotFoundException f) {
-            Log.e(TAG, "error reading file for loading event data, ClassNotFound");
-            return;
+        // get the check points from the data manager. NOTE: This list Object WILL change every time (until I fix that)
+        if(mCheckPoints == null) {
+            mCheckPoints = new ArrayList<>();
         }
-
-        // find checkpoints for passed event id
-        CheckPoint checkPoints[] = null;
-        boolean found = false;
-        for(int i = 0; i < events.size(); i ++) {
-            if(events.get(i).getID() == eventID) {
-                mCheckPoints = new ArrayList<>();
-                mCheckPoints.addAll(Arrays.asList(events.get(i).getCheckPoints()));
-            }
-        }
+        mCheckPoints.clear();
+        mCheckPoints.addAll(DataManager.instance(getContext()).getCheckpoints(eventID));
     }
 
     @Override
