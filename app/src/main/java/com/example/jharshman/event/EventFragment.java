@@ -1,15 +1,28 @@
+/**
+ * @file EventFragment.java
+ * @author Bruce Emehiser
+ * @date 2016 03 10
+ *
+ * Event fragment which handles the display
+ * and user interactions for event data
+ */
+
+
 package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.google.gson.Gson;
 
@@ -17,13 +30,7 @@ import java.util.List;
 
 import okhttp3.OkHttpClient;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
- * to handle interaction events.
- */
-public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, EventAdapter.OnEventClickListener, DataManager.UpdateListener {
+public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, EventAdapter.OnEventClickListener, View.OnClickListener, DataManager.UpdateListener {
 
     private static final String TAG = "EventFragment";
 
@@ -37,6 +44,8 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
     private ListView mListView;
     private EventAdapter mEventAdapter;
     private SharedPreferences mSharedPreferences;
+    private FloatingActionButton mFab;
+    private RelativeLayout mHeader;
 
     public EventFragment() {
         // Required empty public constructor
@@ -44,6 +53,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event, container, false);
 
@@ -62,6 +72,14 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         mEventAdapter.setOnEventClickListener(this);
         mListView.setOnItemClickListener(this);
 
+        mFab = (FloatingActionButton) view.findViewById(R.id.fragment_event_fab);
+        mFab.setOnClickListener(this);
+
+        ImageView headerDoneButton = (ImageView) view.findViewById(R.id.fragment_event_header_done_image_button);
+        headerDoneButton.setOnClickListener(this);
+
+        mHeader = (RelativeLayout) view.findViewById(R.id.fragment_event_header);
+        mHeader.setVisibility(View.GONE);
 
         return view;
     }
@@ -118,7 +136,10 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
             // update subscription state
             event.setSubscribed(! event.getSubscribed());
 
+            // update the view
             mEventAdapter.notifyDataSetChanged();
+
+            // todo set data set changed flag so that the server will get updated when the data is saved
         }
     }
 
@@ -137,6 +158,32 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
                 mEventAdapter.notifyDataSetChanged();
             }
         });
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param view The view that was clicked.
+     */
+    @Override
+    public void onClick(View view) {
+
+        // hide or show event list editing views
+        if(view.getId() == R.id.fragment_event_fab) {
+
+            mFab.hide();
+            mHeader.setVisibility(View.VISIBLE);
+
+            // todo add all events to event list, along with subscription status, and show add/delete buttons on each item
+        }
+        else if(view.getId() == R.id.fragment_event_header_done_image_button) {
+
+            mFab.show();
+            mHeader.setVisibility(View.GONE);
+
+            // todo remove events that are not subscribed from the list
+        }
+
     }
 
     /**

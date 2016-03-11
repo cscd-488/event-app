@@ -59,7 +59,9 @@ public class DataManager implements Callback {
      * but never destroyed and recreated with a different reference.
      * This allows it to be used easily in ArrayAdapters etc.
      */
-    private final List<Event> mEvents = new ArrayList<Event>();
+    private final List<Event> mEvents = new ArrayList<>();
+
+    private boolean mDataSetChanged;
 
     /**
      * Server connection and data parser
@@ -70,6 +72,7 @@ public class DataManager implements Callback {
     private DataManager() {
         // singleton constructor will read data from server on first run
         mEvents.addAll(readCachedData());
+        mDataSetChanged = false;
         getEventData();
     }
 
@@ -84,7 +87,7 @@ public class DataManager implements Callback {
         return mInstance;
     }
 
-    // todo pull data from web server ( based on location and radius )
+    // todo pull data from web server based on location and radius
     // todo put data to web server
 
     /**
@@ -174,25 +177,10 @@ public class DataManager implements Callback {
      */
     private void updateEvents(List<Event> newEvents) {
 
-        //todo make this faster than O(n^2)
+        // todo make this just update the events instead of overwriting them. Make sure that the subscription check in data are saved
 
-        boolean found;
-        Event newEvent;
-        for(int i = 0; i < newEvents.size(); i ++) {
-            newEvent = newEvents.get(i);
-            found = false;
-            for(int j = 0; j < mEvents.size() && ! found; j ++) {
-                if(mEvents.get(j).getID() == newEvent.getID()) {
-                    found = true;
-                    // update that event by overwriting with new event
-                    // todo make this only overwrite some stuff, and keep the check in and subscription data that is in the current events
-                    mEvents.set(j, newEvent);
-                }
-            }
-            if(! found) {
-                mEvents.add(newEvent);
-            }
-        }
+        mEvents.clear();
+        mEvents.addAll(newEvents);
 
         // clue listeners in to the fact that new data awaits
         notifyUpdateListeners();
@@ -255,7 +243,7 @@ public class DataManager implements Callback {
 
     public List<CheckPoint> getCheckpoints(int eventID) {
 
-        // todo make this faster than O(n)
+        // todo make this make a deep copy of the events, or somehow otherwise make it immutable by other programs
         for(int i = 0; i < mEvents.size(); i ++) {
             if(mEvents.get(i).getID() == eventID) {
                 return Arrays.asList(mEvents.get(i).getCheckPoints());
@@ -277,7 +265,21 @@ public class DataManager implements Callback {
      * important changes
      */
     public void flush() {
+        // save the events to disk
         writeCachedData(mEvents);
+
+        if(mDataSetChanged) {
+            // todo save the updates to the server
+            // this will include subscriptions and check in data
+        }
+    }
+
+    /**
+     * This sets a flag which is used to decide whether or not
+     * to update the server with any changes to the data.
+     */
+    public void setDataChanged() {
+        mDataSetChanged = true;
     }
 
     public interface UpdateListener {
