@@ -29,7 +29,6 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
      */
     private static final String TAG = "CheckPointFragment";
     private static final String EVENT_ID_KEY = "event_id_key";
-    private static final String CHECK_POINT_LIST_KEY = "check_point_key";
 
     /**
      * Check points for list card view

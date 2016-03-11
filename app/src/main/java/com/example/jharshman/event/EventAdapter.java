@@ -35,10 +35,17 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
      */
     List<Event> mEvents;
 
+    /**
+     * This tells the adapter to show the edit buttons,
+     * or to show the generic buttons for external linking etc.
+     */
+    boolean mShowEditButtons;
+
     public EventAdapter(Context context, int resource, List<Event> events) {
         super(context, resource, events);
 
         mEvents = events;
+        mShowEditButtons = false;
     }
 
     @Override
@@ -53,9 +60,9 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
 
             holder = new EventViewHolder();
 
-            holder.mTitle = (TextView) convertView.findViewById(R.id.fragment_event_card_title);
-            holder.mDescription = (TextView) convertView.findViewById(R.id.fragment_event_card_short_description);
-            holder.mAddDeleteButton = (FloatingActionButton) convertView.findViewById(R.id.fragment_collections_add_delete_button);
+            holder.mTitle = (TextView) convertView.findViewById(R.id.event_card_title);
+            holder.mDescription = (TextView) convertView.findViewById(R.id.event_card_short_description);
+            holder.mAddDeleteButton = (FloatingActionButton) convertView.findViewById(R.id.event_card_fab);
             // todo get progress bar
 
             // set holder on view for later use
@@ -73,19 +80,55 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         holder.mDescription.setText(event.getDescription());
         // set event id as tag on add/delete button so we can get the EVENT_TAG_KEY when notifying of a click
         holder.mAddDeleteButton.setTag(R.layout.fragment_event, event);
-        if(! event.getSubscribed()) {
-            holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_add);
-            holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.addButton)));
-        }
-        else {
-            holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-            holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.deleteButton)));
-        }
+
+        // set up floating action button
+        setFAB(event, holder);
+
         holder.mAddDeleteButton.setOnClickListener(this);
 
         // todo set progress bar based on position
 
         return convertView;
+    }
+
+    /**
+     * Set up the floating action button based on the current state
+     * of the list view.
+     *
+     * @param event Event who's data we care about
+     * @param holder The holder containing the floating action button
+     */
+    private void setFAB(Event event, EventViewHolder holder) {
+
+        // if we want to see the add/delete button
+        if(mShowEditButtons) {
+            if (!event.getSubscribed()) {
+                holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_add);
+                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.addButton)));
+            } else {
+                holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.deleteButton)));
+            }
+        }
+        // else we want to see the link button
+        else {
+            if(false) {
+                // todo if we have completed an event, show restart button
+            }
+            else {
+                holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_info_details);
+                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.colorAccent)));
+            }
+        }
+    }
+
+    /**
+     * Show or hide the edit buttons
+     *
+     * @param show The boolean state true=show, false=hide
+     */
+    public void setShowEditButtons(boolean show) {
+        mShowEditButtons = show;
     }
 
     /**

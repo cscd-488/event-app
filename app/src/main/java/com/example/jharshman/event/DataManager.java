@@ -58,8 +58,12 @@ public class DataManager implements Callback {
      * It is final so that it will only be modified or updated,
      * but never destroyed and recreated with a different reference.
      * This allows it to be used easily in ArrayAdapters etc.
+     *
+     * The list must also be synchronized, so if the list is being updated or read
+     * it won't cause an exception if something trys to access it from another thread
      */
-    private final List<Event> mEvents = new ArrayList<>();
+//    private final List<Event> mEvents = Collections.synchronizedList(new ArrayList<Event>());
+    private final ArrayList<Event> mEvents = new ArrayList<>();
 
     private boolean mDataSetChanged;
 
@@ -235,15 +239,35 @@ public class DataManager implements Callback {
         }
     }
 
-    // todo maybe make this return a deep copy of events instead of events themselves
     public List<Event> getEvents() {
+        // todo maybe make this return a deep copy of events instead of events themselves
 
         return mEvents;
     }
 
-    public List<CheckPoint> getCheckpoints(int eventID) {
+    /**
+     * Get the events that the user is subscribed to.
+     * This returns a shallow copy of the event list.
+     *
+     * @return The list of subscribed events
+     */
+    public List<Event> getSubscribedEvents() {
+        // todo make this return a deep copy or somehow make mEvents immutable
 
+        ArrayList<Event> subscribedEvents = new ArrayList<>();
+
+        for (Event event : mEvents) {
+            if (event.getSubscribed()) {
+                subscribedEvents.add(event);
+            }
+        }
+
+        return subscribedEvents;
+    }
+
+    public List<CheckPoint> getCheckpoints(int eventID) {
         // todo make this make a deep copy of the events, or somehow otherwise make it immutable by other programs
+
         for(int i = 0; i < mEvents.size(); i ++) {
             if(mEvents.get(i).getID() == eventID) {
                 return Arrays.asList(mEvents.get(i).getCheckPoints());

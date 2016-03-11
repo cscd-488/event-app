@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -47,6 +48,8 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
     private FloatingActionButton mFab;
     private RelativeLayout mHeader;
 
+    private boolean mInEditMode;
+
     public EventFragment() {
         // Required empty public constructor
     }
@@ -59,27 +62,35 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
 
         // get the event data
         DataManager dataManager = DataManager.instance(getContext());
-        mEvents = dataManager.getEvents();
         dataManager.setUpdateListener(this);
+        if(mEvents == null) {
+            mEvents = new ArrayList<>();
+        }
+        else {
+            mEvents.clear();
+        }
+        mEvents.addAll(dataManager.getSubscribedEvents());
 
+        // set up list view
         mListView = (ListView) view.findViewById(R.id.fragment_event_list_view);
-
-        // create adapter
         mEventAdapter = new EventAdapter(view.getContext(), R.layout.fragment_event_card, mEvents);
-        // set adapter on events collection
         mListView.setAdapter(mEventAdapter);
 
         mEventAdapter.setOnEventClickListener(this);
         mListView.setOnItemClickListener(this);
 
+        // set up floating action button
         mFab = (FloatingActionButton) view.findViewById(R.id.fragment_event_fab);
         mFab.setOnClickListener(this);
 
+        // set up header
         ImageView headerDoneButton = (ImageView) view.findViewById(R.id.fragment_event_header_done_image_button);
         headerDoneButton.setOnClickListener(this);
 
         mHeader = (RelativeLayout) view.findViewById(R.id.fragment_event_header);
         mHeader.setVisibility(View.GONE);
+
+        mInEditMode = false;
 
         return view;
     }
@@ -131,13 +142,21 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
 
         Log.i(TAG, String.format("onEventClick(%d, %s)", view.getId(), event.getTitle()));
 
-        if(view.getId() == R.id.fragment_collections_add_delete_button) {
+        if(view.getId() == R.id.event_card_fab) {
 
-            // update subscription state
-            event.setSubscribed(! event.getSubscribed());
+            if(mInEditMode) {
+                // update subscription state
+                event.setSubscribed(!event.getSubscribed());
 
-            // update the view
-            mEventAdapter.notifyDataSetChanged();
+                // update the view
+                mEventAdapter.notifyDataSetChanged();
+            }
+            else {
+                // notify listener of event click
+                if(mListener != null) {
+                    mListener.onEventInteraction(event.getID());
+                }
+            }
 
             // todo set data set changed flag so that the server will get updated when the data is saved
         }
@@ -170,20 +189,23 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
 
         // hide or show event list editing views
         if(view.getId() == R.id.fragment_event_fab) {
+            mInEditMode = true;
 
             mFab.hide();
             mHeader.setVisibility(View.VISIBLE);
-
-            // todo add all events to event list, along with subscription status, and show add/delete buttons on each item
+            mEventAdapter.setShowEditButtons(true);
+            mEvents.clear();
+            mEvents.addAll(DataManager.instance(getContext()).getEvents());
         }
         else if(view.getId() == R.id.fragment_event_header_done_image_button) {
+            mInEditMode = false;
 
             mFab.show();
             mHeader.setVisibility(View.GONE);
-
-            // todo remove events that are not subscribed from the list
+            mEventAdapter.setShowEditButtons(false);
+            mEvents.clear();
+            mEvents.addAll(DataManager.instance(getContext()).getSubscribedEvents());
         }
-
     }
 
     /**
