@@ -252,7 +252,7 @@ public class DataManager implements Callback {
      * @return The list of subscribed events
      */
     public List<Event> getSubscribedEvents() {
-        // todo make this return a deep copy or somehow make mEvents immutable
+        // todo make this return a deep copy or somehow make mEvents immutable (this will happen when sqlite database gets implemented)
 
         ArrayList<Event> subscribedEvents = new ArrayList<>();
 
@@ -266,7 +266,7 @@ public class DataManager implements Callback {
     }
 
     public List<CheckPoint> getCheckpoints(int eventID) {
-        // todo make this make a deep copy of the events, or somehow otherwise make it immutable by other programs
+        // todo make this make immutable by other programs (also solved by using a sqlite database)
 
         for(int i = 0; i < mEvents.size(); i ++) {
             if(mEvents.get(i).getID() == eventID) {
