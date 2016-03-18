@@ -45,11 +45,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         mEvents = new ArrayList<>();
         // add blah data
         for(int i = 0; i < 10; i ++) {
-            Event event = new Event();
-            event.mID = i;
-            event.mDescription = "Eastern Treasure Hunt";
-            event.mTitle = "EWU " + i;
-            event.mPosition = 2;
+            Event event = new Event(i, "EWU " + i, "Eastern Treasure Hunt", "", "", "", "", false, new CheckPoint[]{});
             mEvents.add(event);
         }
         // create adapter
@@ -94,7 +90,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         Log.i(TAG, "Item Clicked " + position);
 
         if(mListener != null) {
-            mListener.onEventInteraction(mEvents.get(position).mID);
+            mListener.onEventInteraction(mEvents.get(position).getID());
         }
     }
 

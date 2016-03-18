@@ -15,7 +15,7 @@ package com.example.jharshman.event;
 import android.support.annotation.NonNull;
 import java.io.Serializable;
 
-public class CheckPoint implements Comparable<CheckPoint>, Serializable {
+public class CheckPoint implements Comparable<CheckPoint>, Serializable, LocationMapFragment.CoordinateCollection {
 
     /**
      * Event Attributes
@@ -40,12 +40,14 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
 
 
     public void setmDisplayed(){this.mDisplayed = true;}
+    @Override
     public boolean wasDisplayed(){return this.mDisplayed;}
 
     public int getID() {
         return mID;
     }
 
+    @Override
     public String getTitle() {
         return mTitle;
     }
@@ -66,6 +68,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mLon;
     }
 
+    @Override
     public double[] getCoordinates() {
         return new double[] {getLat(),getLon()};
     }

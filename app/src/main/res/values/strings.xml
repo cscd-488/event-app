@@ -5,12 +5,10 @@
     <string name="loading">Signing in...</string>
     <string name="Welcome">Hello %1$s!</string>
     <string name="swipe_to_learn">Swipe to Learn More ></string>
-<<<<<<< HEAD
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="NullLocation">Null Location</string>
-=======
     <string name="Continue">Continue</string>
 
     <!-- Server and OAuth2 information -->
@@ -20,5 +18,4 @@
     <!-- shared preferences keys -->
     <string name="jwt_server_token">jwt_server_token</string>
     <string name="first_use">first_use</string>
->>>>>>> refs/remotes/origin/master
 </resources>

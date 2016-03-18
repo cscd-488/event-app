@@ -1,3 +1,12 @@
+/**
+ * @file Event.java
+ * @author Aaron Young
+ * @date 2016 03 01
+ * @date 2016 03 18
+ *
+ * Map fragment class to display
+ * locations
+ */
 package com.example.jharshman.event;
 
 import android.Manifest;
@@ -11,8 +20,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -35,11 +44,18 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class LocationMapFragment extends Fragment implements OnMapReadyCallback {
+    public interface CoordinateCollection{
+        public double[] getCoordinates();
+        public boolean wasDisplayed();
+        public String getTitle();
+    }
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final float METERS_TO_FEET = 3.28084f;
+    private static final int DEFAULT_ZOOM = 10;
 
     private MapView mapView;
     private GoogleMap map;
@@ -50,17 +66,16 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-    private List<CheckPoint> checkPointList = new ArrayList<>();
+    private CoordinateCollection[] coordinates;
     private Location mLocation;
+    private boolean zoomed = false;
 
     private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
         public void onMyLocationChange(Location location) {
             mLocation = location;
-            if(checkPointList.size() > 0) {
-                ((TextView) getActivity().findViewById(R.id.textFeet)).setText(distanceFromUserFeet(checkPointList.get(0)) + " Feet");
-                ((TextView) getActivity().findViewById(R.id.textMeters)).setText(distanceFromUserMeter(checkPointList.get(0)) + " Meters");
-            }
+            if(!zoomed)
+                centerToCurrentLocation();
         }
     };
 
@@ -101,6 +116,14 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         View v = inflater.inflate(R.layout.fragment_location_map, container, false);
 
+       this.buildMap(v, savedInstanceState);
+
+        return v;
+        // Inflate the layout for this fragment
+        //return inflater.inflate(R.layout.fragment_location_map, container, false);
+    }
+
+    private void buildMap(View v, Bundle savedInstanceState){
         mapView = (MapView) v.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
@@ -112,10 +135,6 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         }
 
         mapView.getMapAsync(this);
-
-        return v;
-        // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_location_map, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -125,15 +144,15 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         }
     }
 
-    public float distanceFromUserMeter(CheckPoint checkPoint){
+    public float distanceFromUserMeter(CoordinateCollection checkPoint){
         float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getmCoordinates()[0], checkPoint.getmCoordinates()[1], results);
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
         return results[0];
     }
 
-    public float distanceFromUserFeet(CheckPoint checkPoint){
+    public float distanceFromUserFeet(CoordinateCollection checkPoint){
         float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getmCoordinates()[0], checkPoint.getmCoordinates()[1], results);
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
         results[0] *= METERS_TO_FEET;
         return results[0];
     }
@@ -161,44 +180,51 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         mListener = null;
     }
 
-    public void addLocations(CheckPoint[] checkPoints) {
-        double[] coords;
-
-        for (CheckPoint c : checkPoints) {
-            this.checkPointList.add(c);
-        }
-        if(this.map != null)
-            this.setupCheckPoints();
+    public void addLocations(CoordinateCollection[] coordinates) {
+        if(coordinates == null)
+            throw new NullPointerException("Event cannot be null");
+        this.coordinates = coordinates;
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
+
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         this.map.setMyLocationEnabled(true);
 
         this.setupCheckPoints();
-
         this.map.setOnMyLocationChangeListener(this.myLocationChangeListener);
     }
 
+    private void centerToCurrentLocation(){
+        if(this.map == null)
+            return;
+
+        if(this.mLocation != null){
+            this.map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(this.mLocation.getLatitude(), this.mLocation.getLongitude()), DEFAULT_ZOOM));
+        }
+        this.zoomed = true;
+    }
+
     private void setupCheckPoints(){
+        if(this.coordinates == null)
+            return;
         double[] coords;
         float hue;
-        for (CheckPoint c : this.checkPointList) {
+        for (CoordinateCollection c : this.coordinates) {
             if (c.wasDisplayed())
                 hue = BitmapDescriptorFactory.HUE_GREEN;
             else
                 hue = BitmapDescriptorFactory.HUE_RED;
 
-            coords = c.getmCoordinates();
+            coords = c.getCoordinates();
             markers.add(map.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
-                    .title(c.getmTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
+                    .title(c.getTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
         }
-        //this.checkPointList.clear();
     }
 
     /**
