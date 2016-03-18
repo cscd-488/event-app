@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -56,6 +57,10 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         @Override
         public void onMyLocationChange(Location location) {
             mLocation = location;
+            if(checkPointList.size() > 0) {
+                ((TextView) getActivity().findViewById(R.id.textFeet)).setText(distanceFromUserFeet(checkPointList.get(0)) + " Feet");
+                ((TextView) getActivity().findViewById(R.id.textMeters)).setText(distanceFromUserMeter(checkPointList.get(0)) + " Meters");
+            }
         }
     };
 
@@ -193,7 +198,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
                     .position(new LatLng(coords[0], coords[1]))
                     .title(c.getmTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
         }
-        this.checkPointList.clear();
+        //this.checkPointList.clear();
     }
 
     /**

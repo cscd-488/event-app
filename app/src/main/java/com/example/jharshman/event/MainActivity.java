@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements LocationMapFragme
             transaction.add(R.id.FragmentContainer, mPagerFragment);
             transaction.commit();
 
-            this.mPagerFragment.addLocations(new CheckPoint[]{new CheckPoint("Test", "Discription", "Image", new double[]{0.0, 0.0})});
+            this.mPagerFragment.addLocations(new CheckPoint[]{new CheckPoint("Test", "Discription", "Image", new double[]{47.489681, -117.58534})});
         }
 
     }

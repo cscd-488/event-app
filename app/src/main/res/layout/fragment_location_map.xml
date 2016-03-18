@@ -17,9 +17,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/textView"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:text="Distance" />
+        android:id="@+id/textFeet"
+        android:text="Distance"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="53dp"
+        android:layout_marginEnd="53dp"
+        android:layout_marginTop="49dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/textMeters"
+        android:text="Distance"
+        android:layout_marginTop="45dp"
+        android:layout_below="@+id/textFeet"
+        android:layout_alignLeft="@+id/textFeet"
+        android:layout_alignStart="@+id/textFeet" />
 
 </RelativeLayout>
