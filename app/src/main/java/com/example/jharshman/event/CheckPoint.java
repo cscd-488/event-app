@@ -1,69 +1,83 @@
 package com.example.jharshman.event;
 
 /**
- * Created by jharshman on 1/13/16.
+ * @file CheckPoint.java
+ * @author Josh Harshman
+ * @author Aaron Young
+ * @author Bruce Emehiser
+ * @date 2016 01 13
+ * @date 2016 02 23
  *
- * Modified by Aaron Young on 2/4/16
+ * Check points for events
  */
-public class CheckPoint implements Comparable<CheckPoint>{
+
+
+import android.support.annotation.NonNull;
+import java.io.Serializable;
+
+public class CheckPoint implements Comparable<CheckPoint>, Serializable {
 
     /**
      * Event Attributes
-     * */
+     */
+    private int mID;
     private String mTitle;
     private String mDescription;
     private String mImageSrc;
-    private double[] mCoordinates; //todo: implement getter / setter for longitude and latitude
+    private double mLat;
+    private double mLon;
     private boolean mDisplayed;
 
-    public CheckPoint(String title, String description, String image, double[] coordinates) {
-        this.mTitle = title;
-        this.mDescription = description;
-        this.mImageSrc = image;
-        this.mCoordinates = coordinates;
+    public CheckPoint(int id, String title, String description, String image, double lat, double lon) {
+        mID = id;
+        mTitle = title;
+        mDescription = description;
+        mImageSrc = image;
+        mLat = lat;
+        mLon = lon;
         this.mDisplayed = false;
     }
+
 
     public void setmDisplayed(){this.mDisplayed = true;}
     public boolean wasDisplayed(){return this.mDisplayed;}
 
-    public String getmTitle() {
+    public int getID() {
+        return mID;
+    }
+
+    public String getTitle() {
         return mTitle;
     }
 
-    public String getmDescription() {
+    public String getDescription() {
         return mDescription;
     }
 
-    public String getmImageSrc() {
+    public String getImageSrc() {
         return mImageSrc;
     }
 
-    public double[] getmCoordinates() {
-        return mCoordinates;
+    public double getLat() {
+        return mLat;
     }
 
-    public void setmTitle(String mTitle) {
+    public double getLon() {
+        return mLon;
+    }
+
+    public double[] getCoordinates() {
+        return new double[] {getLat(),getLon()};
+    }
+
+    public void setTitle(String mTitle) {
         this.mTitle = mTitle;
     }
 
-    public void setmDescription(String mDescription) {
-        this.mDescription = mDescription;
-    }
-
-    public void setmImageSrc(String mImageSrc) {
-        this.mImageSrc = mImageSrc;
-    }
-
-    public void setmCoordinates(double latitude, double longitude) {
-        this.mCoordinates[0] = latitude;
-        this.mCoordinates[1] = longitude;
-    }
-
     @Override
-    public int compareTo(CheckPoint another) {
-        if(this.getmCoordinates()[0] == another.getmCoordinates()[0] && this.getmCoordinates()[1] == another.getmCoordinates()[1])
-            return 0;
-        return -1;
+    public int compareTo(@NonNull CheckPoint that) {
+
+        // compare based on ID
+        return mID - that.getID();
     }
 }
