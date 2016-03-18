@@ -57,6 +57,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private static final float METERS_TO_FEET = 3.28084f;
     private static final int DEFAULT_ZOOM = 10;
 
+    private static Location mLocation;
+
     private MapView mapView;
     private GoogleMap map;
     private List<Marker> markers = new ArrayList<>();
@@ -67,7 +69,6 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
     private OnFragmentInteractionListener mListener;
     private CoordinateCollection[] coordinates;
-    private Location mLocation;
     private boolean zoomed = false;
 
     private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
@@ -144,15 +145,33 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         }
     }
 
-    public float distanceFromUserMeter(CoordinateCollection checkPoint){
+    /**
+     * Returns the distance in meters from the last known user location
+     *
+     * @param  coordinateCollection  the coordinate to compare from
+     * @return      the distance in meters from the last known location. -1 if no known location
+     */
+    public static float distanceFromUserMeter(CoordinateCollection coordinateCollection){
+        if(mLocation == null)
+            return -1f;
+
         float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), coordinateCollection.getCoordinates()[0], coordinateCollection.getCoordinates()[1], results);
         return results[0];
     }
 
-    public float distanceFromUserFeet(CoordinateCollection checkPoint){
+    /**
+     * Returns the distance in feet from the last known user location
+     *
+     * @param  coordinateCollection  the coordinate to compare from
+     * @return      the distance in feet from the last known location. -1 if no known location
+     */
+    public static float distanceFromUserFeet(CoordinateCollection coordinateCollection){
+        if(mLocation == null)
+            return -1f;
+
         float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), coordinateCollection.getCoordinates()[0], coordinateCollection.getCoordinates()[1], results);
         results[0] *= METERS_TO_FEET;
         return results[0];
     }
@@ -182,7 +201,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
     public void addLocations(CoordinateCollection[] coordinates) {
         if(coordinates == null)
-            throw new NullPointerException("Event cannot be null");
+            throw new NullPointerException("CoordinateCollection array cannot be null");
         this.coordinates = coordinates;
     }
 
@@ -203,8 +222,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         if(this.map == null)
             return;
 
-        if(this.mLocation != null){
-            this.map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(this.mLocation.getLatitude(), this.mLocation.getLongitude()), DEFAULT_ZOOM));
+        if(mLocation != null){
+            this.map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM));
         }
         this.zoomed = true;
     }
