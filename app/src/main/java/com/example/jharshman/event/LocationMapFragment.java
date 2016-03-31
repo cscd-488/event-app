@@ -20,6 +20,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,9 +34,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,11 +43,21 @@ import java.util.List;
  * Use the {@link LocationMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LocationMapFragment extends Fragment implements OnMapReadyCallback {
+public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     public interface CoordinateCollection{
         public double[] getCoordinates();
         public boolean wasDisplayed();
         public String getTitle();
+    }
+
+    private class MarkerWrapper{
+        public CoordinateCollection location;
+        public Marker marker;
+
+        public MarkerWrapper(CoordinateCollection location, Marker marker){
+            this.location = location;
+            this.marker = marker;
+        }
     }
 
     // TODO: Rename parameter arguments, choose names that match
@@ -55,13 +65,14 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final float METERS_TO_FEET = 3.28084f;
-    private static final int DEFAULT_ZOOM = 10;
+    private static final int DEFAULT_ZOOM = 17;
 
     private static Location mLocation;
 
     private MapView mapView;
+    private int displayIndex = 0;
     private GoogleMap map;
-    private List<Marker> markers = new ArrayList<>();
+    private MarkerWrapper[] markers;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -76,7 +87,24 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         public void onMyLocationChange(Location location) {
             mLocation = location;
             if(!zoomed)
-                centerToCurrentLocation();
+                centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
+        }
+    };
+
+    private GoogleMap.OnMarkerClickListener myMarkerClickListener = new GoogleMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            for(int i = 0; i < markers.length; i++){
+                if(markers[i].marker.equals(marker)){
+                    displayIndex = i;
+                    double d = distanceFromUserFeet(markers[i].location);
+
+                    Toast.makeText(getContext(), "Distance: " + d + " feet", Toast.LENGTH_SHORT).show();
+                    fillText(markers[i]);
+                    return false;
+                }
+            }
+            return true;
         }
     };
 
@@ -215,15 +243,60 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         this.map.setMyLocationEnabled(true);
 
         this.setupCheckPoints();
+        this.map.setOnMarkerClickListener(this.myMarkerClickListener);
         this.map.setOnMyLocationChangeListener(this.myLocationChangeListener);
+        this.populateFunctionality();
     }
 
-    private void centerToCurrentLocation(){
+    private void populateFunctionality(){
+        MarkerWrapper mw = this.markers[this.displayIndex];
+        Button prevButton = (Button) getActivity().findViewById(R.id.prevButton);
+        Button nextButton = (Button) getActivity().findViewById(R.id.nextButton);
+        this.fillText(mw);
+
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayIndex--;
+                if (displayIndex == -1)
+                    displayIndex = markers.length - 1;
+
+                fillText(markers[displayIndex]);
+                centerToLocation(markers[displayIndex].location.getCoordinates());
+            }
+        });
+
+        prevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayIndex++;
+                if (displayIndex == markers.length)
+                    displayIndex = 0;
+
+                fillText(markers[displayIndex]);
+                centerToLocation(markers[displayIndex].location.getCoordinates());
+            }
+        });
+    }
+
+    private void fillText(MarkerWrapper mw){
+        TextView view = (TextView) getActivity().findViewById(R.id.titleText);
+
+        view.setText(mw.location.getTitle());
+        view = (TextView)getActivity().findViewById(R.id.distanceText);
+        view.setText("Not implemented");
+    }
+
+    private void centerToLocation(double[] coords){
+        this.centerToLocation(coords[0], coords[1]);
+    }
+
+    private void centerToLocation(double lat, double lon){
         if(this.map == null)
             return;
 
         if(mLocation != null){
-            this.map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM));
+            this.map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), DEFAULT_ZOOM));
         }
         this.zoomed = true;
     }
@@ -232,17 +305,19 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         if(this.coordinates == null)
             return;
         double[] coords;
+        this.markers = new MarkerWrapper[this.coordinates.length];
         float hue;
-        for (CoordinateCollection c : this.coordinates) {
-            if (c.wasDisplayed())
+        for (int i = 0; i < this.coordinates.length; i++){
+            if (this.coordinates[i].wasDisplayed())
                 hue = BitmapDescriptorFactory.HUE_GREEN;
             else
                 hue = BitmapDescriptorFactory.HUE_RED;
 
-            coords = c.getCoordinates();
-            markers.add(map.addMarker(new MarkerOptions()
+            coords = this.coordinates[i].getCoordinates();
+
+            markers[i] = new MarkerWrapper(this.coordinates[i], map.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
-                    .title(c.getTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
+                    .title(this.coordinates[i].getTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
         }
     }
 

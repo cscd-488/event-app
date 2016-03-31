@@ -50,6 +50,37 @@ public class MainActivity extends AppCompatActivity implements
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             mPagerFragment = new LocationMapFragment();
+            mPagerFragment.addLocations(new LocationMapFragment.CoordinateCollection[] {new LocationMapFragment.CoordinateCollection() {
+                @Override
+                public double[] getCoordinates() {
+                    return new double[]{47.490203, -117.585146};
+                }
+
+                @Override
+                public boolean wasDisplayed() {
+                    return false;
+                }
+
+                @Override
+                public String getTitle() {
+                    return "CEB Building";
+                }
+            }, new LocationMapFragment.CoordinateCollection() {
+                @Override
+                public double[] getCoordinates() {
+                    return new double[]{47.491392, -117.582813};
+                }
+
+                @Override
+                public boolean wasDisplayed() {
+                    return false;
+                }
+
+                @Override
+                public String getTitle() {
+                    return "Campus Mall";
+                }
+            }});
             transaction.add(R.id.FragmentContainer, mPagerFragment);
             transaction.commit();
         }
