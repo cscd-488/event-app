@@ -20,7 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -84,7 +84,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         mFab.setOnClickListener(this);
 
         // set up header
-        ImageView headerDoneButton = (ImageView) view.findViewById(R.id.fragment_event_header_done_image_button);
+        Button headerDoneButton = (Button) view.findViewById(R.id.fragment_event_header_done_image_button);
         headerDoneButton.setOnClickListener(this);
 
         mHeader = (RelativeLayout) view.findViewById(R.id.fragment_event_header);

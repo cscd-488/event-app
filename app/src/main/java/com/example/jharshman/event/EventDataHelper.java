@@ -127,7 +127,12 @@ public class EventDataHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
-        // todo if we ever upgrade our release version
+        // drop the old table
+        database.execSQL("DROP TABLE IF EXISTS " + EVENT_TABLE);
+        database.execSQL("DROP TABLE IF EXISTS " + CHECK_POINT_TABLE);
+
+        // create a new tables
+        onCreate(database);
     }
 
     /**
@@ -188,4 +193,9 @@ public class EventDataHelper extends SQLiteOpenHelper {
         // return events (which may be an empty list)
         return events;
     }
+
+    /**
+     * todo create methods to insert and update existing Events in the table
+     * http://www.perfectapk.com/sqliteopenhelper-example.html
+     */
 }

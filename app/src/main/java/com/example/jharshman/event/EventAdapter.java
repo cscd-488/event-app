@@ -104,10 +104,10 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         if(mShowEditButtons) {
             if (!event.getSubscribed()) {
                 holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_add);
-                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.addButton)));
+                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.green)));
             } else {
                 holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.deleteButton)));
+                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.red)));
             }
         }
         // else we want to see the link button

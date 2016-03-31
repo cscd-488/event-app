@@ -2,10 +2,15 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#4fc8a8</color>
+    <color name="colorAccent">#55D883</color>
 
-    <!--Add/Delete button colors-->
-    <color name="addButton">#56d884</color>
-    <color name="deleteButton">#ed2f4a</color>
+    <color name="red">#ED2E49</color>
+    <color name="green">#55D883</color>
+    <color name="blue">#3FA9F5</color>
+
+    <color name="dark_gray">#2C3034</color>
+    <color name="medium_gray">#9398A0</color>
+    <color name="light_gray">#C9CED6</color>
+    <color name="white">#FFFFFF</color>
 
 </resources>

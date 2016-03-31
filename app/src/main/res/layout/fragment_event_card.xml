@@ -43,8 +43,10 @@
         app:layout_anchorGravity="right|center"
         app:fabSize="mini"
         android:layout_margin="16dp"
-        android:src="@drawable/abc_ic_clear_mtrl_alpha"
+        android:src="@drawable/ic_chevron_right_24dp"
         android:id="@+id/event_card_fab"
-        android:clickable="true" />
+        android:clickable="true"
+        android:tint="@color/white"
+        android:scaleType="centerCrop" />
 
 </android.support.design.widget.CoordinatorLayout>
