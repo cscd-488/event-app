@@ -58,7 +58,7 @@
                 android:layout_below="@+id/fragment_check_point_author_text"
                 android:layout_alignLeft="@+id/fragment_check_point_author_text"
                 android:layout_alignStart="@+id/fragment_check_point_author_text"
-                android:textSize="@dimen/smaller_text" />
+                android:textSize="@dimen/tiny_text" />
 
             <FrameLayout
                 android:orientation="horizontal"
@@ -112,7 +112,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_margin="20dp"
-                android:textSize="@dimen/smaller_text_plus" />
+                android:textSize="@dimen/small_text" />
 
         </RelativeLayout>
 
@@ -124,8 +124,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:background="@color/colorPrimary"
-        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
-        android:scaleType="fitXY" />
+        android:src="@drawable/ic_add_24dp"
+        android:tint="@color/white"/>
 
 </FrameLayout>

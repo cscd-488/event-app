@@ -18,8 +18,8 @@ import java.io.Serializable;
 public class EventViewHolder implements Serializable {
 
     TextView mTitle;
-    TextView mDescription;
-    FloatingActionButton mAddDeleteButton;
+    TextView mTitleShort;
+    FloatingActionButton mFloatingActionButton;
     ProgressBar mProgressBar;
     int mProgress;
 }

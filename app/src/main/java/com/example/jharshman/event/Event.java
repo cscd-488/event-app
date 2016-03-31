@@ -21,6 +21,8 @@ public class Event implements Serializable {
     private int mID;
     @SerializedName("title")
     private String mTitle;
+    // todo add Short Title from database
+    private String mShortTitle;
     // todo add Author from Database
     private String mAuthor;
     @SerializedName("description")
@@ -45,6 +47,7 @@ public class Event implements Serializable {
 
         mID = id;
         mTitle = title;
+        mShortTitle = generateShortTitle(title);
         mDescription = description;
         mImageSrc = imageSrc;
         mCheckInType = checkInType;
@@ -73,6 +76,15 @@ public class Event implements Serializable {
 
     public String getTitle() {
         return mTitle;
+    }
+
+    public String getShortTitle() {
+
+        if(mShortTitle == null) {
+            mShortTitle = generateShortTitle(mTitle);
+        }
+
+        return mShortTitle;
     }
 
     public String getDescription() {
@@ -109,6 +121,27 @@ public class Event implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("%d %s %s %s %s %s %s %b %s", mID, mTitle, mDescription, mImageSrc, mCheckInType, mTimeCreated, mTimeUpdated, mRedeemed, Arrays.toString(mCheckPoints));
+        return String.format("%d %s %s %s %s %s %s %s %b %s", mID, mTitle, mShortTitle, mDescription, mImageSrc, mCheckInType, mTimeCreated, mTimeUpdated, mRedeemed, Arrays.toString(mCheckPoints));
+    }
+
+    /**
+     * Generate a short title by adding the first character of
+     * each space delimited word to the title string
+     * @param title The title string
+     * @return The short version of the title string
+     */
+    private static String generateShortTitle(String title) {
+
+        // check incoming parameters
+        if(title == null) {
+            return "";
+        }
+
+        String shortTitle = "";
+        for(String s : title.split(" ")) {
+            shortTitle += Character.toUpperCase(s.charAt(0));
+        }
+
+        return shortTitle;
     }
 }

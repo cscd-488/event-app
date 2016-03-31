@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -31,7 +30,7 @@ import java.util.List;
 
 import okhttp3.OkHttpClient;
 
-public class EventFragment extends Fragment implements AdapterView.OnItemClickListener, EventAdapter.OnEventClickListener, View.OnClickListener, DataManager.UpdateListener {
+public class EventFragment extends Fragment implements EventAdapter.OnEventClickListener, View.OnClickListener, DataManager.UpdateListener {
 
     private static final String TAG = "EventFragment";
 
@@ -77,7 +76,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
         mListView.setAdapter(mEventAdapter);
 
         mEventAdapter.setOnEventClickListener(this);
-        mListView.setOnItemClickListener(this);
+//        mListView.setOnItemClickListener(this);
 
         // set up floating action button
         mFab = (FloatingActionButton) view.findViewById(R.id.fragment_event_fab);
@@ -121,15 +120,15 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
      * @param position The position of the view in the adapter.
      * @param id       The row id of the item that was clicked.
      */
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        Log.i(TAG, "Item Clicked " + position);
-
-        if(mListener != null) {
-            mListener.onEventInteraction(mEvents.get(position).getID());
-        }
-    }
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//
+//        Log.i(TAG, "Item Clicked " + position);
+//
+//        if(mListener != null) {
+//            mListener.onEventInteraction(mEvents.get(position).getID());
+//        }
+//    }
 
     /**
      * Notify listener that event has been clicked
@@ -187,7 +186,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
     @Override
     public void onClick(View view) {
 
-        // hide or show event list editing views
+        // "add" floating action button, show header
         if(view.getId() == R.id.fragment_event_fab) {
             mInEditMode = true;
 
@@ -197,6 +196,7 @@ public class EventFragment extends Fragment implements AdapterView.OnItemClickLi
             mEvents.clear();
             mEvents.addAll(DataManager.instance(getContext()).getEvents());
         }
+        // done button, hide header
         else if(view.getId() == R.id.fragment_event_header_done_image_button) {
             mInEditMode = false;
 

@@ -33,12 +33,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="WITHIN n MILES"
-        android:id="@+id/textView2"
+        android:id="@+id/event_header_distance"
         android:layout_below="@+id/fragment_event_header_location_text"
         android:layout_toRightOf="@+id/fragment_event_header_location_pin"
         android:layout_toEndOf="@+id/fragment_event_header_location_pin"
         android:layout_marginTop="5dp"
-        android:textSize="@dimen/smaller_text" />
+        android:textSize="@dimen/tiny_text"
+        android:textColor="@color/light_gray"
+        android:textIsSelectable="true" />
 
     <ImageView
         android:layout_width="50dp"
@@ -64,6 +66,6 @@
         android:layout_alignEnd="@+id/fragment_event_header_edit_image_button"
         android:text="Done"
         android:textColor="#ffffff"
-        android:textSize="@dimen/medium_text" />
+        android:textSize="@dimen/small_text" />
 
 </RelativeLayout>

@@ -21,17 +21,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="EWU"
-                android:textSize="75sp"
-                android:id="@+id/event_card_title"
-                android:layout_centerVertical="true" />
+                android:textSize="@dimen/huge_text"
+                android:id="@+id/event_card_title_short"
+                android:layout_centerVertical="true"
+                android:layout_margin="10dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/event_card_short_description"
+                android:id="@+id/event_card_title"
                 android:text="Eastern Washington University Tour"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentRight="true"
+                android:textSize="@dimen/tiny_text"
+                android:layout_margin="10dp" />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

@@ -12,6 +12,7 @@ package com.example.jharshman.event;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,8 +62,8 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
             holder = new EventViewHolder();
 
             holder.mTitle = (TextView) convertView.findViewById(R.id.event_card_title);
-            holder.mDescription = (TextView) convertView.findViewById(R.id.event_card_short_description);
-            holder.mAddDeleteButton = (FloatingActionButton) convertView.findViewById(R.id.event_card_fab);
+            holder.mTitleShort = (TextView) convertView.findViewById(R.id.event_card_title_short);
+            holder.mFloatingActionButton = (FloatingActionButton) convertView.findViewById(R.id.event_card_fab);
             // todo get progress bar
 
             // set holder on view for later use
@@ -77,14 +78,14 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         Event event = mEvents.get(position);
 
         holder.mTitle.setText(event.getTitle());
-        holder.mDescription.setText(event.getDescription());
+        holder.mTitleShort.setText(event.getShortTitle());
         // set event id as tag on add/delete button so we can get the EVENT_TAG_KEY when notifying of a click
-        holder.mAddDeleteButton.setTag(R.layout.fragment_event, event);
+        holder.mFloatingActionButton.setTag(R.layout.fragment_event, event);
 
         // set up floating action button
         setFAB(event, holder);
 
-        holder.mAddDeleteButton.setOnClickListener(this);
+        holder.mFloatingActionButton.setOnClickListener(this);
 
         // todo set progress bar based on position
 
@@ -100,26 +101,33 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
      */
     private void setFAB(Event event, EventViewHolder holder) {
 
+        int drawableID = -1;
+        int tintColor = -1;
+
         // if we want to see the add/delete button
         if(mShowEditButtons) {
             if (!event.getSubscribed()) {
-                holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_add);
-                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.green)));
+                drawableID = R.drawable.ic_add_24dp;
+                tintColor = R.color.green;
             } else {
-                holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.red)));
+                drawableID = R.drawable.ic_remove_24dp;
+                tintColor = R.color.red;
             }
         }
         // else we want to see the link button
         else {
-            if(false) {
-                // todo if we have completed an event, show restart button
+            if(event.isRedeemed()) {
+                drawableID = R.drawable.ic_autorenew_24dp;
+                tintColor = R.color.light_gray;
             }
             else {
-                holder.mAddDeleteButton.setImageResource(android.R.drawable.ic_menu_info_details);
-                holder.mAddDeleteButton.setBackgroundTintList(ColorStateList.valueOf(getContext().getResources().getColor(R.color.colorAccent)));
+                drawableID = R.drawable.ic_chevron_right_24dp;
+                tintColor = R.color.colorAccent;
             }
         }
+
+        holder.mFloatingActionButton.setImageResource(drawableID);
+        holder.mFloatingActionButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), tintColor)));
     }
 
     /**
@@ -151,13 +159,8 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         Log.i("CheckPointListAdapter", "button clicked");
 
         if(mListener != null) {
-            try {
-                Event event = (Event) view.getTag(R.layout.fragment_event);
-                mListener.onEventClick(view, event);
-
-            } catch (NullPointerException e) {
-                Log.e(TAG, e.getClass() + " Unable to notify listener");
-            }
+            Event event = (Event) view.getTag(R.layout.fragment_event);
+            mListener.onEventClick(view, event);
         }
     }
 

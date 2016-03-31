@@ -8,7 +8,7 @@
 
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="match_parent"
         android:id="@+id/check_point_card_image"
         android:src="@drawable/i100x100"
@@ -27,7 +27,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_margin="10dp"
-            android:textSize="@dimen/smaller_text" />
+            android:textSize="@dimen/tiny_text" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,7 +73,7 @@
                     android:layout_alignBottom="@+id/check_point_card_time_image"
                     android:layout_toRightOf="@+id/check_point_card_time_image"
                     android:layout_toEndOf="@+id/check_point_card_time_image"
-                    android:textSize="@dimen/smaller_text" />
+                    android:textSize="@dimen/tiny_text" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -100,7 +100,7 @@
                     android:layout_alignBottom="@+id/check_point_card_distance_image"
                     android:layout_toRightOf="@+id/check_point_card_distance_image"
                     android:layout_toEndOf="@+id/check_point_card_distance_image"
-                    android:textSize="@dimen/smaller_text" />
+                    android:textSize="@dimen/tiny_text" />
             </RelativeLayout>
 
         </LinearLayout>
