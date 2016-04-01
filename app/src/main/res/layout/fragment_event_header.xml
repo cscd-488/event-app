@@ -7,8 +7,8 @@
 
 
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:id="@+id/fragment_event_header_location_pin"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -37,14 +37,13 @@
         android:layout_below="@+id/fragment_event_header_location_text"
         android:layout_toRightOf="@+id/fragment_event_header_location_pin"
         android:layout_toEndOf="@+id/fragment_event_header_location_pin"
-        android:layout_marginTop="5dp"
         android:textSize="@dimen/tiny_text"
         android:textColor="@color/light_gray"
         android:textIsSelectable="true" />
 
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:id="@+id/fragment_event_header_edit_image_button"
         android:layout_alignTop="@+id/fragment_event_header_location_text"
         android:layout_alignParentRight="true"

@@ -74,12 +74,13 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:id="@+id/fragment_check_point_check_in_button"
-                    android:src="@drawable/i100x100"
+                    android:src="@drawable/ic_check_circle_24dp"
                     android:scaleType="center"
                     android:adjustViewBounds="false"
                     android:baselineAlignBottom="false"
                     android:contentDescription="Check In"
-                    android:layout_gravity="center" />
+                    android:layout_gravity="center"
+                    android:tint="@color/white" />
 
                 <ImageView
                     android:layout_width="72dp"
