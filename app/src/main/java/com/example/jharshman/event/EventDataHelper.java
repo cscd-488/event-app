@@ -30,20 +30,54 @@ public class EventDataHelper extends SQLiteOpenHelper {
     // database name
     private static final String DATABASE_NAME = "magpie_data";
 
-    // table names todo finish adding tables
+    // table names
+    private static final String USER_TABLE = "users";
+    private static final String SUBSCRIPTIONS_TABLE = "subscriptions";
+    private static final String CHECKED_TABLE = "checked";
+    private static final String REDEEMED_TABLE = "redeemed";
     private static final String EVENT_TABLE = "events";
     private static final String CHECK_POINT_TABLE = "check_points";
 
-    // column names todo finish adding columns and tables
+    // column names
+    private static final String USER_COLUMN_ID = "user_id";
+    private static final String USER_COLUMN_FIRST_NAME = "first_name";
+    private static final String USER_COLUMN_LAST_NAME = "last_name";
+    private static final String USER_COLUMN_TOKEN = "token";
+
+    private static final String SUBSCRIPTIONS_COLUMN_ID = "subscription_id";
+    private static final String SUBSCRIPTION_COLUMN_USER_ID = "user_id";
+    private static final String SUBSCRIPTION_COLUMN_EVENT_ID = "event_id";
+
+    private static final String CHECKED_COLUMN_ID = "checked_id";
+    private static final String CHECKED_COLUMN_USER_ID = "user_id";
+    private static final String CHECKED_COLUMN_CHECKPOINT_ID = "checkpoint_id";
+
+    private static final String REDEEMED_COLUMN_ID = "redeemed_id";
+    private static final String REDEEMED_COLUMN_USER_ID = "user_id";
+    private static final String REDEEMED_COLUMN_EVENT_ID = "event_id";
+
     private static final String EVENT_COLUMN_ID = "event_id";
     private static final String EVENT_COLUMN_TITLE = "title";
+    private static final String EVENT_COLUMN_SHORT_TITLE = "short_title";
+    private static final String EVENT_COLUMN_AUTHOR = "author";
     private static final String EVENT_COLUMN_DESCRIPTION = "description";
     private static final String EVENT_COLUMN_IMAGE_SRC = "image_src";
+    private static final String EVENT_COLUMN_LAT = "lat";
+    private static final String EVENT_COLUMN_LON = "lon";
+    private static final String EVENT_COLUMN_QR = "qr";
+    private static final String EVENT_COLUMN_TIME_CREATED = "time_created";
+    private static final String EVENT_COLUMN_TIME_UPDATED = "time_updated";
 
     private static final String CHECK_POINT_COLUMN_ID = "checkpoint_id";
     private static final String CHECK_POINT_COLUMN_TITLE = "title";
+    private static final String CHECK_POINT_COLUMN_ARTIST = "artist";
     private static final String CHECK_POINT_COLUMN_DESCRIPTION = "description";
     private static final String CHECK_POINT_COLUMN_IMAGE_SRC = "image_src";
+    private static final String CHECK_POINT_COLUMN_LAT = "lat";
+    private static final String CHECK_POINT_COLUMN_LON = "lon";
+    private static final String CHECK_POINT_COLUMN_QR = "qr";
+    private static final String CHECK_POINT_COLUMN_TIME_CREATED = "time_created";
+    private static final String CHECK_POINT_COLUMN_TIME_UPDATED = "time_updated";
 
     public static EventDataHelper newInstance(Context context, String databaseName) {
 
@@ -89,19 +123,56 @@ public class EventDataHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase database) {
 
         // create tables todo finish adding tables to table creation
+
+
+        database.execSQL(
+                "CREATE TABLE " + USER_TABLE + "("
+                        + USER_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + USER_COLUMN_FIRST_NAME + " TEXT NOT NULL"
+                        + USER_COLUMN_LAST_NAME + " TEXT NOT NULL"
+                        + USER_COLUMN_TOKEN + " TEXT NOT NULL"
+                        + ")"
+        );
+
+        database.execSQL(
+                "CREATE TABLE " + SUBSCRIPTIONS_TABLE + "("
+                        + SUBSCRIPTIONS_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + SUBSCRIPTION_COLUMN_USER_ID + " INTEGER NOT NULL"
+                        + SUBSCRIPTION_COLUMN_EVENT_ID + " INTEGER NOT NULL"
+                        + ")"
+        );
+
+        database.execSQL(
+                "CREATE TABLE " + CHECKED_TABLE + "("
+                        + CHECKED_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + CHECKED_COLUMN_USER_ID + " INTEGER NOT NULL"
+                        + CHECKED_COLUMN_CHECKPOINT_ID + " INTEGER NOT NULL"
+                        + ")"
+        );
+
         database.execSQL(
                 "CREATE TABLE " + EVENT_TABLE + "("
                         + EVENT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + EVENT_COLUMN_TITLE + " VARCHAR(30) NOT NULL,"
-                        + EVENT_COLUMN_DESCRIPTION + " VARCHAR(100) NOT NULL"
-                        + EVENT_COLUMN_IMAGE_SRC + " VARCHAR(30) NOT NULL" + ")");
+                        + EVENT_COLUMN_TITLE + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_DESCRIPTION + " TEXT NOT NULL"
+                        + EVENT_COLUMN_IMAGE_SRC + " TEXT NOT NULL"
+                        // todo finish event table
+                        + ")"
+        );
 
         database.execSQL(
                 "CREATE TABLE " + CHECK_POINT_TABLE + "("
                         + CHECK_POINT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + CHECK_POINT_COLUMN_TITLE + " VARCHAR(30) NOT NULL,"
-                        + CHECK_POINT_COLUMN_DESCRIPTION + " VARCHAR(100) NOT NULL"
-                        + CHECK_POINT_COLUMN_IMAGE_SRC + " VARCHAR(30) NOT NULL" + ")");
+                        + CHECK_POINT_COLUMN_TITLE + " TEXT NOT NULL,"
+                        + CHECK_POINT_COLUMN_DESCRIPTION + " TEXT NOT NULL"
+                        + CHECK_POINT_COLUMN_IMAGE_SRC + " TEXT NOT NULL"
+                        + CHECK_POINT_COLUMN_LAT + " TEXT NOT NULL"
+                        + CHECK_POINT_COLUMN_LON + " TEXT NOT NULL"
+                        + CHECK_POINT_COLUMN_QR + " TEXT NOT NULL"
+                        // TODO finish check point table
+                        + ")"
+        );
+
     }
 
     /**
