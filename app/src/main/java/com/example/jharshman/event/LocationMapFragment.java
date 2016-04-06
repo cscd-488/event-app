@@ -2,7 +2,7 @@
  * @file Event.java
  * @author Aaron Young
  * @date 2016 03 01
- * @date 2016 03 18
+ * @date 2016 04 01
  *
  * Map fragment class to display
  * locations
@@ -20,7 +20,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +34,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -44,17 +43,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * create an instance of this fragment.
  */
 public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
-    public interface CoordinateCollection{
-        public double[] getCoordinates();
-        public boolean wasDisplayed();
-        public String getTitle();
-    }
-
     private class MarkerWrapper{
-        public CoordinateCollection location;
+        public CheckPoint location;
         public Marker marker;
 
-        public MarkerWrapper(CoordinateCollection location, Marker marker){
+        public MarkerWrapper(CheckPoint location, Marker marker){
             this.location = location;
             this.marker = marker;
         }
@@ -65,6 +58,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final float METERS_TO_FEET = 3.28084f;
+    private static final float METERS_TO_KILO = 1000f;
+    private static final float FEET_TO_MILES = 5280f;
     private static final int DEFAULT_ZOOM = 17;
 
     private static Location mLocation;
@@ -72,22 +67,26 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     private MapView mapView;
     private int displayIndex = 0;
     private GoogleMap map;
-    private MarkerWrapper[] markers;
+    private MarkerWrapper[] markers = new MarkerWrapper[0];
+    private OnFragmentInteractionListener mListener;
+    private CheckPoint[] coordinates = new CheckPoint[0];
+    private boolean zoomed = false;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
-    private CoordinateCollection[] coordinates;
-    private boolean zoomed = false;
-
     private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
         public void onMyLocationChange(Location location) {
+            float distance;
             mLocation = location;
             if(!zoomed)
                 centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
+
+            distance = distanceFromUserMiles(coordinates[displayIndex]);
+            TextView view = (TextView) getView().findViewById(R.id.distanceTextView);
+            view.setText(String.format("%.2f", distance) + "miles");
         }
     };
 
@@ -97,9 +96,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
             for(int i = 0; i < markers.length; i++){
                 if(markers[i].marker.equals(marker)){
                     displayIndex = i;
-                    double d = distanceFromUserFeet(markers[i].location);
 
-                    Toast.makeText(getContext(), "Distance: " + d + " feet", Toast.LENGTH_SHORT).show();
                     fillText(markers[i]);
                     return false;
                 }
@@ -173,13 +170,20 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
+    public static float distanceFromUserKilometers(CheckPoint coordinateCollection) {
+        return distanceFromUserMeter(coordinateCollection) / METERS_TO_KILO;
+    }
+
+    public static float distanceFromUserMiles(CheckPoint coordinateCollection) {
+        return distanceFromUserFeet(coordinateCollection) / FEET_TO_MILES;
+    }
     /**
      * Returns the distance in meters from the last known user location
      *
      * @param  coordinateCollection  the coordinate to compare from
      * @return      the distance in meters from the last known location. -1 if no known location
      */
-    public static float distanceFromUserMeter(CoordinateCollection coordinateCollection){
+    public static float distanceFromUserMeter(CheckPoint coordinateCollection){
         if(mLocation == null)
             return -1f;
 
@@ -194,7 +198,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
      * @param  coordinateCollection  the coordinate to compare from
      * @return      the distance in feet from the last known location. -1 if no known location
      */
-    public static float distanceFromUserFeet(CoordinateCollection coordinateCollection){
+    public static float distanceFromUserFeet(CheckPoint coordinateCollection){
         if(mLocation == null)
             return -1f;
 
@@ -227,7 +231,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         mListener = null;
     }
 
-    public void addLocations(CoordinateCollection[] coordinates) {
+    public void addLocations(CheckPoint[] coordinates) {
         if(coordinates == null)
             throw new NullPointerException("CoordinateCollection array cannot be null");
         this.coordinates = coordinates;
@@ -249,14 +253,37 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void populateFunctionality(){
-        MarkerWrapper mw = this.markers[this.displayIndex];
-        Button prevButton = (Button) getActivity().findViewById(R.id.prevButton);
-        Button nextButton = (Button) getActivity().findViewById(R.id.nextButton);
+        MarkerWrapper mw = null;
+        if(this.markers.length != 0)
+            mw = this.markers[this.displayIndex];
+
+        ImageButton prevButton = (ImageButton) getActivity().findViewById(R.id.prevButton);
+        ImageButton nextButton = (ImageButton) getActivity().findViewById(R.id.nextButton);
+        ImageButton centerButton = (ImageButton) getActivity().findViewById(R.id.centerButton);
+        ImageButton detailsButton = (ImageButton) getActivity().findViewById(R.id.displayCheckPointButton);
         this.fillText(mw);
+
+        detailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "Not yet implemented", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        centerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(markers.length == 0)return;
+
+                centerToLocation(markers[displayIndex].location.getCoordinates());
+            }
+        });
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(markers.length == 0)return;
+
                 displayIndex--;
                 if (displayIndex == -1)
                     displayIndex = markers.length - 1;
@@ -269,6 +296,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(markers.length == 0)return;
+
                 displayIndex++;
                 if (displayIndex == markers.length)
                     displayIndex = 0;
@@ -280,10 +309,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void fillText(MarkerWrapper mw){
+        if(mw == null) return;
+
         TextView view = (TextView) getActivity().findViewById(R.id.titleText);
 
         view.setText(mw.location.getTitle());
-        view = (TextView)getActivity().findViewById(R.id.distanceText);
+        view = (TextView)getActivity().findViewById(R.id.descriptionTextView);
         view.setText("Not implemented");
     }
 
@@ -308,16 +339,13 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         this.markers = new MarkerWrapper[this.coordinates.length];
         float hue;
         for (int i = 0; i < this.coordinates.length; i++){
-            if (this.coordinates[i].wasDisplayed())
-                hue = BitmapDescriptorFactory.HUE_GREEN;
-            else
-                hue = BitmapDescriptorFactory.HUE_RED;
-
             coords = this.coordinates[i].getCoordinates();
 
             markers[i] = new MarkerWrapper(this.coordinates[i], map.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
-                    .title(this.coordinates[i].getTitle()).icon(BitmapDescriptorFactory.defaultMarker(hue))));
+                    .snippet(this.coordinates[i].getDescription())
+                    .title(this.coordinates[i].getTitle())
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_event_test_image))));
         }
     }
 
