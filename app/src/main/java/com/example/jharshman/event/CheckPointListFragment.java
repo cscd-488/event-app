@@ -105,7 +105,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
 
         Log.i(TAG, "Event ID passed in " + eventID);
 
-        // get the check points from the data manager. NOTE: This list Object WILL change every time (until I fix that)
+        // get the check points from the data manager. // todo NOTE: This list Object WILL change every time (until I fix it)
         if(mCheckPoints == null) {
             mCheckPoints = new ArrayList<>();
         }

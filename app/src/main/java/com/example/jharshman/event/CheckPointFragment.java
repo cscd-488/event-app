@@ -87,7 +87,7 @@ public class CheckPointFragment extends Fragment {
         // get views
         ImageView image = (ImageView) view.findViewById(R.id.fragment_check_point_title_image);
         TextView title = (TextView) view.findViewById(R.id.fragment_check_point_title_text);
-        TextView author = (TextView) view.findViewById(R.id.fragment_check_point_author_text);
+        TextView artist = (TextView) view.findViewById(R.id.fragment_check_point_artist_text);
         TextView description = (TextView) view.findViewById(R.id.fragment_check_point_description_text);
 
         // load data into views
@@ -95,6 +95,7 @@ public class CheckPointFragment extends Fragment {
                 .load(mCheckPoint.getImageSrc())
                 .into(image);
         title.setText(mCheckPoint.getTitle());
+        artist.setText(mCheckPoint.getArtist());
         description.setText(mCheckPoint.getDescription());
 //        description.setText("Non qui unde eum nostrum sunt sed quisquam dignissim pede aut parturient, iusto tempus nostrum, ea, dolor suspendisse, possimus occaecat, interdum non animi orci? Duis mus mollit vivamus quae aliquip! Saepe dapibus est ratione arcu, nisl. Quae eius odit eu, vitae cursus, laboris quidem, nostrum litora odio cum, habitant officia rem netus ante tortor, volutpat perferendis maxime, dignissim curabitur volutpat, orci risus maiores do amet aut, suscipit arcu necessitatibus, eros laborum inventore tempus dolores repellendus totam, placerat odio? Ea et! Do quas primis beatae tortor deleniti conubia egestas. Sunt laboris, placerat, nemo, animi conubia diam. Ducimus. Congue dolores sequi harum.\n" +
 //                "\n" +

@@ -76,7 +76,7 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         mListView.setAdapter(mEventAdapter);
 
         mEventAdapter.setOnEventClickListener(this);
-//        mListView.setOnItemClickListener(this);
+//        mListView.setOnItemClickListener(this); // note: This is not necessary now that we have a chevron button to take us to the event
 
         // set up floating action button
         mFab = (FloatingActionButton) view.findViewById(R.id.fragment_event_fab);

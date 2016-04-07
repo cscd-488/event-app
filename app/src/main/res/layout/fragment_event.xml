@@ -31,4 +31,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/fab_add" />
 
+    <!--<include layout="@layout/navigation_menu" />-->
+
 </FrameLayout>

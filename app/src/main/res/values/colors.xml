@@ -8,9 +8,11 @@
     <color name="green">#55D883</color>
     <color name="blue">#3FA9F5</color>
 
+    <color name="black">#000000</color>
     <color name="dark_gray">#2C3034</color>
     <color name="medium_gray">#9398A0</color>
     <color name="light_gray">#C9CED6</color>
     <color name="white">#FFFFFF</color>
+    <color name="invisible">#00FFFFFF</color>
 
 </resources>

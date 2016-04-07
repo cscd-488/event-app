@@ -21,9 +21,9 @@ public class Event implements Serializable {
     private int mID;
     @SerializedName("title")
     private String mTitle;
-    // todo add Short Title from database
+    @SerializedName("short_title")
     private String mShortTitle;
-    // todo add Author from Database
+    @SerializedName("author")
     private String mAuthor;
     @SerializedName("description")
     private String mDescription;
@@ -39,7 +39,7 @@ public class Event implements Serializable {
     private boolean mRedeemed;
     private boolean mSubscribed;
 
-    @SerializedName("locations")
+    @SerializedName("checkpoints")
     private CheckPoint[] mCheckPoints;
 
     public Event(int id, String title, String description, String imageSrc, String checkInType,

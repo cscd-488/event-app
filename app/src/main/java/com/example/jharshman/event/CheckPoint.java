@@ -30,18 +30,21 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private int mEventID;
     @SerializedName("title")
     private String mTitle;
-    // todo add Artist from database
+    @SerializedName("artist")
     private String mArtist;
     @SerializedName("description")
     private String mDescription;
     @SerializedName("image_src")
     private String mImageSrc;
-    @SerializedName("coordinates")
-    private String mCoordinates;
-    // todo switch from coordinates to lat and lon
+    // todo lat and lon from String to double
+    @SerializedName("lat")
+    private String lat;
+    @SerializedName("lon")
+    private String lon;
     private double mLat;
     private double mLon;
     // todo add QR functionality
+    @SerializedName("qr")
     private String mQR;
     @SerializedName("created_at")
     private String mTimeCreated;
@@ -58,60 +61,11 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
 
         public CheckPoint build() {
             //todo finish builder
-            throw new NullPointerException("Method build() not yet implimented");
+            throw new NullPointerException("Method build() not yet implemented");
         }
 
-        public void setID(int id) {
-            mCheckPointID = id;
-        }
-
-        public void setEventID(int eventID) {
-            mEventID = eventID;
-        }
-
-        public void setTitle(String title) {
-            mTitle = title;
-        }
-
-        public void setDescription(String description) {
-            mDescription = description;
-        }
-
-        public void setImageSrc(String imageSrc) {
-            mImageSrc = imageSrc;
-        }
-
-        public void setCoordinates(String coordinates) {
-            mCoordinates = coordinates;
-        }
-
-        public void setLat(double lat) {
-            mLat = lat;
-        }
-
-        public void setLon(double lon) {
-            mLon = lon;
-        }
-
-        public void setQR(String qr) {
-            mQR = qr;
-        }
-
-        public void setTimeCreated(String timeCreated) {
-            mTimeCreated = timeCreated;
-        }
-
-        public void setTimeUpdated(String timeUpdated) {
-            mTimeUpdated = timeUpdated;
-        }
-
-        public void setCollected(boolean collected) {
-            mCollected = collected;
-        }
-
-        public void setWasDisplayed(boolean displayed) {
-            mWasDisplayed = displayed;
-        }
+        // todo fill in methods
+        // todo note: Allow chaining by returning "this"
     }
 
     public CheckPoint(int id, int eventID, String title, String description, String image, double lat, double lon, String timeCreated, String timeUpdated, boolean collected) {
