@@ -51,6 +51,8 @@ public class DataManager implements Callback {
 
     private Context mContext;
 
+    private static DataHelper mDataHelper;
+
     /**
      * SQLite database manager.
      */
@@ -82,6 +84,14 @@ public class DataManager implements Callback {
 
         // sync data with server todo use SyncData() instead
         getEventData();
+
+        // todo integrate data helper into data manager
+        Log.i(TAG, "Creating new instance of data helper");
+        mDataHelper = DataHelper.newInstance(mContext);
+        Log.i(TAG, "Inserting new empty event into database via Data Helper");
+        mDataHelper.insertEvent(new Event());
+        Log.i(TAG, "Reading events from data helper");
+        mDataHelper.getEvents();
     }
 
     /**
