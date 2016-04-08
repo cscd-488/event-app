@@ -1,5 +1,5 @@
 /**
- * @file EventDataHelper.java
+ * @file DataHelper.java
  * @author Bruce Emehiser
  * @date 2016 03 15
  *
@@ -9,26 +9,26 @@
 
 package com.example.jharshman.event;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQuery;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventDataHelper extends SQLiteOpenHelper {
+public class DataHelper extends SQLiteOpenHelper {
 
-    private static final String TAG = "EventDataHelper";
+    // debugging tag
+    private static final String TAG = "DataHelper";
 
     // database version
     private static final int DATABASE_VERSION = 1;
 
     // database name
-    private static final String DATABASE_NAME = "magpie_data";
+    private static final String DATABASE_NAME = "magpie.db";
 
     // table names
     private static final String USER_TABLE = "users";
@@ -69,6 +69,7 @@ public class EventDataHelper extends SQLiteOpenHelper {
     private static final String EVENT_COLUMN_TIME_UPDATED = "time_updated";
 
     private static final String CHECK_POINT_COLUMN_ID = "checkpoint_id";
+    private static final String CHECK_POINT_COLUMNT_EVENT_ID = "event_id";
     private static final String CHECK_POINT_COLUMN_TITLE = "title";
     private static final String CHECK_POINT_COLUMN_ARTIST = "artist";
     private static final String CHECK_POINT_COLUMN_DESCRIPTION = "description";
@@ -79,21 +80,16 @@ public class EventDataHelper extends SQLiteOpenHelper {
     private static final String CHECK_POINT_COLUMN_TIME_CREATED = "time_created";
     private static final String CHECK_POINT_COLUMN_TIME_UPDATED = "time_updated";
 
-    public static EventDataHelper newInstance(Context context, String databaseName) {
+    /**
+     * Get an instance of the data helper.
+     * @param context The application context
+     * @return Instance of Event Data Helper
+     */
+    public static DataHelper newInstance(Context context) {
 
-        int version = 1;
+        Log.i(TAG, "Creating new instance of SQLite data helper");
 
-        //todo figure out how to actually get a cursor factory
-        SQLiteDatabase.CursorFactory cursorFactory = new SQLiteDatabase.CursorFactory() {
-            @Override
-            public Cursor newCursor(SQLiteDatabase db, SQLiteCursorDriver masterQuery, String editTable, SQLiteQuery query) {
-                return null;
-            }
-        };
-
-        EventDataHelper databasehelper = new EventDataHelper(context, databaseName, cursorFactory, version);
-
-        return databasehelper;
+        return new DataHelper(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     /**
@@ -109,7 +105,7 @@ public class EventDataHelper extends SQLiteOpenHelper {
      *                {@link #onUpgrade} will be used to upgrade the database; if the database is
      *                newer, {@link #onDowngrade} will be used to downgrade the database
      */
-    private EventDataHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    private DataHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
@@ -122,14 +118,15 @@ public class EventDataHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database) {
 
-        // create tables todo finish adding tables to table creation
+        Log.i(TAG, "Creating database");
 
+        // create tables todo finish adding tables to table creation
 
         database.execSQL(
                 "CREATE TABLE " + USER_TABLE + "("
                         + USER_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + USER_COLUMN_FIRST_NAME + " TEXT NOT NULL"
-                        + USER_COLUMN_LAST_NAME + " TEXT NOT NULL"
+                        + USER_COLUMN_FIRST_NAME + " TEXT NOT NULL,"
+                        + USER_COLUMN_LAST_NAME + " TEXT NOT NULL,"
                         + USER_COLUMN_TOKEN + " TEXT NOT NULL"
                         + ")"
         );
@@ -137,16 +134,20 @@ public class EventDataHelper extends SQLiteOpenHelper {
         database.execSQL(
                 "CREATE TABLE " + SUBSCRIPTIONS_TABLE + "("
                         + SUBSCRIPTIONS_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + SUBSCRIPTION_COLUMN_USER_ID + " INTEGER NOT NULL"
-                        + SUBSCRIPTION_COLUMN_EVENT_ID + " INTEGER NOT NULL"
+                        + SUBSCRIPTION_COLUMN_USER_ID + " INTEGER NOT NULL,"
+                        + SUBSCRIPTION_COLUMN_EVENT_ID + " INTEGER NOT NULL,"
+                        + "FOREIGN KEY(" + SUBSCRIPTION_COLUMN_USER_ID + ") REFERENCES " + USER_TABLE + "(" + USER_COLUMN_ID + "),"
+                        + "FOREIGN KEY(" + SUBSCRIPTION_COLUMN_USER_ID + ") REFERENCES " + EVENT_TABLE + "(" + EVENT_COLUMN_ID + ")"
                         + ")"
         );
 
         database.execSQL(
                 "CREATE TABLE " + CHECKED_TABLE + "("
                         + CHECKED_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + CHECKED_COLUMN_USER_ID + " INTEGER NOT NULL"
-                        + CHECKED_COLUMN_CHECKPOINT_ID + " INTEGER NOT NULL"
+                        + CHECKED_COLUMN_USER_ID + " INTEGER NOT NULL,"
+                        + CHECKED_COLUMN_CHECKPOINT_ID + " INTEGER NOT NULL,"
+                        + "FOREIGN KEY(" + CHECKED_COLUMN_USER_ID + ") REFERENCES " + USER_TABLE + "(" + USER_COLUMN_ID + "),"
+                        + "FOREIGN KEY(" + CHECKED_COLUMN_CHECKPOINT_ID + ") REFERENCES " + CHECK_POINT_TABLE + "(" + CHECK_POINT_COLUMN_ID + ")"
                         + ")"
         );
 
@@ -154,25 +155,34 @@ public class EventDataHelper extends SQLiteOpenHelper {
                 "CREATE TABLE " + EVENT_TABLE + "("
                         + EVENT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                         + EVENT_COLUMN_TITLE + " TEXT NOT NULL,"
-                        + EVENT_COLUMN_DESCRIPTION + " TEXT NOT NULL"
-                        + EVENT_COLUMN_IMAGE_SRC + " TEXT NOT NULL"
-                        // todo finish event table
+                        + EVENT_COLUMN_SHORT_TITLE + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_AUTHOR + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_DESCRIPTION + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_IMAGE_SRC + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_LAT + " DOUBLE,"
+                        + EVENT_COLUMN_LON + " DOUBLE,"
+                        + EVENT_COLUMN_QR + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_TIME_CREATED + " TEXT NOT NULL,"
+                        + EVENT_COLUMN_TIME_UPDATED + " TEXT NOT NULL"
                         + ")"
         );
 
         database.execSQL(
                 "CREATE TABLE " + CHECK_POINT_TABLE + "("
                         + CHECK_POINT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + CHECK_POINT_COLUMNT_EVENT_ID + " INTEGER,"
                         + CHECK_POINT_COLUMN_TITLE + " TEXT NOT NULL,"
-                        + CHECK_POINT_COLUMN_DESCRIPTION + " TEXT NOT NULL"
-                        + CHECK_POINT_COLUMN_IMAGE_SRC + " TEXT NOT NULL"
-                        + CHECK_POINT_COLUMN_LAT + " TEXT NOT NULL"
-                        + CHECK_POINT_COLUMN_LON + " TEXT NOT NULL"
-                        + CHECK_POINT_COLUMN_QR + " TEXT NOT NULL"
-                        // TODO finish check point table
+                        + CHECK_POINT_COLUMN_ARTIST + " TEXT NOT NULL,"
+                        + CHECK_POINT_COLUMN_DESCRIPTION + " TEXT NOT NULL,"
+                        + CHECK_POINT_COLUMN_IMAGE_SRC + " TEXT NOT NULL,"
+                        + CHECK_POINT_COLUMN_LAT + " DOUBLE,"
+                        + CHECK_POINT_COLUMN_LON + " DOUBLE,"
+                        + CHECK_POINT_COLUMN_QR + " TEXT NOT NULL,"
+                        + CHECK_POINT_COLUMN_TIME_CREATED + " TEXT NOT NULL,"
+                        + CHECK_POINT_COLUMN_TIME_UPDATED + " TEXT NOT NULL,"
+                        + "FOREIGN KEY(" + CHECK_POINT_COLUMNT_EVENT_ID + ") REFERENCES " + EVENT_TABLE +"(" + EVENT_COLUMN_ID + ")"
                         + ")"
         );
-
     }
 
     /**
@@ -181,7 +191,7 @@ public class EventDataHelper extends SQLiteOpenHelper {
      * needs to upgrade to the new schema version.
      * <p/>
      * <p>
-     * The EventDataHelper ALTER TABLE documentation can be found
+     * The DataHelper ALTER TABLE documentation can be found
      * <a href="http://sqlite.org/lang_altertable.html">here</a>. If you add new columns
      * you can use ALTER TABLE to insert them into a live table. If you rename or remove columns
      * you can use ALTER TABLE to rename the old table, then create the new table and then
@@ -199,6 +209,10 @@ public class EventDataHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
         // drop the old table
+        database.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
+        database.execSQL("DROP TABLE IF EXISTS " + SUBSCRIPTIONS_TABLE);
+        database.execSQL("DROP TABLE IF EXISTS " + CHECKED_TABLE);
+        database.execSQL("DROP TABLE IF EXISTS " + REDEEMED_TABLE);
         database.execSQL("DROP TABLE IF EXISTS " + EVENT_TABLE);
         database.execSQL("DROP TABLE IF EXISTS " + CHECK_POINT_TABLE);
 
@@ -206,12 +220,48 @@ public class EventDataHelper extends SQLiteOpenHelper {
         onCreate(database);
     }
 
+
+    /**
+     * Add an event to the local database if the event does not exist.
+     *
+     * @param event The event to add.
+     * @return True if event was added, otherwise false.
+     */
+    public boolean insertEvent(Event event) {
+
+        SQLiteDatabase database = getWritableDatabase();
+
+        // set up the row
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(EVENT_COLUMN_ID, event.getID());
+        contentValues.put(EVENT_COLUMN_TITLE, event.getTitle());
+        contentValues.put(EVENT_COLUMN_SHORT_TITLE, event.getShortTitle());
+        contentValues.put(EVENT_COLUMN_AUTHOR, event.getAuthor());
+        contentValues.put(EVENT_COLUMN_DESCRIPTION, event.getDescription());
+        contentValues.put(EVENT_COLUMN_IMAGE_SRC, event.getImageSrc());
+        contentValues.put(EVENT_COLUMN_LAT, event.getLat());
+        contentValues.put(EVENT_COLUMN_LON, event.getLon());
+        contentValues.put(EVENT_COLUMN_QR, event.getQR());
+        contentValues.put(EVENT_COLUMN_TIME_CREATED, event.getTimeCreated());
+        contentValues.put(EVENT_COLUMN_TIME_UPDATED, event.getTimeUpdated());
+
+        // insert row into the database
+        long inserted = database.insert(EVENT_TABLE, null, contentValues);
+
+        Log.i(TAG, "Insert Event successful: " + inserted);
+
+        // inserted succeeded if (inserted != -1)
+        return inserted != -1;
+    }
+
     /**
      * Get a list of all Events from the database
      *
      * @return The list of Events
      */
-    private List<Event> getEvents() {
+    public List<Event> getEvents() {
+
+        Log.i(TAG, "Getting events...");
 
         ArrayList<Event> events = new ArrayList<>();
 
@@ -222,33 +272,78 @@ public class EventDataHelper extends SQLiteOpenHelper {
             SQLiteDatabase database = this.getReadableDatabase();
 
             // send query database for all events
-            Cursor cursor = database.query(EVENT_TABLE, new String[] {
-                            EVENT_COLUMN_ID,
-                            EVENT_COLUMN_TITLE,
-                            EVENT_COLUMN_DESCRIPTION,
-                            EVENT_COLUMN_IMAGE_SRC
-                    },
-                    null, null, null, null, null, null);
+//            Cursor cursor = database.query(EVENT_TABLE, new String[] {
+//                            EVENT_COLUMN_ID,
+//                            EVENT_COLUMN_TITLE,
+//                            EVENT_COLUMN_SHORT_TITLE,
+//                            EVENT_COLUMN_AUTHOR,
+//                            EVENT_COLUMN_DESCRIPTION,
+//                            EVENT_COLUMN_IMAGE_SRC,
+//                            EVENT_COLUMN_LAT,
+//                            EVENT_COLUMN_LON,
+//                            EVENT_COLUMN_QR,
+//                            EVENT_COLUMN_TIME_CREATED,
+//                            EVENT_COLUMN_TIME_UPDATED
+//                    },
+//                    null ,null, null, null, null);
+
+            Cursor cursor = database.query(true, EVENT_TABLE, null, null, null, null, null, null, null, null);
+//            Cursor cursor = database.query(EVENT_TABLE, null, null, null, null, null, null);
+
+            Log.i(TAG, "Cursor Created");
+            if (cursor == null) {
+                Log.i(TAG, "Cursor is null!");
+            }
 
             // get the data from the cursor
             if(cursor != null) {
 
+                Log.i(TAG, "Cursor wasn't null!");
+
                 // add items to the list todo complete list of elements
                 int event_id;
                 String title;
+                String shortTitle;
+                String author;
                 String description;
                 String imageSrc;
+                double lat;
+                double lon;
+                String qr;
+                String timeCreated;
+                String timeUpdated;
                 Event event;
+
                 for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
 
+                    Log.i(TAG, "Getting event from cursor");
+
+                    int pos = 0;
+
                     // get elements from cursor
-                    event_id = cursor.getInt(0);
-                    title = cursor.getString(1);
-                    description = cursor.getString(2);
-                    imageSrc = cursor.getString(3);
+                    event_id = cursor.getInt(pos ++);
+                    title = cursor.getString(pos ++);
+                    shortTitle = cursor.getString(pos ++);
+                    author = cursor.getString(pos ++);
+                    description = cursor.getString(pos ++);
+                    imageSrc = cursor.getString(pos ++);
+                    lat = cursor.getDouble(pos ++);
+                    lon = cursor.getDouble(pos ++);
+                    qr = cursor.getString(pos ++);
+                    timeCreated = cursor.getString(pos ++);
+                    timeUpdated = cursor.getString(pos);
 
                     // create new event and add it to the list
-                    event = new Event(0, title, description, imageSrc, null, null, null, false, null);
+                    // todo finish builder in event, and set up this to use it
+                    event = new Event();
+                    event.setID(event_id);
+                    event.setTitle(title);
+                    event.setAuthor(author);
+                    event.setDescription(description);
+                    event.setImageSrc(imageSrc);
+
+                    Log.i(TAG, String.format("%d %s %s %s %s", event_id, title, author, description, imageSrc));
+
                     events.add(event);
                 }
 

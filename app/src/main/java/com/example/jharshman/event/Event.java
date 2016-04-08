@@ -29,8 +29,12 @@ public class Event implements Serializable {
     private String mDescription;
     @SerializedName("image_src")
     private String mImageSrc;
-    @SerializedName("check_in_type")
-    private String mCheckInType;
+    @SerializedName("lat")
+    private double mLat;
+    @SerializedName("lon")
+    private double mLon;
+    @SerializedName("qr")
+    private String mQR;
     @SerializedName("created_at")
     private String mTimeCreated;
     @SerializedName("updated_at")
@@ -42,24 +46,65 @@ public class Event implements Serializable {
     @SerializedName("checkpoints")
     private CheckPoint[] mCheckPoints;
 
-    public Event(int id, String title, String description, String imageSrc, String checkInType,
-                 String timeCreated, String timeUpdated, boolean redeemed, CheckPoint[] checkPoints) {
-
-        mID = id;
-        mTitle = title;
-        mShortTitle = generateShortTitle(title);
-        mDescription = description;
-        mImageSrc = imageSrc;
-        mCheckInType = checkInType;
-        mTimeCreated = timeCreated;
-        mTimeUpdated = timeUpdated;
-        mRedeemed = redeemed;
-        mCheckPoints = checkPoints;
-        mSubscribed = false;
+    public void setID(int mID) {
+        this.mID = mID;
     }
 
-    public void setTimeUpdated(String timeUpdated) {
-        mTimeUpdated = timeUpdated;
+    public void setTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
+    public void setAuthor(String mAuthor) {
+        this.mAuthor = mAuthor;
+    }
+
+    public void setDescription(String mDescription) {
+        this.mDescription = mDescription;
+    }
+
+    public void setImageSrc(String mImageSrc) {
+        this.mImageSrc = mImageSrc;
+    }
+
+    public Event() {
+
+        int defaultID = 1;
+
+        mID = defaultID;
+        mTitle = "default title";
+        mShortTitle = generateShortTitle("DT");
+        mAuthor = "default author";
+        mDescription = "default description";
+        mImageSrc = "http://jessicauelmen.com/wp-content/uploads/2016/02/android-logo-featured.jpeg";
+        mLat = 0.0;
+        mLon = 0.0;
+        mQR = "default qr";
+        mTimeCreated = "2016-01-01 01:01:01";
+        mTimeUpdated = "2016-01-01 01:01:01";
+
+        mRedeemed = false;
+
+        mSubscribed = false;
+
+        mCheckPoints = new CheckPoint[] {new CheckPoint(defaultID)};
+    }
+
+    /**
+     * Builder class for Event class.
+     */
+    public class Builder {
+
+        public Event.Builder setID(int id) {
+            mID = id;
+
+            return this;
+        }
+
+        public Event.Builder setTitle(String title) {
+            mTitle = title;
+
+            return this;
+        }
     }
 
     public void setRedeemed(boolean redeemed) {
@@ -87,6 +132,10 @@ public class Event implements Serializable {
         return mShortTitle;
     }
 
+    public String getAuthor() {
+        return mAuthor;
+    }
+
     public String getDescription() {
         return mDescription;
     }
@@ -95,8 +144,16 @@ public class Event implements Serializable {
         return mImageSrc;
     }
 
-    public String getCheckInType() {
-        return mCheckInType;
+    public double getLat() {
+        return mLat;
+    }
+
+    public double getLon() {
+        return mLon;
+    }
+
+    public String getQR() {
+        return mQR;
     }
 
     public String getTimeCreated() {
@@ -121,7 +178,7 @@ public class Event implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("%d %s %s %s %s %s %s %s %b %s", mID, mTitle, mShortTitle, mDescription, mImageSrc, mCheckInType, mTimeCreated, mTimeUpdated, mRedeemed, Arrays.toString(mCheckPoints));
+        return String.format("%d %s %s %s %s %s %s %s %b %s", mID, mTitle, mShortTitle, mAuthor, mDescription, mImageSrc, mTimeCreated, mTimeUpdated, mRedeemed, Arrays.toString(mCheckPoints));
     }
 
     /**

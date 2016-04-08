@@ -53,6 +53,8 @@ public class DataManager implements Callback {
     private static DataManager mInstance;
     private static Context mContext;
 
+    private static DataHelper mDataHelper;
+
     /**
      * Event and Check Point Data
      * It is final so that it will only be modified or updated,
@@ -78,6 +80,14 @@ public class DataManager implements Callback {
         mEvents.addAll(readCachedData());
         mDataSetChanged = false;
         getEventData();
+
+        // todo integrate data helper into data manager
+        Log.i(TAG, "Creating new instance of data helper");
+        mDataHelper = DataHelper.newInstance(mContext);
+        Log.i(TAG, "Inserting new empty event into database via Data Helper");
+        mDataHelper.insertEvent(new Event());
+        Log.i(TAG, "Reading events from data helper");
+        mDataHelper.getEvents();
     }
 
     public static DataManager instance(Context context) {

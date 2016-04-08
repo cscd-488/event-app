@@ -83,6 +83,22 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         mCollected = collected;
     }
 
+    public CheckPoint(int mEventID) {
+
+        mCheckPointID = 1;
+        mEventID = 1;
+        mTitle = "default title";
+        mArtist = "default artist";
+        mDescription = "default description";
+        mImageSrc = "http://jessicauelmen.com/wp-content/uploads/2016/02/android-logo-featured.jpeg";
+        mLat = 0.0;
+        mLon = 0.0;
+        mQR = "default qr";
+        mTimeCreated = "2016-01-01 01:01:01";
+        mTimeUpdated = "2016-01-01 01:01:01";
+        mCollected = false;
+    }
+
     public void setDisplayed() {
         mWasDisplayed = true;
     }
