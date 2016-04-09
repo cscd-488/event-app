@@ -12,11 +12,14 @@ package com.example.jharshman.event;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,10 +32,22 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,6 +58,98 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * create an instance of this fragment.
  */
 public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
+    private class DownloadTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String data = "";
+
+            try{
+                data = downloadUrl(params[0]);
+            }catch(Exception e){
+                Log.d("Background Task",e.toString());
+            }
+
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String results){
+            super.onPostExecute(results);
+
+            ParserTask parserTask = new ParserTask();
+            parserTask.execute(results);
+        }
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... params) {
+            JSONObject jsonObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try{
+                jsonObject = new JSONObject(params[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                routes = parser.parse(jsonObject);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> results) {
+            List<LatLng> points = null;
+            PolylineOptions polylineOptions = null;
+            MarkerOptions markerOptions = new MarkerOptions();
+            String distance = "";
+            String duration = "";
+
+            try {
+                if (results.size() < 1) {
+                    return;
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+                return;
+            }
+
+            for(int i = 0; i < results.size(); i++){
+                points = new ArrayList<>();
+                polylineOptions = new PolylineOptions();
+                List<HashMap<String, String>> path = results.get(i);
+
+                for(int j = 0; j < path.size(); j++){
+                    HashMap<String, String> point = path.get(j);
+
+                    if(j==0){
+                        distance = (String)point.get("distance");
+                        continue;
+                    }else if(j==1){
+                        duration = (String)point.get("duration");
+                        continue;
+                    }
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                polylineOptions.addAll(points);
+                polylineOptions.width(2f);
+                polylineOptions.color(Color.RED);
+            }
+            TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
+            timeView.setText(duration);
+        }
+    }
+
     private class MarkerWrapper{
         public CheckPoint location;
         public Marker marker;
@@ -80,15 +187,78 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         @Override
         public void onMyLocationChange(Location location) {
             float distance;
+            CheckPoint hovered = coordinates[displayIndex];
             mLocation = location;
             if(!zoomed)
                 centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
 
-            distance = distanceFromUserMiles(coordinates[displayIndex]);
-            TextView view = (TextView) getView().findViewById(R.id.distanceTextView);
-            view.setText(String.format("%.2f", distance) + "miles");
+            TextView distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
+
+            distance = distanceFromUserMiles(hovered);
+
+            String url = getDirectionsUrl(new LatLng(location.getLatitude(), location.getLongitude()),
+                                            new LatLng(hovered.getCoordinates()[0], hovered.getCoordinates()[1]));
+
+            DownloadTask downloadTask = new DownloadTask();
+            downloadTask.execute(url);
+
+            try {
+                if (distance >= 0) {
+                    distanceView.setText(String.format("%.2f", distance) + "miles");
+                } else {
+                    distanceView.setText("No user location");
+                }
+            }catch(NullPointerException e){
+                e.printStackTrace();
+            }
+
         }
     };
+
+    private String downloadUrl(String strUrl) throws IOException{
+        String data = "";
+        InputStream inputStream = null;
+        HttpURLConnection urlConnection = null;
+
+        try{
+
+            URL url = new URL(strUrl);
+            urlConnection = (HttpURLConnection)url.openConnection();
+            urlConnection.connect();
+            inputStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer sb = new StringBuffer();
+
+            String line = "";
+
+            while((line = br.readLine())!= null){
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+
+        }catch(Exception e){
+            Log.d("Exception downloading", e.toString());
+        }finally {
+            inputStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    private String getDirectionsUrl(LatLng start, LatLng dest){
+        String strOrigin = "origin="+start.latitude+","+start.longitude;
+        String strDest = "destination="+dest.latitude+","+dest.longitude;
+        String sensor = "sensor=false";
+        String params = strOrigin+"&"+strDest+"&"+sensor;
+        String output = "json";
+        String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+params;
+
+        return url;
+    }
 
     private GoogleMap.OnMarkerClickListener myMarkerClickListener = new GoogleMap.OnMarkerClickListener() {
         @Override
@@ -145,8 +315,6 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
        this.buildMap(v, savedInstanceState);
 
         return v;
-        // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_location_map, container, false);
     }
 
     private void buildMap(View v, Bundle savedInstanceState){
@@ -177,6 +345,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     public static float distanceFromUserMiles(CheckPoint coordinateCollection) {
         return distanceFromUserFeet(coordinateCollection) / FEET_TO_MILES;
     }
+
     /**
      * Returns the distance in meters from the last known user location
      *
@@ -344,8 +513,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
             markers[i] = new MarkerWrapper(this.coordinates[i], map.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
                     .snippet(this.coordinates[i].getDescription())
-                    .title(this.coordinates[i].getTitle())
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_event_test_image))));
+                    .title(this.coordinates[i].getTitle())));
         }
     }
 

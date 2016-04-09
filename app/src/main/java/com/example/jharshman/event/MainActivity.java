@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             mPagerFragment = new LocationMapFragment();
-            mPagerFragment.addLocations(new CheckPoint[]{new CheckPoint(1, "Title", "Description", "", 0.0, 0.0)});
+            mPagerFragment.addLocations(new CheckPoint[]{new CheckPoint(1, "Title", "Description", "", 47.0379, -122.9007)});
 
             transaction.add(R.id.FragmentContainer, mPagerFragment);
             transaction.commit();
