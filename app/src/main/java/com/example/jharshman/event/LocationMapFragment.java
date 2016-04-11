@@ -58,7 +58,7 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
-    private class DownloadTask extends AsyncTask<String, Void, String> {
+    private static class DownloadTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -82,7 +82,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+    private static class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... params) {
@@ -145,8 +145,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
                 polylineOptions.width(2f);
                 polylineOptions.color(Color.RED);
             }
-            TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
-            timeView.setText(duration);
+            timeToLocation = duration;
         }
     }
 
@@ -170,6 +169,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     private static final int DEFAULT_ZOOM = 17;
 
     private static Location mLocation;
+    private static String timeToLocation = "No Data";
 
     private MapView mapView;
     private int displayIndex = 0;
@@ -193,16 +193,15 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
                 centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
 
             TextView distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
+            TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
 
             distance = distanceFromUserMiles(hovered);
 
-            String url = getDirectionsUrl(new LatLng(location.getLatitude(), location.getLongitude()),
-                                            new LatLng(hovered.getCoordinates()[0], hovered.getCoordinates()[1]));
-
-            DownloadTask downloadTask = new DownloadTask();
-            downloadTask.execute(url);
+            timeToLocation(hovered);
 
             try {
+
+                timeView.setText(timeToLocation);
                 if (distance >= 0) {
                     distanceView.setText(String.format("%.2f", distance) + "miles");
                 } else {
@@ -215,7 +214,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         }
     };
 
-    private String downloadUrl(String strUrl) throws IOException{
+    private static String downloadUrl(String strUrl) throws IOException{
         String data = "";
         InputStream inputStream = null;
         HttpURLConnection urlConnection = null;
@@ -249,11 +248,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         return data;
     }
 
-    private String getDirectionsUrl(LatLng start, LatLng dest){
+    private static String getDirectionsUrl(LatLng start, LatLng dest){
         String strOrigin = "origin="+start.latitude+","+start.longitude;
         String strDest = "destination="+dest.latitude+","+dest.longitude;
         String sensor = "sensor=false";
-        String params = strOrigin+"&"+strDest+"&"+sensor;
+        String mode = "mode=walking";
+        String params = strOrigin+"&"+strDest+"&"+sensor+"&"+mode;
         String output = "json";
         String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+params;
 
@@ -338,41 +338,59 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
-    public static float distanceFromUserKilometers(CheckPoint coordinateCollection) {
-        return distanceFromUserMeter(coordinateCollection) / METERS_TO_KILO;
+    public static float distanceFromUserKilometers(CheckPoint checkPoint) {
+        return distanceFromUserMeter(checkPoint) / METERS_TO_KILO;
     }
 
-    public static float distanceFromUserMiles(CheckPoint coordinateCollection) {
-        return distanceFromUserFeet(coordinateCollection) / FEET_TO_MILES;
+    public static float distanceFromUserMiles(CheckPoint checkPoint) {
+        return distanceFromUserFeet(checkPoint) / FEET_TO_MILES;
+    }
+
+    /**
+     * Returns the walking time from the users last known location to the passed checkpoint
+     *
+     * @param  checkPoint  the coordinate to compare from
+     * @return      the walking time in days/hrs/min/sec from the last known location. "No Data" if no known location
+     */
+    public static String timeToLocation(CheckPoint checkPoint){
+        double[] coords = checkPoint.getCoordinates();
+
+        String url = getDirectionsUrl(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()),
+                new LatLng(coords[0], coords[1]));
+
+        DownloadTask downloadTask = new DownloadTask();
+        downloadTask.execute(url);
+
+        return timeToLocation;
     }
 
     /**
      * Returns the distance in meters from the last known user location
      *
-     * @param  coordinateCollection  the coordinate to compare from
+     * @param  checkPoint  the coordinate to compare from
      * @return      the distance in meters from the last known location. -1 if no known location
      */
-    public static float distanceFromUserMeter(CheckPoint coordinateCollection){
+    public static float distanceFromUserMeter(CheckPoint checkPoint){
         if(mLocation == null)
             return -1f;
 
         float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), coordinateCollection.getCoordinates()[0], coordinateCollection.getCoordinates()[1], results);
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
         return results[0];
     }
 
     /**
      * Returns the distance in feet from the last known user location
      *
-     * @param  coordinateCollection  the coordinate to compare from
+     * @param  checkPoint  the coordinate to compare from
      * @return      the distance in feet from the last known location. -1 if no known location
      */
-    public static float distanceFromUserFeet(CheckPoint coordinateCollection){
+    public static float distanceFromUserFeet(CheckPoint checkPoint){
         if(mLocation == null)
             return -1f;
 
         float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), coordinateCollection.getCoordinates()[0], coordinateCollection.getCoordinates()[1], results);
+        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
         results[0] *= METERS_TO_FEET;
         return results[0];
     }
