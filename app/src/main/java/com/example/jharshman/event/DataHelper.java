@@ -18,6 +18,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class DataHelper extends SQLiteOpenHelper {
 
@@ -47,6 +48,7 @@ public class DataHelper extends SQLiteOpenHelper {
     private static final String SUBSCRIPTIONS_COLUMN_ID = "subscription_id";
     private static final String SUBSCRIPTION_COLUMN_USER_ID = "user_id";
     private static final String SUBSCRIPTION_COLUMN_EVENT_ID = "event_id";
+    private static final String SUBSCRIPTION_COLUMN_SUBSCRIBED = "subscribed";
 
     private static final String CHECKED_COLUMN_ID = "checked_id";
     private static final String CHECKED_COLUMN_USER_ID = "user_id";
@@ -134,10 +136,11 @@ public class DataHelper extends SQLiteOpenHelper {
         database.execSQL(
                 "CREATE TABLE " + SUBSCRIPTIONS_TABLE + "("
                         + SUBSCRIPTIONS_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + SUBSCRIPTION_COLUMN_USER_ID + " INTEGER NOT NULL,"
+//                        + SUBSCRIPTION_COLUMN_USER_ID + " INTEGER NOT NULL,"
                         + SUBSCRIPTION_COLUMN_EVENT_ID + " INTEGER NOT NULL,"
-                        + "FOREIGN KEY(" + SUBSCRIPTION_COLUMN_USER_ID + ") REFERENCES " + USER_TABLE + "(" + USER_COLUMN_ID + "),"
-                        + "FOREIGN KEY(" + SUBSCRIPTION_COLUMN_USER_ID + ") REFERENCES " + EVENT_TABLE + "(" + EVENT_COLUMN_ID + ")"
+                        + SUBSCRIPTION_COLUMN_SUBSCRIBED + " INTEGER NOT NULL,"
+//                        + "FOREIGN KEY(" + SUBSCRIPTION_COLUMN_USER_ID + ") REFERENCES " + USER_TABLE + "(" + USER_COLUMN_ID + "),"
+                        + "FOREIGN KEY(" + SUBSCRIPTION_COLUMN_EVENT_ID + ") REFERENCES " + EVENT_TABLE + "(" + EVENT_COLUMN_ID + ")"
                         + ")"
         );
 
@@ -153,7 +156,7 @@ public class DataHelper extends SQLiteOpenHelper {
 
         database.execSQL(
                 "CREATE TABLE " + EVENT_TABLE + "("
-                        + EVENT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + EVENT_COLUMN_ID + " INTEGER PRIMARY KEY,"
                         + EVENT_COLUMN_TITLE + " TEXT NOT NULL,"
                         + EVENT_COLUMN_SHORT_TITLE + " TEXT NOT NULL,"
                         + EVENT_COLUMN_AUTHOR + " TEXT NOT NULL,"
@@ -169,7 +172,7 @@ public class DataHelper extends SQLiteOpenHelper {
 
         database.execSQL(
                 "CREATE TABLE " + CHECK_POINT_TABLE + "("
-                        + CHECK_POINT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + CHECK_POINT_COLUMN_ID + " INTEGER PRIMARY KEY,"
                         + CHECK_POINT_COLUMNT_EVENT_ID + " INTEGER,"
                         + CHECK_POINT_COLUMN_TITLE + " TEXT NOT NULL,"
                         + CHECK_POINT_COLUMN_ARTIST + " TEXT NOT NULL,"
@@ -245,10 +248,99 @@ public class DataHelper extends SQLiteOpenHelper {
         contentValues.put(EVENT_COLUMN_TIME_CREATED, event.getTimeCreated());
         contentValues.put(EVENT_COLUMN_TIME_UPDATED, event.getTimeUpdated());
 
-        // insert row into the database
-        long inserted = database.insert(EVENT_TABLE, null, contentValues);
+        // insert row into the database Note: no exception should be thrown todo make events update with whichever data is newest
+        long inserted = database.insertWithOnConflict(EVENT_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
+
+        // insert subscribed.
+        insertSubscription(event.getID(), event.getSubscribed());
 
         Log.i(TAG, "Insert Event successful: " + inserted);
+
+        // inserted succeeded if (inserted != -1)
+        return inserted != -1;
+    }
+
+    /**
+     * Add a subscription to the local database. This will
+     * add or remove the subscription, depending on the boolean value
+     * that is in the passed in event.
+     *
+     * @param event_id The event to subscribe to, or un subscribe from.
+     * @param status The subscription status of the event.
+     */
+    public boolean insertSubscription(int event_id, boolean status) {
+
+        SQLiteDatabase database = getWritableDatabase();
+
+        // set up the row
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SUBSCRIPTION_COLUMN_EVENT_ID, event_id);
+//        contentValues.put(SUBSCRIPTION_COLUMN_USER_ID, this.userID);
+        contentValues.put(SUBSCRIPTION_COLUMN_SUBSCRIBED, status ? 0 : 1);
+
+        // insert row into the database Note: no exception should be thrown todo make events update with whichever data is newest
+        long inserted = database.insertWithOnConflict(SUBSCRIPTIONS_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
+
+        Log.i(TAG, "Insert Subscription successful: " + inserted);
+
+        // inserted succeeded if (inserted != -1)
+        return inserted != -1;
+    }
+
+    /**
+     * Add an checkpoint to the local database if the checkpoint does not exist.
+     *
+     * @param checkPoint The checkpoint to add.
+     * @return True if event was added, otherwise false.
+     */
+    public boolean insertCheckPoint(CheckPoint checkPoint) {
+
+        SQLiteDatabase database = getWritableDatabase();
+
+        // set up the row
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CHECK_POINT_COLUMN_ID, checkPoint.getID());
+        contentValues.put(CHECK_POINT_COLUMN_TITLE, checkPoint.getTitle());
+        contentValues.put(CHECK_POINT_COLUMN_ARTIST, checkPoint.getArtist());
+        contentValues.put(CHECK_POINT_COLUMN_DESCRIPTION, checkPoint.getDescription());
+        contentValues.put(CHECK_POINT_COLUMN_IMAGE_SRC, checkPoint.getImageSrc());
+        contentValues.put(CHECK_POINT_COLUMN_LAT, checkPoint.getLat());
+        contentValues.put(CHECK_POINT_COLUMN_LON, checkPoint.getLon());
+        contentValues.put(CHECK_POINT_COLUMN_QR, checkPoint.getQR());
+        contentValues.put(CHECK_POINT_COLUMN_TIME_CREATED, checkPoint.getTimeCreated());
+        contentValues.put(CHECK_POINT_COLUMN_TIME_UPDATED, checkPoint.getTimeUpdated());
+
+        // insert row into the database Note: no exception should be thrown todo make checkpoints update with whichever data is newest
+        long inserted = database.insertWithOnConflict(CHECK_POINT_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
+
+        Log.i(TAG, "Insert CheckPoint successful: " + inserted);
+
+        // inserted succeeded if (inserted != -1)
+        return inserted != -1;
+    }
+
+    /**
+     * Add an checkpoint to the local database if the checkpoint does not exist.
+     *
+     * @param checkPoint The checkpoint to add.
+     * @return True if event was added, otherwise false.
+     */
+    public boolean insertCollected(CheckPoint checkPoint) {
+
+        // todo update this class to return valid collected
+
+        SQLiteDatabase database = getWritableDatabase();
+
+        // set up the row
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CHECK_POINT_COLUMN_ID, checkPoint.getID());
+        contentValues.put(CHECK_POINT_COLUMN_TITLE, checkPoint.getTitle());
+        contentValues.put(CHECK_POINT_COLUMN_ARTIST, checkPoint.getArtist());
+
+        // insert row into the database Note: no exception should be thrown todo make checkpoints update with whichever data is newest
+        long inserted = database.insertWithOnConflict(CHECK_POINT_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
+
+        Log.i(TAG, "Insert CheckPoint successful: " + inserted);
 
         // inserted succeeded if (inserted != -1)
         return inserted != -1;
@@ -268,27 +360,12 @@ public class DataHelper extends SQLiteOpenHelper {
         // try statement in case of database errors
         try {
 
-            // get the database from SqliteOpenHelper.this
+            // get the database from SQLiteOpenHelper.this
             SQLiteDatabase database = this.getReadableDatabase();
 
             // send query database for all events
-//            Cursor cursor = database.query(EVENT_TABLE, new String[] {
-//                            EVENT_COLUMN_ID,
-//                            EVENT_COLUMN_TITLE,
-//                            EVENT_COLUMN_SHORT_TITLE,
-//                            EVENT_COLUMN_AUTHOR,
-//                            EVENT_COLUMN_DESCRIPTION,
-//                            EVENT_COLUMN_IMAGE_SRC,
-//                            EVENT_COLUMN_LAT,
-//                            EVENT_COLUMN_LON,
-//                            EVENT_COLUMN_QR,
-//                            EVENT_COLUMN_TIME_CREATED,
-//                            EVENT_COLUMN_TIME_UPDATED
-//                    },
-//                    null ,null, null, null, null);
 
-            Cursor cursor = database.query(true, EVENT_TABLE, null, null, null, null, null, null, null, null);
-//            Cursor cursor = database.query(EVENT_TABLE, null, null, null, null, null, null);
+            Cursor cursor = database.query(EVENT_TABLE, null, null, null, null, null, null);
 
             Log.i(TAG, "Cursor Created");
             if (cursor == null) {
@@ -300,7 +377,7 @@ public class DataHelper extends SQLiteOpenHelper {
 
                 Log.i(TAG, "Cursor wasn't null!");
 
-                // add items to the list todo complete list of elements
+                // add items to the list
                 int event_id;
                 String title;
                 String shortTitle;
@@ -312,6 +389,8 @@ public class DataHelper extends SQLiteOpenHelper {
                 String qr;
                 String timeCreated;
                 String timeUpdated;
+                boolean subscribed;
+                List<CheckPoint> checkPoints;
                 Event event;
 
                 for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
@@ -332,17 +411,27 @@ public class DataHelper extends SQLiteOpenHelper {
                     qr = cursor.getString(pos ++);
                     timeCreated = cursor.getString(pos ++);
                     timeUpdated = cursor.getString(pos);
+                    subscribed = getSubscribed(event_id);
+                    checkPoints = this.getCheckpoints(event_id);
 
                     // create new event and add it to the list
-                    // todo finish builder in event, and set up this to use it
-                    event = new Event();
-                    event.setID(event_id);
-                    event.setTitle(title);
-                    event.setAuthor(author);
-                    event.setDescription(description);
-                    event.setImageSrc(imageSrc);
+                    event = new Event.Builder()
+                            .setID(event_id)
+                            .setTitle(title)
+                            .setShortTitle(shortTitle)
+                            .setAuthor(author)
+                            .setDescription(description)
+                            .setImageSrc(imageSrc)
+                            .setLat(lat)
+                            .setLon(lon)
+                            .setQR(qr)
+                            .setTimeCreated(timeCreated)
+                            .setTimeUpdated(timeUpdated)
+                            .setCheckPoints(checkPoints)
+                            .setSubscribed(subscribed)
+                            .build();
 
-                    Log.i(TAG, String.format("%d %s %s %s %s", event_id, title, author, description, imageSrc));
+                    Log.i(TAG, String.format("%d %s %s %s %s %b", event_id, title, author, description, imageSrc, subscribed));
 
                     events.add(event);
                 }
@@ -358,6 +447,147 @@ public class DataHelper extends SQLiteOpenHelper {
 
         // return events (which may be an empty list)
         return events;
+    }
+
+    /**
+     * Get subscription status based on event_id.
+     *
+     * @param event_id The id of the event to find the subscription status of.
+     * @return The boolean subscription status.
+     */
+    public boolean getSubscribed(int event_id) {
+
+        Log.i(TAG, "Getting events...");
+
+        boolean subscribed = false;
+
+        // try statement in case of database errors
+        try {
+
+            // get the database from SQLiteOpenHelper.this
+            SQLiteDatabase database = this.getReadableDatabase();
+
+            // send query database for subscription for event, NOTE: LIMIT 1
+            Cursor cursor = database.query(SUBSCRIPTIONS_TABLE, null, null, null, null, null, null, "1");
+
+            Log.i(TAG, "Cursor Created");
+
+            // get the data from the cursor
+            if(cursor != null && cursor.moveToFirst() && ! cursor.isAfterLast()) {
+
+                Log.i(TAG, "Getting event from cursor");
+
+                // get elements from cursor
+                subscribed = cursor.getInt(0) == 1;
+
+                Log.i(TAG, "Subscribed to event " + event_id + " " + subscribed);
+
+                // close the cursor
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "error getting event subscription status from database");
+            e.printStackTrace();
+        }
+
+        // return subscription status. If event was not null, this will be false.
+        return subscribed;
+    }
+
+    public List<CheckPoint> getCheckpoints(int eventID) {
+
+        Log.i(TAG, "Getting checkpoints...");
+
+        ArrayList<CheckPoint> checkPoints = new ArrayList<>();
+
+        // try statement in case of database errors
+        try {
+
+            // get the database from SQLiteOpenHelper.this
+            SQLiteDatabase database = this.getReadableDatabase();
+
+            // send query database for all checkpoints
+            Cursor cursor = database.query(CHECK_POINT_TABLE, null, CHECK_POINT_COLUMNT_EVENT_ID + "=?", new String[] {String.valueOf(eventID)}, null, null, null);
+
+            Log.i(TAG, "Cursor Created");
+            if (cursor == null) {
+                Log.i(TAG, "Cursor is null!");
+
+            }
+
+            // get the data from the cursor
+            if(cursor != null) {
+
+                Log.i(TAG, "Cursor wasn't null!");
+
+                // add items to the list
+                int checkpoint_id;
+                int event_id;
+                String title;
+                String artist;
+                String description;
+                String imageSrc;
+                double lat;
+                double lon;
+                String qr;
+                String timeCreated;
+                String timeUpdated;
+                CheckPoint checkpoint;
+
+                for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
+
+                    Log.i(TAG, "Getting event from cursor");
+
+                    int pos = 0;
+
+                    // get elements from cursor
+                    checkpoint_id = cursor.getInt(pos ++);
+                    event_id = cursor.getInt(pos ++);
+                    title = cursor.getString(pos ++);
+                    artist = cursor.getString(pos ++);
+                    description = cursor.getString(pos ++);
+                    imageSrc = cursor.getString(pos ++);
+                    lat = cursor.getDouble(pos ++);
+                    lon = cursor.getDouble(pos ++);
+                    qr = cursor.getString(pos ++);
+                    timeCreated = cursor.getString(pos ++);
+                    timeUpdated = cursor.getString(pos);
+
+                    // create new checkpoint and add it to the list
+                    checkpoint = new CheckPoint.Builder()
+                            .setID(checkpoint_id)
+                            .setEventID(event_id)
+                            .setTitle(title)
+                            .setArtist(artist)
+                            .setDescription(description)
+                            .setImageSrc(imageSrc)
+                            .setLat(lat)
+                            .setLon(lon)
+                            .setQR(qr)
+                            .setTimeCreated(timeCreated)
+                            .setTimeUpdated(timeUpdated)
+                            .build();
+
+                    Log.i(TAG, String.format("%d %s %s %s %s", checkpoint_id, title, artist, description, imageSrc));
+
+                    checkPoints.add(checkpoint);
+                }
+
+                // close the cursor
+                cursor.close();
+            }
+            else {
+                Log.i(TAG, "No checkpoints were found for Event with " + eventID);
+                throw new NoSuchElementException("No checkpoints were found for Event with " + eventID);
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "error getting checkpoints from database");
+            e.printStackTrace();
+        }
+
+        // return events (which may be an empty list)
+        return checkPoints;
     }
 
     /**
