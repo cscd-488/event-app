@@ -227,6 +227,6 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         super.onPause();
 
         // save the current events list which contains subscriptions etc
-        DataManager.instance(getContext()).flush();
+//        DataManager.instance(getContext()).flush();
     }
 }

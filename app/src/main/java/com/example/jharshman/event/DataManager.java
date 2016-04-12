@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -51,9 +50,10 @@ public class DataManager implements Callback {
      * Singleton instance of data manager
      */
     private static DataManager mInstance;
-    private static Context mContext;
 
-    private static DataHelper mDataHelper;
+    private Context mContext;
+
+    private DataHelper mDataHelper;
 
     /**
      * Event and Check Point Data
@@ -65,7 +65,7 @@ public class DataManager implements Callback {
      * it won't cause an exception if something trys to access it from another thread
      */
 //    private final List<Event> mEvents = Collections.synchronizedList(new ArrayList<Event>());
-    private final ArrayList<Event> mEvents = new ArrayList<>();
+//    private final ArrayList<Event> mEvents = new ArrayList<>();
 
     private boolean mDataSetChanged;
 
@@ -75,27 +75,24 @@ public class DataManager implements Callback {
     private final OkHttpClient mClient = new OkHttpClient();
     private final Gson mGson = new Gson();
 
-    private DataManager() {
+    private DataManager(Context context) {
         // singleton constructor will read data from server on first run
-        mEvents.addAll(readCachedData());
-        mDataSetChanged = false;
-        getEventData();
+        mContext = context;
 
         // todo integrate data helper into data manager
         Log.i(TAG, "Creating new instance of data helper");
-        mDataHelper = DataHelper.newInstance(mContext);
-        Log.i(TAG, "Inserting new empty event into database via Data Helper");
-        mDataHelper.insertEvent(new Event());
-        Log.i(TAG, "Reading events from data helper");
-        mDataHelper.getEvents();
+        mDataHelper = DataHelper.newInstance(context);
+
+        mListeners = new ArrayList<>();
+
+//        mEvents.addAll(readCachedData());
+        mDataSetChanged = false;
+        getEventData();
     }
 
     public static DataManager instance(Context context) {
-
         if(mInstance == null) {
-            mContext = context;
-            mInstance = new DataManager();
-            mListeners = new ArrayList<>();
+            mInstance = new DataManager(context);
         }
 
         return mInstance;
@@ -187,18 +184,40 @@ public class DataManager implements Callback {
      * Updates the current list of events with
      * the new data
      *
-     * @param newEvents The new updates to write
+     * @param events The new updates to write
      */
-    private void updateEvents(List<Event> newEvents) {
+    private void updateEvents(List<Event> events) {
 
-        // todo make this just update the events instead of overwriting them. Make sure that the subscription check in data are saved
+        // insert all events into the database todo make this only update the database on collision
+        for(Event event : events) {
+            mDataHelper.insertEvent(event);
 
-        mEvents.clear();
-        mEvents.addAll(newEvents);
+            // insert all checkpoints from event
+            for(CheckPoint checkPoint : event.getCheckPoints()) {
+                mDataHelper.insertCheckPoint(checkPoint);
+            }
+        }
 
         // clue listeners in to the fact that new data awaits
         notifyUpdateListeners();
     }
+
+//    /**
+//     * Updates the current list of events with
+//     * the new data
+//     *
+//     * @param newEvents The new updates to write
+//     */
+//    private void updateEvents(List<Event> newEvents) {
+//
+//        // todo make this just update the events instead of overwriting them. Make sure that the subscription check in data are saved
+//
+//        mEvents.clear();
+//        mEvents.addAll(newEvents);
+//
+//        // clue listeners in to the fact that new data awaits
+//        notifyUpdateListeners();
+//    }
 
     /**
      * Read cached event data if it exists
@@ -249,10 +268,17 @@ public class DataManager implements Callback {
         }
     }
 
+    /**
+     * Get all the events from the data helper.
+     *
+     * @return List of all events.
+     */
     public List<Event> getEvents() {
-        // todo maybe make this return a deep copy of events instead of events themselves
 
-        return mEvents;
+        // get all events from data helper
+        List<Event> events = mDataHelper.getEvents();
+
+        return events;
     }
 
     /**
@@ -266,24 +292,46 @@ public class DataManager implements Callback {
 
         ArrayList<Event> subscribedEvents = new ArrayList<>();
 
-        for (Event event : mEvents) {
-            if (event.getSubscribed()) {
-                subscribedEvents.add(event);
-            }
-        }
+//        for (Event event : mEvents) {
+//            if (event.getSubscribed()) {
+//                subscribedEvents.add(event);
+//            }
+//        }
 
         return subscribedEvents;
+    }
+
+    /**
+     * Get all the checkpoints for the given event.
+     *
+     * @param eventID The event to get checkpoints of.
+     * @return List of checkpoints for given event.
+     */
+    public List<CheckPoint> getCheckPoints(int eventID) {
+
+        return mDataHelper.getCheckpoints(eventID);
     }
 
     public List<CheckPoint> getCheckpoints(int eventID) {
         // todo make this make immutable by other programs (also solved by using a sqlite database)
 
-        for(int i = 0; i < mEvents.size(); i ++) {
-            if(mEvents.get(i).getID() == eventID) {
-                return Arrays.asList(mEvents.get(i).getCheckPoints());
-            }
+//        for(int i = 0; i < mEvents.size(); i ++) {
+//            if(mEvents.get(i).getID() == eventID) {
+//                return Arrays.asList(mEvents.get(i).getCheckPoints());
+//            }
+//        }
+//        throw new NoSuchElementException("No elements with event id " + eventID + " found");
+
+        List<CheckPoint> checkPoints;
+
+        try {
+            checkPoints = mDataHelper.getCheckpoints(eventID);
+        } catch (NoSuchElementException e) {
+            Log.e(TAG, e.toString());
+            checkPoints = new ArrayList<>();
         }
-        throw new NoSuchElementException("No elements with event id " + eventID + " found");
+
+        return checkPoints;
     }
 
     /**
@@ -293,20 +341,20 @@ public class DataManager implements Callback {
         getEventData();
     }
 
-    /**
-     * Write event data to local storage
-     * This should be done in onPause(), or whenever something
-     * important changes
-     */
-    public void flush() {
-        // save the events to disk
-        writeCachedData(mEvents);
-
-        if(mDataSetChanged) {
-            // todo save the updates to the server
-            // this will include subscriptions and check in data
-        }
-    }
+//    /**
+//     * Write event data to local storage
+//     * This should be done in onPause(), or whenever something
+//     * important changes
+//     */
+//    public void flush() {
+//        // save the events to disk
+//        writeCachedData(mEvents);
+//
+//        if(mDataSetChanged) {
+//            // todo save the updates to the server
+//            // this will include subscriptions and check in data
+//        }
+//    }
 
     /**
      * This sets a flag which is used to decide whether or not
