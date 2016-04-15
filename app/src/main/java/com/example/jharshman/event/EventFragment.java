@@ -110,16 +110,16 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         mListener = null;
     }
 
-    /**
-     * Callback method to be invoked when an item in this AdapterView has
-     * been clicked.
-     *
-     * @param parent   The AdapterView where the click happened.
-     * @param view     The view within the AdapterView that was clicked (this
-     *                 will be a view provided by the adapter)
-     * @param position The position of the view in the adapter.
-     * @param id       The row id of the item that was clicked.
-     */
+//    /**
+//     * Callback method to be invoked when an item in this AdapterView has
+//     * been clicked.
+//     *
+//     * @param parent   The AdapterView where the click happened.
+//     * @param view     The view within the AdapterView that was clicked (this
+//     *                 will be a view provided by the adapter)
+//     * @param position The position of the view in the adapter.
+//     * @param id       The row id of the item that was clicked.
+//     */
 //    @Override
 //    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //
@@ -146,6 +146,8 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
             if(mInEditMode) {
                 // update subscription state
                 event.setSubscribed(!event.getSubscribed());
+                // update the database to match
+                DataManager.instance(getContext()).updateSubscribed(event.getID(), event.getSubscribed());
 
                 // update the view
                 mEventAdapter.notifyDataSetChanged();
@@ -156,8 +158,6 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
                     mListener.onEventInteraction(event.getID());
                 }
             }
-
-            // todo set data set changed flag so that the server will get updated when the data is saved
         }
     }
 

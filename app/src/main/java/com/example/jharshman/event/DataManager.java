@@ -22,13 +22,14 @@ import com.google.gson.JsonParser;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -176,31 +177,39 @@ public class DataManager implements Callback {
             Log.i(TAG, "Event: " + event.toString());
         }
 
-        // update the current list of events
-        updateEvents(events);
-    }
-
-    /**
-     * Updates the current list of events with
-     * the new data
-     *
-     * @param events The new updates to write
-     */
-    private void updateEvents(List<Event> events) {
-
-        // insert all events into the database todo make this only update the database on collision
+        // update the local database
         for(Event event : events) {
+            // insert event
             mDataHelper.insertEvent(event);
 
-            // insert all checkpoints from event
+            // insert checkpoints
             for(CheckPoint checkPoint : event.getCheckPoints()) {
                 mDataHelper.insertCheckPoint(checkPoint);
             }
         }
-
-        // clue listeners in to the fact that new data awaits
-        notifyUpdateListeners();
     }
+
+//    /**
+//     * Updates the current list of events with
+//     * the new data
+//     *
+//     * @param events The new updates to write
+//     */
+//    private void updateEvents(List<Event> events) {
+//
+//        // insert all events into the database todo make this only update the database on collision
+//        for(Event event : events) {
+//            mDataHelper.insertEvent(event);
+//
+//            // insert all checkpoints from event
+//            for(CheckPoint checkPoint : event.getCheckPoints()) {
+//                mDataHelper.insertCheckPoint(checkPoint);
+//            }
+//        }
+//
+//        // clue listeners in to the fact that new data awaits
+//        notifyUpdateListeners();
+//    }
 
 //    /**
 //     * Updates the current list of events with
@@ -253,20 +262,20 @@ public class DataManager implements Callback {
         return events;
     }
 
-    private void writeCachedData(List<Event> events) {
-
-        Activity activity = (Activity) mContext;
-
-        try {
-            // save all the data out to storage for use by CheckPointFragment
-            File cachedEventData = new File(activity.getCacheDir(),activity.getString(R.string.event_data_cache_file));
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(cachedEventData));
-            objectOutputStream.writeObject(events);
-
-        } catch (IOException e) {
-            Log.i(TAG, "Error writing cached data");
-        }
-    }
+//    private void writeCachedData(List<Event> events) {
+//
+//        Activity activity = (Activity) mContext;
+//
+//        try {
+//            // save all the data out to storage for use by CheckPointFragment
+//            File cachedEventData = new File(activity.getCacheDir(),activity.getString(R.string.event_data_cache_file));
+//            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(cachedEventData));
+//            objectOutputStream.writeObject(events);
+//
+//        } catch (IOException e) {
+//            Log.i(TAG, "Error writing cached data");
+//        }
+//    }
 
     /**
      * Get all the events from the data helper.
@@ -276,9 +285,7 @@ public class DataManager implements Callback {
     public List<Event> getEvents() {
 
         // get all events from data helper
-        List<Event> events = mDataHelper.getEvents();
-
-        return events;
+        return mDataHelper.getEvents();
     }
 
     /**
@@ -288,17 +295,35 @@ public class DataManager implements Callback {
      * @return The list of subscribed events
      */
     public List<Event> getSubscribedEvents() {
-        // todo make this return a deep copy or somehow make mEvents immutable (this will happen when sqlite database gets implemented)
 
-        ArrayList<Event> subscribedEvents = new ArrayList<>();
+        List<Event> subscribedEvents = new ArrayList<>();
+        List<Event> allEvents = mDataHelper.getEvents();
 
-//        for (Event event : mEvents) {
-//            if (event.getSubscribed()) {
-//                subscribedEvents.add(event);
-//            }
-//        }
+        for(Event event : allEvents) {
+            if(event.getSubscribed()) {
+                subscribedEvents.add(event);
+            }
+        }
 
         return subscribedEvents;
+
+    }
+
+    /**
+     * Update the subscription status of the event.
+     *
+     * @param eventID The event to update.
+     * @param subscribed The subscription status.
+     * @return True if event updated, otherwise false.
+     */
+    public boolean updateSubscribed(int eventID, boolean subscribed) {
+
+        long updated = mDataHelper.updateSubscribed(eventID, subscribed);
+
+        // set data set changed, so server will be updated
+        mDataSetChanged = true;
+
+        return updated != -1;
     }
 
     /**
@@ -307,38 +332,18 @@ public class DataManager implements Callback {
      * @param eventID The event to get checkpoints of.
      * @return List of checkpoints for given event.
      */
-    public List<CheckPoint> getCheckPoints(int eventID) {
+    public List<CheckPoint> getCheckpoints(int eventID) {
 
         return mDataHelper.getCheckpoints(eventID);
     }
 
-    public List<CheckPoint> getCheckpoints(int eventID) {
-        // todo make this make immutable by other programs (also solved by using a sqlite database)
-
-//        for(int i = 0; i < mEvents.size(); i ++) {
-//            if(mEvents.get(i).getID() == eventID) {
-//                return Arrays.asList(mEvents.get(i).getCheckPoints());
-//            }
-//        }
-//        throw new NoSuchElementException("No elements with event id " + eventID + " found");
-
-        List<CheckPoint> checkPoints;
-
-        try {
-            checkPoints = mDataHelper.getCheckpoints(eventID);
-        } catch (NoSuchElementException e) {
-            Log.e(TAG, e.toString());
-            checkPoints = new ArrayList<>();
-        }
-
-        return checkPoints;
-    }
-
     /**
-     * Get updated data set from the server
+     * Synchronize data with server
      */
-    public void update() {
+    public void syncData() {
         getEventData();
+
+        // todo make this update both local and server data with the most recent data.
     }
 
 //    /**
@@ -356,13 +361,13 @@ public class DataManager implements Callback {
 //        }
 //    }
 
-    /**
-     * This sets a flag which is used to decide whether or not
-     * to update the server with any changes to the data.
-     */
-    public void setDataChanged() {
-        mDataSetChanged = true;
-    }
+//    /**
+//     * This sets a flag which is used to decide whether or not
+//     * to update the server with any changes to the data.
+//     */
+//    public void setDataChanged() {
+//        mDataSetChanged = true;
+//    }
 
     public interface UpdateListener {
 
@@ -403,6 +408,28 @@ public class DataManager implements Callback {
             } catch (NullPointerException e) {
                 mListeners.remove(listener);
             }
+        }
+    }
+
+    /**
+     * Get the timestamp of the current time
+     * @return The timestamp as a string.
+     */
+    private String getTimestamp() {
+
+         // todo figure out if we should parse strings for the date, or just let SQLite handle it as a DATE type
+
+        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        //Local time zone
+        SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        try {
+            return dateFormatLocal.parse(dateFormatGmt.format(new Date())).toString();
+        } catch (ParseException e) {
+            Log.e(TAG, "Error parsing timestamp");
+            return "0000-000-00 00:00:00";
         }
     }
 }
