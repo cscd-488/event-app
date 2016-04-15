@@ -276,7 +276,7 @@ public class DataHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SUBSCRIPTION_COLUMN_EVENT_ID, event_id);
 //        contentValues.put(SUBSCRIPTION_COLUMN_USER_ID, this.userID);
-        contentValues.put(SUBSCRIPTION_COLUMN_SUBSCRIBED, status ? 0 : 1);
+        contentValues.put(SUBSCRIPTION_COLUMN_SUBSCRIBED, status ? 1 : 0);
 
         // insert row into the database Note: no exception should be thrown todo make events update with whichever data is newest
         long inserted = database.insertWithOnConflict(SUBSCRIPTIONS_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
@@ -468,7 +468,7 @@ public class DataHelper extends SQLiteOpenHelper {
             SQLiteDatabase database = this.getReadableDatabase();
 
             // send query database for subscription for event, NOTE: LIMIT 1
-            Cursor cursor = database.query(SUBSCRIPTIONS_TABLE, null, null, null, null, null, null, "1");
+            Cursor cursor = database.query(true, SUBSCRIPTIONS_TABLE, new String[] {SUBSCRIPTION_COLUMN_SUBSCRIBED}, null, null, null, null, null, "1");
 
             Log.i(TAG, "Cursor Created");
 
@@ -494,6 +494,29 @@ public class DataHelper extends SQLiteOpenHelper {
         return subscribed;
     }
 
+    /**
+     * Update subscription status of an event.
+     *
+     * @param event_id The event to set subscription value.
+     * @param subscribed The boolean subscription status.
+     * @return The number of rows affected by update, or -1 if no rows affected.
+     */
+    public long updateSubscribed(int event_id, boolean subscribed) {
+
+        SQLiteDatabase database = getWritableDatabase();
+
+        // set up the row
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SUBSCRIPTION_COLUMN_SUBSCRIBED, subscribed ? 1 : 0);
+
+        // insert row into the database Note: no exception should be thrown
+        long updated = database.update(SUBSCRIPTIONS_TABLE, contentValues, SUBSCRIPTION_COLUMN_EVENT_ID + "=?", new String[]{String.valueOf(event_id)});
+
+        Log.i(TAG, "Event Subscription updated successful: " + updated);
+
+        return updated;
+    }
+
     public List<CheckPoint> getCheckpoints(int eventID) {
 
         Log.i(TAG, "Getting checkpoints...");
@@ -507,7 +530,8 @@ public class DataHelper extends SQLiteOpenHelper {
             SQLiteDatabase database = this.getReadableDatabase();
 
             // send query database for all checkpoints
-            Cursor cursor = database.query(CHECK_POINT_TABLE, null, CHECK_POINT_COLUMNT_EVENT_ID + "=?", new String[] {String.valueOf(eventID)}, null, null, null);
+//            Cursor cursor = database.query(CHECK_POINT_TABLE, null, CHECK_POINT_COLUMNT_EVENT_ID + "=?", new String[] {String.valueOf(eventID)}, null, null, null);
+            Cursor cursor = database.query(CHECK_POINT_TABLE, null, null, null, null, null, null);
 
             Log.i(TAG, "Cursor Created");
             if (cursor == null) {
