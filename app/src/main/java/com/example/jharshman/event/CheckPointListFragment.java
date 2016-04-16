@@ -75,7 +75,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
         if(mInstance == null) {
             mInstance = new CheckPointListFragment();
 
-            // set check point arguments on fragment
+            // set check point arguments on fragment. The bundle is used to pass the event id to the check point fragment
             Bundle args = new Bundle();
             args.putInt(EVENT_ID_KEY, event_id);
             mInstance.setArguments(args);
@@ -105,7 +105,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
 
         Log.i(TAG, "Event ID passed in " + eventID);
 
-        // get the check points from the data manager. // todo NOTE: This list Object WILL change every time (until I fix it)
+        // get the check points from the data manager.
         if(mCheckPoints == null) {
             mCheckPoints = new ArrayList<>();
         }

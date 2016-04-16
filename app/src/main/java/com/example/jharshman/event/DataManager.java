@@ -20,10 +20,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,31 +40,25 @@ public class DataManager implements Callback {
     private static final String TAG = "DataManager";
 
     /**
-     * Listeners who want to be notified of changes
+     * Listeners who want to be notified of changes.
      */
     private static ArrayList<UpdateListener> mListeners;
 
     /**
-     * Singleton instance of data manager
+     * Singleton instance of data manager.
      */
     private static DataManager mInstance;
 
     private Context mContext;
 
+    /**
+     * SQLite database manager.
+     */
     private DataHelper mDataHelper;
 
     /**
-     * Event and Check Point Data
-     * It is final so that it will only be modified or updated,
-     * but never destroyed and recreated with a different reference.
-     * This allows it to be used easily in ArrayAdapters etc.
-     *
-     * The list must also be synchronized, so if the list is being updated or read
-     * it won't cause an exception if something trys to access it from another thread
+     * Tells whether or not data set is dirty.
      */
-//    private final List<Event> mEvents = Collections.synchronizedList(new ArrayList<Event>());
-//    private final ArrayList<Event> mEvents = new ArrayList<>();
-
     private boolean mDataSetChanged;
 
     /**
@@ -80,17 +71,27 @@ public class DataManager implements Callback {
         // singleton constructor will read data from server on first run
         mContext = context;
 
-        // todo integrate data helper into data manager
-        Log.i(TAG, "Creating new instance of data helper");
+        // connect to database
         mDataHelper = DataHelper.newInstance(context);
 
+        // set up data listeners
         mListeners = new ArrayList<>();
 
-//        mEvents.addAll(readCachedData());
+        // set current data set state
         mDataSetChanged = false;
+
+        // sync data with server todo use SyncData() instead
         getEventData();
     }
 
+    /**
+     * Singleton instance method. This is so that we don't
+     * get concurrent database access issues, and can easily
+     * use the same instance everywhere.
+     *
+     * @param context Everyone needs some context in their isntance.
+     * @return The new Data Manager
+     */
     public static DataManager instance(Context context) {
         if(mInstance == null) {
             mInstance = new DataManager(context);
@@ -189,94 +190,6 @@ public class DataManager implements Callback {
         }
     }
 
-//    /**
-//     * Updates the current list of events with
-//     * the new data
-//     *
-//     * @param events The new updates to write
-//     */
-//    private void updateEvents(List<Event> events) {
-//
-//        // insert all events into the database todo make this only update the database on collision
-//        for(Event event : events) {
-//            mDataHelper.insertEvent(event);
-//
-//            // insert all checkpoints from event
-//            for(CheckPoint checkPoint : event.getCheckPoints()) {
-//                mDataHelper.insertCheckPoint(checkPoint);
-//            }
-//        }
-//
-//        // clue listeners in to the fact that new data awaits
-//        notifyUpdateListeners();
-//    }
-
-//    /**
-//     * Updates the current list of events with
-//     * the new data
-//     *
-//     * @param newEvents The new updates to write
-//     */
-//    private void updateEvents(List<Event> newEvents) {
-//
-//        // todo make this just update the events instead of overwriting them. Make sure that the subscription check in data are saved
-//
-//        mEvents.clear();
-//        mEvents.addAll(newEvents);
-//
-//        // clue listeners in to the fact that new data awaits
-//        notifyUpdateListeners();
-//    }
-
-    /**
-     * Read cached event data if it exists
-     *
-     * @return Data found/not found
-     */
-    @SuppressWarnings("unchecked")
-    private List<Event> readCachedData() {
-
-        Activity activity = (Activity) mContext;
-
-        // read all the event data from the cache file
-        File cachedEventData = new File(activity.getCacheDir(), activity.getString(R.string.event_data_cache_file));
-
-        // if file does not exist, then return empty list of events
-        if(! cachedEventData.exists()) {
-            return new ArrayList<>();
-        }
-
-        ArrayList<Event> events = null;
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(cachedEventData));
-            events = (ArrayList<Event>) objectInputStream.readObject();
-
-        } catch (IOException | ClassNotFoundException e) {
-            // ignore
-        }
-
-        if(events == null) {
-            return new ArrayList<>();
-        }
-
-        return events;
-    }
-
-//    private void writeCachedData(List<Event> events) {
-//
-//        Activity activity = (Activity) mContext;
-//
-//        try {
-//            // save all the data out to storage for use by CheckPointFragment
-//            File cachedEventData = new File(activity.getCacheDir(),activity.getString(R.string.event_data_cache_file));
-//            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(cachedEventData));
-//            objectOutputStream.writeObject(events);
-//
-//        } catch (IOException e) {
-//            Log.i(TAG, "Error writing cached data");
-//        }
-//    }
-
     /**
      * Get all the events from the data helper.
      *
@@ -306,7 +219,6 @@ public class DataManager implements Callback {
         }
 
         return subscribedEvents;
-
     }
 
     /**
@@ -327,6 +239,23 @@ public class DataManager implements Callback {
     }
 
     /**
+     * Update the current check in status at the check point.
+     *
+     * @param checkpointID The checkpoint to check in to.
+     * @param checked The check in status.
+     * @return Success/failure when updating local database.
+     */
+    public boolean updateChecked(int checkpointID, boolean checked) {
+
+        long updated = mDataHelper.updateChecked(checkpointID, checked);
+
+        // set data set changed, so server will be updated
+        mDataSetChanged = true;
+
+        return updated != -1;
+    }
+
+    /**
      * Get all the checkpoints for the given event.
      *
      * @param eventID The event to get checkpoints of.
@@ -338,6 +267,17 @@ public class DataManager implements Callback {
     }
 
     /**
+     * Get a single checkpoint.
+     *
+     * @param checkpointID The ID of the checkpoint.
+     * @return The instance of the checkpoint.
+     */
+    public CheckPoint getCheckpoint(int checkpointID) {
+
+        return mDataHelper.getCheckpoint(checkpointID);
+    }
+
+    /**
      * Synchronize data with server
      */
     public void syncData() {
@@ -345,29 +285,6 @@ public class DataManager implements Callback {
 
         // todo make this update both local and server data with the most recent data.
     }
-
-//    /**
-//     * Write event data to local storage
-//     * This should be done in onPause(), or whenever something
-//     * important changes
-//     */
-//    public void flush() {
-//        // save the events to disk
-//        writeCachedData(mEvents);
-//
-//        if(mDataSetChanged) {
-//            // todo save the updates to the server
-//            // this will include subscriptions and check in data
-//        }
-//    }
-
-//    /**
-//     * This sets a flag which is used to decide whether or not
-//     * to update the server with any changes to the data.
-//     */
-//    public void setDataChanged() {
-//        mDataSetChanged = true;
-//    }
 
     public interface UpdateListener {
 
@@ -405,7 +322,8 @@ public class DataManager implements Callback {
         for(UpdateListener listener : mListeners) {
             try {
                 listener.onDataUpdated(this);
-            } catch (NullPointerException e) {
+            } catch (Exception e) {
+                Log.e(TAG, "Error when notifying listener of data set changed.");
                 mListeners.remove(listener);
             }
         }

@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-public class CheckPointFragment extends Fragment {
+public class CheckPointFragment extends Fragment implements View.OnClickListener {
 
     /**
      * Final Keys/Tags
@@ -89,6 +89,9 @@ public class CheckPointFragment extends Fragment {
         TextView title = (TextView) view.findViewById(R.id.fragment_check_point_title_text);
         TextView artist = (TextView) view.findViewById(R.id.fragment_check_point_artist_text);
         TextView description = (TextView) view.findViewById(R.id.fragment_check_point_description_text);
+        ImageView checkIn = (ImageView) view.findViewById(R.id.fragment_check_point_check_in_button);
+        ImageView share = (ImageView) view.findViewById(R.id.fragment_check_point_card_share_button);
+        ImageView map = (ImageView) view.findViewById(R.id.fragment_check_point_map_button);
 
         // load data into views
         Picasso.with(getContext())
@@ -97,11 +100,48 @@ public class CheckPointFragment extends Fragment {
         title.setText(mCheckPoint.getTitle());
         artist.setText(mCheckPoint.getArtist());
         description.setText(mCheckPoint.getDescription());
-//        description.setText("Non qui unde eum nostrum sunt sed quisquam dignissim pede aut parturient, iusto tempus nostrum, ea, dolor suspendisse, possimus occaecat, interdum non animi orci? Duis mus mollit vivamus quae aliquip! Saepe dapibus est ratione arcu, nisl. Quae eius odit eu, vitae cursus, laboris quidem, nostrum litora odio cum, habitant officia rem netus ante tortor, volutpat perferendis maxime, dignissim curabitur volutpat, orci risus maiores do amet aut, suscipit arcu necessitatibus, eros laborum inventore tempus dolores repellendus totam, placerat odio? Ea et! Do quas primis beatae tortor deleniti conubia egestas. Sunt laboris, placerat, nemo, animi conubia diam. Ducimus. Congue dolores sequi harum.\n" +
-//                "\n" +
-//                "Quisque distinctio. Sint. Porta, minus? Ratione nemo tempus hac iaculis neque nibh. Dignissimos unde vero venenatis praesent ab adipisci penatibus cumque, doloremque integer voluptatum incididunt excepturi? Sociosqu animi optio hymenaeos doloremque quam mollitia potenti porta lacinia, quo praesentium eligendi? Recusandae lacus mollit, cursus, minus temporibus? Perspiciatis ipsum ligula laoreet est dictum maecenas rhoncus dolore harum ea, adipisci facilis aenean sit? Ullamcorper numquam magnam nam sem mollit felis netus, deleniti itaque, natus ac. Aliquam et eveniet, lacus iure, aute, perspiciatis pharetra, labore? Odit, eius viverra mollitia nemo optio aptent, pariatur. Illum, velit assumenda phasellus elit? Corrupti eros mollis tenetur adipisci nisl.\n" +
-//                "\n" +
-//                "Suspendisse porta fuga praesent delectus tempora! Ex nullam. Ut nullam laudantium nam, tortor ullamcorper consectetuer occaecat! Posuere adipisicing, nam dis! Ullamco officia fusce perferendis massa, perferendis neque ullamco. Aliqua officia, illo sollicitudin accusantium rhoncus. Blandit urna! Repudiandae euismod lacus primis sociis culpa. Nostrud ullam cum? Etiam consequuntur sodales? Illum eaque? Accusantium gravida. Hac nesciunt. Aliqua est? Nisi aenean aliquet incidunt nihil itaque ultrices voluptate etiam tempus, lobortis eius saepe amet? Illo tincidunt tristique porttitor provident laborum pulvinar libero vivamus doloribus fringilla nisi, veniam iure eveniet natoque pellentesque convallis molestie adipiscing accusamus doloremque natus itaque, debitis pretium ducimus justo, sapien aenean.");
+
+        if(mCheckPoint.getChecked()) {
+            checkIn.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+        }
+
+        // set click listeners todo finish setting click listeners
+        checkIn.setOnClickListener(this);
+
+
         return view;
+    }
+
+    /**
+     * Click listener for buttons.
+     *
+     * @param view The view that was clicked.
+     */
+    @Override
+    public void onClick(View view) {
+
+        switch (view.getId()) {
+
+            case R.id.fragment_check_point_check_in_button:
+
+                // store that user checked in. Note: click should only ever check in, never un-check
+                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+
+                if(checkSaved) {
+
+                    // update image button
+                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
+                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+                }
+
+                break;
+            case R.id.fragment_check_point_card_share_button:
+                // todo handle share button click
+                break;
+            case R.id.fragment_check_point_map_button:
+                // todo handle map button click
+                break;
+        }
+
     }
 }

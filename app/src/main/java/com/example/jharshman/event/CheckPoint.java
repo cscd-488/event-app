@@ -52,7 +52,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     @SerializedName("updated_at")
     private String mTimeUpdated;
 
-    private boolean mCollected;
+    private boolean mChecked;
     private boolean mWasDisplayed;
 
     private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, boolean collected) {
@@ -68,7 +68,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         mQR = qr;
         mTimeCreated = timeCreated;
         mTimeUpdated = timeUpdated;
-        mCollected = collected;
+        mChecked = collected;
     }
 
     /**
@@ -144,7 +144,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
             return this;
         }
 
-        public CheckPoint.Builder setCollected(boolean collected) {
+        public CheckPoint.Builder setChecked(boolean collected) {
             mCollected = collected;
             return this;
         }
@@ -211,7 +211,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public void setCollected(boolean collected) {
-        mCollected = collected;
+        mChecked = collected;
     }
 
     public String getDescription() {
@@ -258,8 +258,8 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mTimeUpdated;
     }
 
-    public boolean getCollected() {
-        return mCollected;
+    public boolean getChecked() {
+        return mChecked;
     }
 
     public double[] getCoordinates() {
@@ -280,6 +280,6 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
 
     @Override
     public String toString() {
-        return String.format("%d %d %s %s %s %s %f %f %s %s %s %b %b", mCheckPointID, mEventID, mTitle, mArtist, mDescription, mImageSrc, mLat, mLon, mQR, mTimeCreated, mTimeUpdated, mCollected, mWasDisplayed);
+        return String.format("%d %d %s %s %s %s %f %f %s %s %s %b %b", mCheckPointID, mEventID, mTitle, mArtist, mDescription, mImageSrc, mLat, mLon, mQR, mTimeCreated, mTimeUpdated, mChecked, mWasDisplayed);
     }
 }
