@@ -190,7 +190,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         if(CheckPoint != null){
             if(notificationsEnabled && !CheckPoint.wasDisplayed()) {
                 sendNotification(context);
-                CheckPoint.setmDisplayed();
+                CheckPoint.setDisplayed();
             }
         }
     }

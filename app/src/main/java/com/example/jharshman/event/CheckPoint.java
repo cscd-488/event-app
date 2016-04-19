@@ -7,47 +7,211 @@ package com.example.jharshman.event;
  * @author Bruce Emehiser
  * @date 2016 01 13
  * @date 2016 02 23
+ * @date 2016 03 02
  *
  * Check points for events
  */
 
-
 import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class CheckPoint implements Comparable<CheckPoint>, Serializable {
 
+    private static final String TAG = "CheckPoint";
+
     /**
      * Event Attributes
      */
-    private int mID;
+    @SerializedName("id")
+    private int mCheckPointID;
+    @SerializedName("event_id")
+    private int mEventID;
+    @SerializedName("title")
     private String mTitle;
+    @SerializedName("artist")
+    private String mArtist;
+    @SerializedName("description")
     private String mDescription;
+    @SerializedName("image_src")
     private String mImageSrc;
+    // todo lat and lon from String to double
+    @SerializedName("lat")
+    private String lat;
+    @SerializedName("lon")
+    private String lon;
     private double mLat;
     private double mLon;
-    private boolean mDisplayed;
+    @SerializedName("qr")
+    private String mQR;
+    @SerializedName("created_at")
+    private String mTimeCreated;
+    @SerializedName("updated_at")
+    private String mTimeUpdated;
 
-    public CheckPoint(int id, String title, String description, String image, double lat, double lon) {
-        mID = id;
+    private boolean mChecked;
+    private boolean mWasDisplayed;
+
+    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, boolean collected) {
+
+        mCheckPointID = id;
+        mEventID = eventID;
         mTitle = title;
+        mArtist = artist;
         mDescription = description;
-        mImageSrc = image;
+        mImageSrc = imageSrc;
         mLat = lat;
         mLon = lon;
-        this.mDisplayed = false;
+        mQR = qr;
+        mTimeCreated = timeCreated;
+        mTimeUpdated = timeUpdated;
+        mChecked = collected;
     }
 
+    /**
+     * Builder class for CheckPoint class.
+     */
+    public static class Builder {
 
-    public void setmDisplayed(){this.mDisplayed = true;}
-    public boolean wasDisplayed(){return this.mDisplayed;}
+        private int mID;
+        private int mEventID;
+        private String mTitle;
+        private String mArtist;
+        private String mDescription;
+        private String mImageSrc;
+        private double mLat;
+        private double mLon;
+        private String mQR;
+        private String mTimeCreated;
+        private String mTimeUpdated;
+        private boolean mCollected;
+
+        public CheckPoint.Builder setID(int id) {
+            mID = id;
+            return this;
+        }
+
+        public CheckPoint.Builder setEventID(int event_id) {
+            mEventID = event_id;
+            return this;
+        }
+
+        public CheckPoint.Builder setTitle(String title) {
+            mTitle = title;
+            return this;
+        }
+
+        public CheckPoint.Builder setArtist(String artist) {
+            mArtist = artist;
+            return this;
+        }
+
+        public CheckPoint.Builder setDescription(String description) {
+            mDescription = description;
+            return this;
+        }
+
+        public CheckPoint.Builder setImageSrc(String imageSrc) {
+            mImageSrc = imageSrc;
+            return this;
+        }
+
+        public CheckPoint.Builder setLat(double lat) {
+            mLat = lat;
+            return this;
+        }
+
+        public CheckPoint.Builder setLon(double lon) {
+            mLon = lon;
+            return this;
+        }
+
+        public CheckPoint.Builder setQR(String qr) {
+            mQR = qr;
+            return this;
+        }
+
+        public CheckPoint.Builder setTimeCreated(String timeCreated) {
+            mTimeCreated = timeCreated;
+            return this;
+        }
+
+        public CheckPoint.Builder setTimeUpdated(String timeUpdated) {
+            mTimeUpdated = timeUpdated;
+            return this;
+        }
+
+        public CheckPoint.Builder setChecked(boolean collected) {
+            mCollected = collected;
+            return this;
+        }
+
+        public CheckPoint build() {
+
+            // fix any null parameters
+            if(mTitle == null) {
+                mTitle = "";
+            }
+            if(mArtist == null) {
+                mArtist = "";
+            }
+            if(mDescription == null) {
+                mDescription = "";
+            }
+            if(mImageSrc == null) {
+                mImageSrc = "";
+            }
+            if(mQR == null) {
+                mQR = "";
+            }
+            if(mTimeCreated == null) {
+                mTimeCreated = "";
+            }
+            if(mTimeUpdated == null) {
+                mTimeUpdated = "";
+            }
+
+            // instantiate new event
+            return new CheckPoint(mID,
+                    mEventID,
+                    mTitle,
+                    mArtist,
+                    mDescription,
+                    mImageSrc,
+                    mLat,
+                    mLon,
+                    mQR,
+                    mTimeCreated,
+                    mTimeUpdated,
+                    mCollected);
+        }
+    }
+
+    public void setDisplayed() {
+        mWasDisplayed = true;
+    }
 
     public int getID() {
-        return mID;
+        return mCheckPointID;
+    }
+
+    public int getEventID() {
+        return mEventID;
     }
 
     public String getTitle() {
         return mTitle;
+    }
+
+    public String getArtist() {
+        return mArtist;
+    }
+
+    public void setCollected(boolean collected) {
+        mChecked = collected;
     }
 
     public String getDescription() {
@@ -59,25 +223,63 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public double getLat() {
+        if(mLat == 0.0) {
+            try {
+                mLat = Double.valueOf(lat);
+            } catch (ClassCastException e) {
+                Log.e(TAG, "Error converting latitude to double");
+            }
+        }
+
         return mLat;
     }
 
     public double getLon() {
+        if(mLon == 0.0) {
+            try {
+                mLon = Double.valueOf(lon);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Error converting longitude to double");
+            }
+        }
+
         return mLon;
     }
 
-    public double[] getCoordinates() {
-        return new double[] {getLat(),getLon()};
+    public String getQR() {
+        return mQR;
     }
 
-    public void setTitle(String mTitle) {
-        this.mTitle = mTitle;
+    public String getTimeCreated() {
+        return mTimeCreated;
+    }
+
+    public String getTimeUpdated() {
+        return mTimeUpdated;
+    }
+
+    public boolean getChecked() {
+        return mChecked;
+    }
+
+    public double[] getCoordinates() {
+
+        return new double[] {getLat(), getLon()};
+    }
+
+    public boolean wasDisplayed() {
+        return mWasDisplayed;
     }
 
     @Override
     public int compareTo(@NonNull CheckPoint that) {
 
         // compare based on ID
-        return mID - that.getID();
+        return mCheckPointID - that.getID();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%d %d %s %s %s %s %f %f %s %s %s %b %b", mCheckPointID, mEventID, mTitle, mArtist, mDescription, mImageSrc, mLat, mLon, mQR, mTimeCreated, mTimeUpdated, mChecked, mWasDisplayed);
     }
 }

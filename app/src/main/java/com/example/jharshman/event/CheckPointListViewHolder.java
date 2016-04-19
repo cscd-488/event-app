@@ -1,5 +1,5 @@
 /**
- * @file CheckPointViewHolder.java
+ * @file CheckPointListViewHolder.java
  * @author Bruce Emehiser
  * @date 2016 02 09
  *
@@ -10,15 +10,15 @@
 
 package com.example.jharshman.event;
 
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class CheckPointViewHolder {
+public class CheckPointListViewHolder {
 
-    TextView mTitle;
-    TextView mDescription;
     ImageView mImage;
-    ImageButton mCheckIn;
-    ImageButton mSharing;
+    TextView mTitle;
+    TextView mAuthor;
+
+    TextView mTime;
+    TextView mDistance;
 }

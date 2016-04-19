@@ -6,7 +6,7 @@
     android:descendantFocusability="blocksDescendants" >
 
     <android.support.v7.widget.CardView
-        android:id="@+id/fragment_collections_card_view"
+        android:id="@+id/event_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -21,17 +21,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="EWU"
-                android:textSize="75sp"
-                android:id="@+id/fragment_event_card_title"
-                android:layout_centerVertical="true" />
+                android:textSize="@dimen/huge_text"
+                android:id="@+id/event_card_title_short"
+                android:layout_centerVertical="true"
+                android:layout_margin="10dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/fragment_event_card_short_description"
+                android:id="@+id/event_card_title"
                 android:text="Eastern Washington University Tour"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentRight="true"
+                android:textSize="@dimen/tiny_text"
+                android:layout_margin="10dp" />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>
@@ -39,12 +42,14 @@
     <android.support.design.widget.FloatingActionButton
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        app:layout_anchor="@id/fragment_collections_card_view"
+        app:layout_anchor="@id/event_card_view"
         app:layout_anchorGravity="right|center"
         app:fabSize="mini"
         android:layout_margin="16dp"
-        android:src="@drawable/abc_ic_clear_mtrl_alpha"
-        android:id="@+id/fragment_collections_add_delete_button"
-        android:clickable="true" />
+        android:src="@drawable/ic_chevron_right_24dp"
+        android:id="@+id/event_card_fab"
+        android:clickable="true"
+        android:tint="@color/white"
+        android:scaleType="centerCrop" />
 
 </android.support.design.widget.CoordinatorLayout>
