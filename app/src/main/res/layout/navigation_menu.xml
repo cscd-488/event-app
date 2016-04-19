@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="false"
+    android:background="@drawable/tilt_gradient">
+
+    <com.github.clans.fab.FloatingActionMenu
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:layout_width="413dp"
+        android:layout_height="530dp"
+        android:id="@+id/fragment_event_fab"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="8dp"
+        app:menu_shadowColor="@color/light_gray"
+        app:menu_shadowRadius="4dp"
+        fab:menu_colorNormal="@color/white"
+        fab:menu_colorPressed="@color/light_gray"
+        fab:menu_colorRipple="@color/light_gray"
+        fab:menu_icon="@drawable/ic_more_vert_24dp"
+        fab:menu_showShadow="true"
+        fab:menu_openDirection="up"
+
+        fab:menu_labels_margin="0dp"
+        fab:menu_labels_showAnimation="@anim/fab_slide_in_from_right"
+        fab:menu_labels_hideAnimation="@anim/fab_slide_out_to_right"
+        fab:menu_labels_paddingTop="4dp"
+        fab:menu_labels_paddingRight="8dp"
+        fab:menu_labels_paddingBottom="4dp"
+        fab:menu_labels_paddingLeft="8dp"
+        fab:menu_labels_padding="8dp"
+        fab:menu_labels_textColor="@color/dark_gray"
+        fab:menu_labels_textSize="14sp"
+        fab:menu_labels_cornerRadius="3dp"
+        fab:menu_labels_colorNormal="@color/white"
+        fab:menu_labels_colorPressed="@color/white"
+        fab:menu_labels_colorRipple="@color/white"
+        fab:menu_labels_singleLine="true"
+        fab:menu_labels_position="left">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_home_24dp"
+            fab:fab_size="normal"
+            fab:fab_label="Your Collections"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/light_gray"
+            fab:fab_colorRipple="@color/medium_gray" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/menu_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_toc_24dp"
+            fab:fab_size="normal"
+            fab:fab_label="Progress"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/light_gray"
+            fab:fab_colorRipple="@color/medium_gray" />
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+</FrameLayout>

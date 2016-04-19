@@ -9,9 +9,16 @@
 
     <!-- Server and OAuth2 information -->
     <string name="OAuth_client_ID">170378995036-99ob67o6p5871kn02omq6bh5blb25070.apps.googleusercontent.com</string>
+    <string name="magpie_server_event_data">http://magpieserver.com/events</string>
     <string name="magpie_server_login">http://magpieserver.com/google/login</string>
 
     <!-- shared preferences keys -->
     <string name="jwt_server_token">jwt_server_token</string>
     <string name="first_use">first_use</string>
+
+    <!--event data cache file-->
+    <string name="event_data_cache_file">cached_event_data</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

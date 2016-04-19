@@ -1,104 +1,108 @@
-<?xml version="1.0" encoding="utf-8"?>
 
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:layout_height="match_parent"
+<LinearLayout
+    android:orientation="horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/check_point_card"
     android:layout_width="match_parent"
-    android:orientation="vertical">
+    android:layout_height="100dp">
 
-    <!-- A CardView-->
-    <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/fragment_check_point_card_view"
-        android:layout_gravity="center"
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:id="@+id/check_point_card_image"
+        android:src="@drawable/i100x100"
+        android:layout_margin="10dp" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp">
+        android:layout_height="match_parent">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Author"
+            android:id="@+id/check_point_card_author"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="10dp"
+            android:textSize="@dimen/tiny_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Check Point Title"
+            android:id="@+id/check_point_card_title"
+            android:textSize="@dimen/small_text"
+            android:layout_above="@+id/linearLayout"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:weightSum="1"
+            android:id="@+id/linearLayout">
 
-
-            <ImageView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:id="@+id/fragment_check_point_card_title_image"
-                android:src="@drawable/placeholder_logo"
-                android:scaleType="centerCrop"
-                android:contentDescription="Title Image View" />
+                android:layout_height="match_parent"
+                android:layout_weight=".5">
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="center_vertical|center_horizontal"
-                android:background="#50a4fd">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/check_point_card_time_image"
+                    android:src="@drawable/ic_timelapse_24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_margin="5dp"
+                    android:tint="@color/medium_gray" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Event Card Title"
-                    android:id="@+id/fragment_check_point_card_title_text"
-                    android:textColor="#ffffff"
-                    android:shadowColor="#96000000" />
-            </LinearLayout>
+                    android:text="time"
+                    android:id="@+id/check_point_card_time_text"
+                    android:layout_alignBottom="@+id/check_point_card_time_image"
+                    android:layout_toRightOf="@+id/check_point_card_time_image"
+                    android:layout_toEndOf="@+id/check_point_card_time_image"
+                    android:textSize="@dimen/tiny_text" />
+            </RelativeLayout>
 
-            <LinearLayout
-                android:orientation="horizontal"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#464646">
+                android:layout_height="match_parent"
+                android:layout_weight=".5">
 
-                <ImageButton
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/fragment_check_point_card_camera_button"
-                    android:src="@drawable/abc_btn_rating_star_off_mtrl_alpha"
-                    android:scaleType="center"
-                    android:layout_gravity="end"
-                    android:layout_weight="1"
-                    android:contentDescription="Camera" />
+                    android:id="@+id/check_point_card_distance_image"
+                    android:src="@drawable/ic_place_24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_margin="5dp"
+                    android:tint="@color/medium_gray" />
 
-                <ImageButton
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/fragment_check_point_card_check_in_button"
-                    android:layout_weight="1"
-                    android:src="@drawable/abc_btn_check_to_on_mtrl_015"
-                    android:scaleType="center"
-                    android:adjustViewBounds="false"
-                    android:baselineAlignBottom="false"
-                    android:contentDescription="Check In" />
-
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/fragment_check_point_card_share_button"
-                    android:scaleType="center"
-                    android:src="@drawable/abc_ic_menu_share_mtrl_alpha"
-                    android:layout_weight="1"
-                    android:contentDescription="Share" />
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Description Text"
-                android:id="@+id/fragment_check_point_card_description_text"
-                android:layout_margin="10dp" />
+                    android:layout_height="wrap_content"
+                    android:text="distance"
+                    android:id="@+id/check_point_card_distance_text"
+                    android:layout_alignBottom="@+id/check_point_card_distance_image"
+                    android:layout_toRightOf="@+id/check_point_card_distance_image"
+                    android:layout_toEndOf="@+id/check_point_card_distance_image"
+                    android:textSize="@dimen/tiny_text" />
+            </RelativeLayout>
 
         </LinearLayout>
-
-    </android.support.v7.widget.CardView>
-
-
-
+    </RelativeLayout>
 </LinearLayout>

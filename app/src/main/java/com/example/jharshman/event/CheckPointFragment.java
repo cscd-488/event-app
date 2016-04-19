@@ -9,71 +9,59 @@
 
 package com.example.jharshman.event;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.squareup.picasso.Picasso;
 
-public class CheckPointFragment extends Fragment {
+public class CheckPointFragment extends Fragment implements View.OnClickListener {
 
     /**
      * Final Keys/Tags
      */
     private static final String TAG = "CheckPointFragment";
-    public static final String EVENT_ID_KEY = "event_id_key";
-    private static final String CHECK_POINT_KEY = "check_point_key";
+    public static final String CHECK_POINT_KEY = "check_point_key";
 
     /**
-     * Check points for list card view
+     * Singleton getInstance of fragment
      */
-    ArrayList<CheckPoint> mCheckPoints;
+    private static CheckPointFragment mInstance;
 
     /**
-     * List adapter for card view
+     * Check point we are representing and handling in the fragment
      */
-    CheckPointAdapter mListAdapter;
-
-    /**
-     * List view used to display contents of mCheckPoints
-     * via mListAdapter
-     */
-    ListView mListView;
-
-    /**
-     * Fragment transaction listener for returning data
-     * from fragment
-     */
-    private OnFragmentInteractionListener mListener;
+    private CheckPoint mCheckPoint;
 
     public CheckPointFragment() {
         // required empty constructor
     }
 
     /**
-     * Factory method for creating new instance of the
-     * fragment
+     * Factory method for creating or getting new singleton
+     * getInstance of the fragment
      *
-     * @param id ID of the Event the checkpoints of whom we wish to display :P
+     * @param checkPoint The checkpoint to display
      *
-     * @return A new instance of fragment CheckPointFragment.
+     * @return A new getInstance of fragment CheckPointFragment.
      */
-    public static CheckPointFragment newInstance(int id) {
+    public static CheckPointFragment newInstance(CheckPoint checkPoint) {
 
         // create check points fragment
-        CheckPointFragment fragment = new CheckPointFragment();
+        if(mInstance == null) {
+             mInstance = new CheckPointFragment();
+        }
 
         // set check point arguments on fragment
         Bundle args = new Bundle();
-        args.putInt(EVENT_ID_KEY, id);
-        fragment.setArguments(args);
+        args.putSerializable(CHECK_POINT_KEY, checkPoint);
+        mInstance.setArguments(args);
 
-        return fragment;
+        return mInstance;
     }
 
     @Override
@@ -84,16 +72,10 @@ public class CheckPointFragment extends Fragment {
         int eventID = -1;
         if (getArguments() != null) {
             // get Event ID
-            eventID = getArguments().getInt(EVENT_ID_KEY);
+            mCheckPoint = (CheckPoint) getArguments().getSerializable(CHECK_POINT_KEY);
         }
-
-        Log.i(TAG, "Event ID passed in " + eventID);
-
-        // todo pull check points from web service based on event id
-        mCheckPoints = new ArrayList<>();
-        for(int i = 0; i < 20; i ++) {
-            CheckPoint checkPoint = new CheckPoint(42, "title " + i, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", "http://eridem.net/wp-content/uploads/2014/06/Android-Wallpaper-By-Scoobsti-1024x576.png", 49.0, 60.0);
-            mCheckPoints.add(checkPoint);
+        else {
+            throw new NullPointerException("Check point must be set using Key CheckPointFragment.CHECK_POINT_KEY");
         }
     }
 
@@ -102,46 +84,64 @@ public class CheckPointFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_point, container, false);
 
-        // set up list and list adapter
-        mListAdapter = new CheckPointAdapter(getContext(), R.layout.fragment_check_point_card, mCheckPoints);
-        mListView = (ListView) view.findViewById(R.id.fragment_check_point_card_list);
-        mListView.setAdapter(mListAdapter);
+        // get views
+        ImageView image = (ImageView) view.findViewById(R.id.fragment_check_point_title_image);
+        TextView title = (TextView) view.findViewById(R.id.fragment_check_point_title_text);
+        TextView artist = (TextView) view.findViewById(R.id.fragment_check_point_artist_text);
+        TextView description = (TextView) view.findViewById(R.id.fragment_check_point_description_text);
+        ImageView checkIn = (ImageView) view.findViewById(R.id.fragment_check_point_check_in_button);
+        ImageView share = (ImageView) view.findViewById(R.id.fragment_check_point_card_share_button);
+        ImageView map = (ImageView) view.findViewById(R.id.fragment_check_point_map_button);
+
+        // load data into views
+        Picasso.with(getContext())
+                .load(mCheckPoint.getImageSrc())
+                .into(image);
+        title.setText(mCheckPoint.getTitle());
+        artist.setText(mCheckPoint.getArtist());
+        description.setText(mCheckPoint.getDescription());
+
+        if(mCheckPoint.getChecked()) {
+            checkIn.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+        }
+
+        // set click listeners todo finish setting click listeners
+        checkIn.setOnClickListener(this);
+
 
         return view;
     }
 
-    public void onButtonPressed(int id) {
-        if (mListener != null) {
-            mListener.onCheckPointInteraction(id);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString() + " must implement OnEventInteraction");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
     /**
-     * This interface must be implemented by activities which contain this fragment.
+     * Click listener for buttons.
+     *
+     * @param view The view that was clicked.
      */
-    public interface OnFragmentInteractionListener {
+    @Override
+    public void onClick(View view) {
 
-        /**
-         * Check Point was clicked
-         *
-         * @param id The id of the item clicked
-         */
-        void onCheckPointInteraction(int id);
+        switch (view.getId()) {
+
+            case R.id.fragment_check_point_check_in_button:
+
+                // store that user checked in. Note: click should only ever check in, never un-check
+                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+
+                if(checkSaved) {
+
+                    // update image button
+                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
+                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+                }
+
+                break;
+            case R.id.fragment_check_point_card_share_button:
+                // todo handle share button click
+                break;
+            case R.id.fragment_check_point_map_button:
+                // todo handle map button click
+                break;
+        }
+
     }
 }
