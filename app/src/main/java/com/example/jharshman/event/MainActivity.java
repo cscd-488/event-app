@@ -2,6 +2,7 @@ package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -14,12 +15,15 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
         CheckPointListFragment.OnFragmentInteractionListener,
-        EventFragment.OnFragmentInteractionListener {
+        EventFragment.OnFragmentInteractionListener,
+        CheckPointFragment.OnFragmentInteractionListener,
+        LocationMapFragment.OnFragmentInteractionListener {
 
     public static final String PAGER_FRAGMENT = "PAGER_FRAGMENT";
     public static final String EVENT_FRAGMENT = "EVENT_FRAGMENT";
     public static final String CHECK_POINT_LIST_FRAGMENT = "CHECK_POINT_LIST_FRAGMENT";
     public static final String CHECK_POINT_FRAGMENT = "CHECK_POINT_FRAGMENT";
+    public static final String LOCATION_MAP_FRAGMENT = "LOCATION_MAP_FRAGMENT";
 
     private Fragment mPagerFragment;
     SharedPreferences mSharedPreferences;
@@ -149,5 +153,48 @@ public class MainActivity extends AppCompatActivity implements
                 .replace(R.id.FragmentContainer, fragment)
                 .addToBackStack(CHECK_POINT_FRAGMENT)
                 .commit();
+    }
+
+    /**
+     * Interaction from Check Point. Launch the appropriate
+     * fragment, and pass it the value.
+     *
+     * @param button_id The button which was clicked to start
+     *                      the interaction callback.
+     * @param checkpoint_id The id of the check point.
+     */
+    @Override
+    public void onCheckPointInteraction(int button_id, int checkpoint_id) {
+
+        switch (button_id) {
+
+            case R.id.fragment_check_point_map_button:
+
+                // launch map fragment
+
+                Fragment fragment = getSupportFragmentManager().findFragmentByTag(LOCATION_MAP_FRAGMENT);
+
+                if(fragment == null) {
+                    fragment = LocationMapFragment.newInstance(checkpoint_id);
+                }
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.FragmentContainer, fragment, LOCATION_MAP_FRAGMENT)
+                        .addToBackStack(LOCATION_MAP_FRAGMENT)
+                        .commit();
+
+                break;
+            case R.id.fragment_check_point_card_share_button:
+
+                // todo launch the share fragment
+
+                break;
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+        // todo finish implementing this
     }
 }
