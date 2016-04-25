@@ -179,9 +179,10 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     private CheckPoint[] coordinates = new CheckPoint[0];
     private boolean zoomed = false;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    /**
+     * The event id to display checkpoints for.
+     */
+    private int eventID;
 
     private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
@@ -299,8 +300,13 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_CHECKPOINT_ID);
+            // get the id of the event
+            eventID = getArguments().getInt(ARG_CHECKPOINT_ID);
+
+            // get the checkpoints for the event
+            addLocations(eventID);
         }
     }
 
