@@ -9,8 +9,10 @@
 
 package com.example.jharshman.event;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +38,11 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
      * Check point we are representing and handling in the fragment
      */
     private CheckPoint mCheckPoint;
+
+    /**
+     * Checkpoint event callback listener.
+     */
+    OnFragmentInteractionListener mListener;
 
     public CheckPointFragment() {
         // required empty constructor
@@ -107,6 +114,8 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
         // set click listeners todo finish setting click listeners
         checkIn.setOnClickListener(this);
+        share.setOnClickListener(this);
+        map.setOnClickListener(this);
 
 
         return view;
@@ -124,6 +133,8 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
             case R.id.fragment_check_point_check_in_button:
 
+                Log.i(TAG, "Check point check in button clicked");
+
                 // store that user checked in. Note: click should only ever check in, never un-check
                 boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
 
@@ -137,11 +148,44 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
                 break;
             case R.id.fragment_check_point_card_share_button:
                 // todo handle share button click
+
+                Log.i(TAG, "Check Point Share button clicked");
+
                 break;
             case R.id.fragment_check_point_map_button:
-                // todo handle map button click
+
+                Log.i(TAG, "Check Point Map button clicked");
+
+                // call callback with check point button id, and current checkpoint id
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, mCheckPoint.getID());
                 break;
         }
+    }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    /**
+     * This interface must be implemented by activities that contain
+     * Checkpoint fragment
+     */
+    public interface OnFragmentInteractionListener {
+
+        /**
+         * Interaction from Check Point. Launch the appropriate
+         * fragment, and pass it the value.
+         *
+         * @param button_id The button which was clicked to start
+         *                      the interaction callback.
+         * @param checkpoint_id The id of the check point.
+         */
+        public void onCheckPointInteraction(int button_id, int checkpoint_id);
     }
 }

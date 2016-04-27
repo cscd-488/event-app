@@ -13,7 +13,6 @@ package com.example.jharshman.event;
  */
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -223,25 +222,27 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public double getLat() {
-        if(mLat == 0.0) {
-            try {
-                mLat = Double.valueOf(lat);
-            } catch (ClassCastException e) {
-                Log.e(TAG, "Error converting latitude to double");
-            }
-        }
+//        todo remove commented code
+//        if(mLat == 0.0) {
+//            try {
+//                mLat = Double.valueOf(lat);
+//            } catch (ClassCastException e) {
+//                Log.e(TAG, "Error converting latitude to double");
+//            }
+//        }
 
         return mLat;
     }
 
     public double getLon() {
-        if(mLon == 0.0) {
-            try {
-                mLon = Double.valueOf(lon);
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "Error converting longitude to double");
-            }
-        }
+//        todo remove commented code
+//        if(mLon == 0.0) {
+//            try {
+//                mLon = Double.valueOf(lon);
+//            } catch (NumberFormatException e) {
+//                Log.e(TAG, "Error converting longitude to double");
+//            }
+//        }
 
         return mLon;
     }
