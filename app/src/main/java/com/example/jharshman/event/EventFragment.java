@@ -11,7 +11,6 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -23,19 +22,12 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import okhttp3.OkHttpClient;
 
 public class EventFragment extends Fragment implements EventAdapter.OnEventClickListener, View.OnClickListener, DataManager.UpdateListener {
 
     private static final String TAG = "EventFragment";
-
-    private final OkHttpClient mClient = new OkHttpClient();
-    private final Gson mGson = new Gson();
 
     private OnFragmentInteractionListener mListener;
 
@@ -43,7 +35,6 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
 
     private ListView mListView;
     private EventAdapter mEventAdapter;
-    private SharedPreferences mSharedPreferences;
     private FloatingActionButton mFab;
     private RelativeLayout mHeader;
 
@@ -75,8 +66,8 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         mEventAdapter = new EventAdapter(view.getContext(), R.layout.fragment_event_card, mEvents);
         mListView.setAdapter(mEventAdapter);
 
+        // set click listeners
         mEventAdapter.setOnEventClickListener(this);
-//        mListView.setOnItemClickListener(this); // note: This is not necessary now that we have a chevron button to take us to the event
 
         // set up floating action button
         mFab = (FloatingActionButton) view.findViewById(R.id.fragment_event_fab);
@@ -109,26 +100,6 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         super.onDetach();
         mListener = null;
     }
-
-//    /**
-//     * Callback method to be invoked when an item in this AdapterView has
-//     * been clicked.
-//     *
-//     * @param parent   The AdapterView where the click happened.
-//     * @param view     The view within the AdapterView that was clicked (this
-//     *                 will be a view provided by the adapter)
-//     * @param position The position of the view in the adapter.
-//     * @param id       The row id of the item that was clicked.
-//     */
-//    @Override
-//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//
-//        Log.i(TAG, "Item Clicked " + position);
-//
-//        if(mListener != null) {
-//            mListener.onEventInteraction(mEvents.get(position).getID());
-//        }
-//    }
 
     /**
      * Notify listener that event has been clicked
