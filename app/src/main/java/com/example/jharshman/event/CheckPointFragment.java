@@ -112,7 +112,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
             checkIn.setImageResource(R.drawable.ic_cloud_done_black_24dp);
         }
 
-        // set click listeners todo finish setting click listeners
+        // set click listeners
         checkIn.setOnClickListener(this);
         share.setOnClickListener(this);
         map.setOnClickListener(this);

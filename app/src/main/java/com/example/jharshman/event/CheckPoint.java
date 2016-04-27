@@ -202,7 +202,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         mQR = "default qr";
         mTimeCreated = "2016-01-01 01:01:01";
         mTimeUpdated = "2016-01-01 01:01:01";
-        mCollected = false;
+        mChecked = false;
     }
 
     public void setDisplayed() {
@@ -238,28 +238,10 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public double getLat() {
-//        todo remove commented code
-//        if(mLat == 0.0) {
-//            try {
-//                mLat = Double.valueOf(lat);
-//            } catch (ClassCastException e) {
-//                Log.e(TAG, "Error converting latitude to double");
-//            }
-//        }
-
         return mLat;
     }
 
     public double getLon() {
-//        todo remove commented code
-//        if(mLon == 0.0) {
-//            try {
-//                mLon = Double.valueOf(lon);
-//            } catch (NumberFormatException e) {
-//                Log.e(TAG, "Error converting longitude to double");
-//            }
-//        }
-
         return mLon;
     }
 

@@ -21,12 +21,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -39,6 +35,8 @@ public class DataManager implements Callback {
 
     private static final String TAG = "DataManager";
 
+    private Context mContext;
+
     /**
      * Listeners who want to be notified of changes.
      */
@@ -48,10 +46,6 @@ public class DataManager implements Callback {
      * Singleton instance of data manager.
      */
     private static DataManager mInstance;
-
-    private Context mContext;
-
-    private static DataHelper mDataHelper;
 
     /**
      * SQLite database manager.
@@ -82,16 +76,11 @@ public class DataManager implements Callback {
         // set current data set state
         mDataSetChanged = false;
 
+
+        // todo pull data from web server based on location and radius
+        // todo put data to web server
         // sync data with server todo use SyncData() instead
         getEventData();
-
-        // todo integrate data helper into data manager
-        Log.i(TAG, "Creating new instance of data helper");
-        mDataHelper = DataHelper.newInstance(mContext);
-        Log.i(TAG, "Inserting new empty event into database via Data Helper");
-        mDataHelper.insertEvent(new Event());
-        Log.i(TAG, "Reading events from data helper");
-        mDataHelper.getEvents();
     }
 
     /**
@@ -109,9 +98,6 @@ public class DataManager implements Callback {
 
         return mInstance;
     }
-
-    // todo pull data from web server based on location and radius
-    // todo put data to web server
 
     /**
      * Get event data from the server
@@ -336,28 +322,6 @@ public class DataManager implements Callback {
                 Log.e(TAG, "Error when notifying listener of data set changed.");
                 mListeners.remove(listener);
             }
-        }
-    }
-
-    /**
-     * Get the timestamp of the current time
-     * @return The timestamp as a string.
-     */
-    private String getTimestamp() {
-
-         // todo figure out if we should parse strings for the date, or just let SQLite handle it as a DATE type
-
-        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-        //Local time zone
-        SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        try {
-            return dateFormatLocal.parse(dateFormatGmt.format(new Date())).toString();
-        } catch (ParseException e) {
-            Log.e(TAG, "Error parsing timestamp");
-            return "0000-000-00 00:00:00";
         }
     }
 }

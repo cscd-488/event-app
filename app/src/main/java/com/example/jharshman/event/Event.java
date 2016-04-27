@@ -92,7 +92,6 @@ public class Event implements Serializable {
 
         // todo remove checkpoints from events, and only get them with a database call
         mCheckPoints = checkPoints;
-        mSubscribed = false;
     }
 
 // public Event() {

@@ -62,7 +62,7 @@ public class Card {
     }
 
     private String mTitleText; // short title
-    private String mTitleImage; // uri/url todo figure out title loading/storage
+    private String mTitleImage; // uri/url
     private String mDescription; // long title
     private String mBodyText; // long description
     private String mShare; // url todo figure out share
