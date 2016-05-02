@@ -51,11 +51,11 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     @SerializedName("updated_at")
     private String mTimeUpdated;
     @SerializedName("status")
-    private boolean mChecked;
+    private int mChecked;
 
     private boolean mWasDisplayed;
 
-    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, boolean collected) {
+    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, int collected) {
 
         mCheckPointID = id;
         mEventID = eventID;
@@ -87,7 +87,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         private String mQR;
         private String mTimeCreated;
         private String mTimeUpdated;
-        private boolean mCollected;
+        private int mCollected;
 
         public CheckPoint.Builder setID(int id) {
             mID = id;
@@ -144,7 +144,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
             return this;
         }
 
-        public CheckPoint.Builder setChecked(boolean collected) {
+        public CheckPoint.Builder setChecked(int collected) {
             mCollected = collected;
             return this;
         }
@@ -203,7 +203,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         mQR = "default qr";
         mTimeCreated = "2016-01-01 01:01:01";
         mTimeUpdated = "2016-01-01 01:01:01";
-        mChecked = false;
+        mChecked = 0;
     }
 
     public void setDisplayed() {
@@ -226,7 +226,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mArtist;
     }
 
-    public void setCollected(boolean collected) {
+    public void setCollected(int collected) {
         mChecked = collected;
     }
 
@@ -258,7 +258,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mTimeUpdated;
     }
 
-    public boolean getChecked() {
+    public int getChecked() {
         return mChecked;
     }
 

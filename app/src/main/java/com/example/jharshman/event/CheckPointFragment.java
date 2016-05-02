@@ -108,7 +108,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
         artist.setText(mCheckPoint.getArtist());
         description.setText(mCheckPoint.getDescription());
 
-        if(mCheckPoint.getChecked()) {
+        if(mCheckPoint.getChecked() == 1) {
             checkIn.setImageResource(R.drawable.ic_cloud_done_black_24dp);
         }
 

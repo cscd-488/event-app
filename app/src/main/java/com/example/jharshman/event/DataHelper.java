@@ -562,7 +562,7 @@ public class DataHelper extends SQLiteOpenHelper {
             String qr;
             String timeCreated;
             String timeUpdated;
-            boolean checked;
+            int checked;
             CheckPoint checkpoint;
 
             for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
@@ -583,7 +583,7 @@ public class DataHelper extends SQLiteOpenHelper {
                 qr = cursor.getString(pos ++);
                 timeCreated = cursor.getString(pos ++);
                 timeUpdated = cursor.getString(pos ++);
-                checked = cursor.getInt(pos) == 1;
+                checked = cursor.getInt(pos);
 
                 // create new checkpoint and add it to the list
                 checkpoint = new CheckPoint.Builder()

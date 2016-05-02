@@ -335,7 +335,7 @@ public class DataManager implements Callback {
                 FormBody formBody = new FormBody.Builder()
                         .add(HEADER_REQUEST_CODE, REQUEST_CODE_UPDATE_CHECKED_BY_CHECKPOINT)
                         .add(HEADER_DATA, String.valueOf(checkPoint.getID()))
-                        .add(HEADER_STATUS, String.valueOf(checkPoint.getChecked() ? 1 : 0))
+                        .add(HEADER_STATUS, String.valueOf(checkPoint.getChecked()))
                         .build();
 
                 // build request
