@@ -50,8 +50,9 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private String mTimeCreated;
     @SerializedName("updated_at")
     private String mTimeUpdated;
-
+    @SerializedName("status")
     private boolean mChecked;
+
     private boolean mWasDisplayed;
 
     private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, boolean collected) {

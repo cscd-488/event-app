@@ -2,6 +2,7 @@
  * @file DataManager.java
  * @author Bruce Emehiser
  * @date 2016 03 07
+ * @date 2016 04 26
  *
  * Data manager which manages Event and Check Point data
  * and the storage and retrieval of them.
@@ -11,7 +12,6 @@ package com.example.jharshman.event;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,6 +26,7 @@ import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -34,6 +35,17 @@ import okhttp3.Response;
 public class DataManager implements Callback {
 
     private static final String TAG = "DataManager";
+
+    // header tags
+
+    private static final String HEADER_REQUEST_CODE = "requestcode";
+    private static final String HEADER_DATA = "data";
+    private static final String HEADER_STATUS = "status";
+
+    private static final String REQUEST_CODE_GET_EVENTS_WITH_CHECKPOINTS = "1";
+    private static final String REQUEST_CODE_GET_CHECKPOINT_BY_EVENT = "2";
+    private static final String REQUEST_CODE_GET_EVENT_BY_CHECKPOINT = "3";
+    private static final String REQUEST_CODE_UPDATE_CHECKED_BY_CHECKPOINT = "4";
 
     private Context mContext;
 
@@ -56,6 +68,7 @@ public class DataManager implements Callback {
      * Tells whether or not data set is dirty.
      */
     private boolean mDataSetChanged;
+    private ArrayList<CheckPoint> mDataChanged;
 
     /**
      * Server connection and data parser
@@ -73,14 +86,18 @@ public class DataManager implements Callback {
         // set up data listeners
         mListeners = new ArrayList<>();
 
+        mDataChanged = new ArrayList<>();
+
         // set current data set state
         mDataSetChanged = false;
-
 
         // todo pull data from web server based on location and radius
         // todo put data to web server
         // sync data with server todo use SyncData() instead
-        getEventData();
+//        getEventData();
+
+        // todo fix sync data
+        syncData();
     }
 
     /**
@@ -104,14 +121,22 @@ public class DataManager implements Callback {
      */
     private void getEventData() {
 
+        Log.i(TAG, "Getting event data from server");
+
         Activity activity = (Activity) mContext;
 
-        SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
-        String token = sharedPreferences.getString(activity.getString(R.string.jwt_server_token), "");
+//        SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
+//        String token = sharedPreferences.getString(activity.getString(R.string.jwt_server_token), "");
+
+        // body for request
+        FormBody formBody = new FormBody.Builder()
+                .add(HEADER_REQUEST_CODE, REQUEST_CODE_GET_EVENTS_WITH_CHECKPOINTS)
+                .build();
 
         Request request = new Request.Builder()
                 .url(activity.getString(R.string.magpie_server_event_data))
-                .addHeader(activity.getString(R.string.jwt_server_token), token)
+                .post(formBody)
+                .addHeader(HEADER_REQUEST_CODE, REQUEST_CODE_GET_EVENTS_WITH_CHECKPOINTS)
                 .build();
 
         mClient.newCall(request).enqueue(this);
@@ -127,6 +152,8 @@ public class DataManager implements Callback {
      */
     @Override
     public void onFailure(Call call, IOException e) {
+
+        Log.i(TAG, "Failed to get response from server!");
 
         try {
             Toast.makeText(mContext, "Server Connection Failed", Toast.LENGTH_LONG).show();
@@ -151,7 +178,7 @@ public class DataManager implements Callback {
     @Override
     public void onResponse(Call call, Response response) throws IOException {
 
-        Log.i(TAG, "onResponse()");
+        Log.i(TAG, "Got response from server!");
 
         if (! response.isSuccessful()) {
             throw new IOException("Unexpected code " + response);
@@ -231,6 +258,8 @@ public class DataManager implements Callback {
         // set data set changed, so server will be updated
         mDataSetChanged = true;
 
+        syncData();
+
         return updated != -1;
     }
 
@@ -247,6 +276,8 @@ public class DataManager implements Callback {
 
         // set data set changed, so server will be updated
         mDataSetChanged = true;
+
+        syncData();
 
         return updated != -1;
     }
@@ -277,9 +308,58 @@ public class DataManager implements Callback {
      * Synchronize data with server
      */
     public void syncData() {
+
+        // check if we need to update the server
+        if(mDataSetChanged) {
+            // todo update server
+
+            updateServerChecked();
+        }
+
+        // update local
         getEventData();
 
         // todo make this update both local and server data with the most recent data.
+
+    }
+
+    private void updateServerChecked() {
+
+        // todo maintain list of modified events and checkpoints, and only updated the server with the changes
+        Log.i(TAG, "Updating server checked");
+
+        for(Event event : getEvents()) {
+            for(CheckPoint checkPoint : event.getCheckPoints()) {
+
+                // body for request
+                FormBody formBody = new FormBody.Builder()
+                        .add(HEADER_REQUEST_CODE, REQUEST_CODE_UPDATE_CHECKED_BY_CHECKPOINT)
+                        .add(HEADER_DATA, String.valueOf(checkPoint.getID()))
+                        .add(HEADER_STATUS, String.valueOf(checkPoint.getChecked() ? 1 : 0))
+                        .build();
+
+                // build request
+                Request request = new Request.Builder()
+                        .url(((Activity) mContext).getString(R.string.magpie_server_event_data))
+                        .post(formBody)
+                        .addHeader(HEADER_REQUEST_CODE, REQUEST_CODE_GET_EVENTS_WITH_CHECKPOINTS)
+                        .build();
+
+                // make new call with request
+                mClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.e(TAG, "Failure updating server with checkpoint status");
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.i(TAG, "Server updated successfully");
+                        Log.i(TAG, "Response: " + response.toString());
+                    }
+                });
+            }
+        }
     }
 
     public interface UpdateListener {

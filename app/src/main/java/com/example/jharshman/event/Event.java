@@ -327,6 +327,12 @@ public class Event implements Serializable {
     }
 
     public CheckPoint[] getCheckPoints() {
+
+        // todo make this prettier
+        if(mCheckPoints == null) {
+            mCheckPoints = new CheckPoint[0];
+        }
+
         return mCheckPoints;
     }
 
