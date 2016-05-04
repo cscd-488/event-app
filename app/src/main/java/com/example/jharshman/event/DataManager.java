@@ -93,10 +93,8 @@ public class DataManager implements Callback {
 
         // todo pull data from web server based on location and radius
         // todo put data to web server
-        // sync data with server todo use SyncData() instead
-//        getEventData();
 
-        // todo fix sync data
+        // todo fix sync data to actually sync changes instead of just pulling any missing data
         syncData();
     }
 
