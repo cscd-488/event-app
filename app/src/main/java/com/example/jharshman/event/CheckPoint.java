@@ -50,11 +50,12 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private String mTimeCreated;
     @SerializedName("updated_at")
     private String mTimeUpdated;
+    @SerializedName("status")
+    private int mChecked;
 
-    private boolean mChecked;
     private boolean mWasDisplayed;
 
-    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, boolean collected) {
+    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, int collected) {
 
         mCheckPointID = id;
         mEventID = eventID;
@@ -86,7 +87,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         private String mQR;
         private String mTimeCreated;
         private String mTimeUpdated;
-        private boolean mCollected;
+        private int mCollected;
 
         public CheckPoint.Builder setID(int id) {
             mID = id;
@@ -143,7 +144,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
             return this;
         }
 
-        public CheckPoint.Builder setChecked(boolean collected) {
+        public CheckPoint.Builder setChecked(int collected) {
             mCollected = collected;
             return this;
         }
@@ -189,6 +190,22 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         }
     }
 
+    public CheckPoint(int mEventID) {
+
+        mCheckPointID = 1;
+        mEventID = 1;
+        mTitle = "default title";
+        mArtist = "default artist";
+        mDescription = "default description";
+        mImageSrc = "http://jessicauelmen.com/wp-content/uploads/2016/02/android-logo-featured.jpeg";
+        mLat = 0.0;
+        mLon = 0.0;
+        mQR = "default qr";
+        mTimeCreated = "2016-01-01 01:01:01";
+        mTimeUpdated = "2016-01-01 01:01:01";
+        mChecked = 0;
+    }
+
     public void setDisplayed() {
         mWasDisplayed = true;
     }
@@ -209,7 +226,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mArtist;
     }
 
-    public void setCollected(boolean collected) {
+    public void setCollected(int collected) {
         mChecked = collected;
     }
 
@@ -222,28 +239,10 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public double getLat() {
-//        todo remove commented code
-//        if(mLat == 0.0) {
-//            try {
-//                mLat = Double.valueOf(lat);
-//            } catch (ClassCastException e) {
-//                Log.e(TAG, "Error converting latitude to double");
-//            }
-//        }
-
         return mLat;
     }
 
     public double getLon() {
-//        todo remove commented code
-//        if(mLon == 0.0) {
-//            try {
-//                mLon = Double.valueOf(lon);
-//            } catch (NumberFormatException e) {
-//                Log.e(TAG, "Error converting longitude to double");
-//            }
-//        }
-
         return mLon;
     }
 
@@ -259,7 +258,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mTimeUpdated;
     }
 
-    public boolean getChecked() {
+    public int getChecked() {
         return mChecked;
     }
 

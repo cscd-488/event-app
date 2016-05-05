@@ -327,6 +327,12 @@ public class Event implements Serializable {
     }
 
     public CheckPoint[] getCheckPoints() {
+
+        // todo remove checkpoints from event class, and only get them with a database call
+        if(mCheckPoints == null) {
+            mCheckPoints = new CheckPoint[0];
+        }
+
         return mCheckPoints;
     }
 
