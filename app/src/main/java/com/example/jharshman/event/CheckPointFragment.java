@@ -135,15 +135,23 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
                 Log.i(TAG, "Check point check in button clicked");
 
-                // store that user checked in. Note: click should only ever check in, never un-check
-                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+                // todo only launch validation if not already checked
 
-                if(checkSaved) {
+                // todo if in gps range, check in
 
-                    // update image button
-                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
-                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
-                }
+
+                // todo otherwise launch qr code scanner
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_check_in_button, mCheckPoint.getID());
+
+//                // store that user checked in. Note: click should only ever check in, never un-check
+//                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+//
+//                if(checkSaved) {
+//
+//                    // update image button
+//                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
+//                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+//                }
 
                 break;
             case R.id.fragment_check_point_card_share_button:
