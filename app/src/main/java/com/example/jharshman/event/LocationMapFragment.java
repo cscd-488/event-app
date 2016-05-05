@@ -187,20 +187,23 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
         public void onMyLocationChange(Location location) {
+            TextView distanceView, timeView;
             float distance;
             mLocation = location;
             if(!zoomed)
                 centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
             if(coordinates == null || coordinates.length == 0)
                 return;
+            
             CheckPoint hovered = coordinates[displayIndex];
-
-            TextView distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
-            TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
-
             distance = distanceFromUserMiles(hovered);
-
             timeToLocation(hovered);
+
+            if((distanceView = (TextView) getView().findViewById(R.id.distanceTextView)) == null)
+                return;
+
+            if((timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView)) == null)
+                return;
 
             try {
 
