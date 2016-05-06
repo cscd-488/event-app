@@ -143,14 +143,14 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Check Point was clicked
      *
-     * @param checkPoint The check point which was clicked
+     * @param checkPointID The id of the check point which was clicked
      */
     @Override
-    public void onCheckPointListInteraction(CheckPoint checkPoint) {
+    public void onCheckPointListInteraction(int checkPointID) {
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(CHECK_POINT_LIST_FRAGMENT);
         if(fragment == null) {
-            fragment = CheckPointFragment.newInstance(checkPoint);
+            fragment = CheckPointFragment.newInstance(checkPointID);
         }
 
         getSupportFragmentManager().beginTransaction()
