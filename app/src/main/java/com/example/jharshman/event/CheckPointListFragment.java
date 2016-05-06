@@ -156,7 +156,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         if(mListener != null) {
-            mListener.onCheckPointListInteraction(mCheckPoints.get(position));
+            mListener.onCheckPointListInteraction(mCheckPoints.get(position).getID());
         }
     }
 
@@ -166,10 +166,10 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
     public interface OnFragmentInteractionListener {
 
         /**
-         * Check Point was clicked
+         * Check Point was clicked.
          *
-         * @param checkPoint The check point which was clicked
+         * @param checkPointID The id of the check point which was clicked.
          */
-        void onCheckPointListInteraction(CheckPoint checkPoint);
+        void onCheckPointListInteraction(int checkPointID);
     }
 }

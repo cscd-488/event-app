@@ -8,6 +8,7 @@ package com.example.jharshman.event;
  * @date 2016 01 13
  * @date 2016 02 23
  * @date 2016 03 02
+ * @date 2016 05 05
  *
  * Check points for events
  */
@@ -52,10 +53,9 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private String mTimeUpdated;
     @SerializedName("status")
     private int mChecked;
-
     private boolean mWasDisplayed;
 
-    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, int collected) {
+    private CheckPoint(int id, int eventID, String title, String artist, String description, String imageSrc, double lat, double lon, String qr, String timeCreated, String timeUpdated, int checked) {
 
         mCheckPointID = id;
         mEventID = eventID;
@@ -68,7 +68,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         mQR = qr;
         mTimeCreated = timeCreated;
         mTimeUpdated = timeUpdated;
-        mChecked = collected;
+        mChecked = checked;
     }
 
     /**
@@ -87,7 +87,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         private String mQR;
         private String mTimeCreated;
         private String mTimeUpdated;
-        private int mCollected;
+        private int mChecked;
 
         public CheckPoint.Builder setID(int id) {
             mID = id;
@@ -144,8 +144,8 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
             return this;
         }
 
-        public CheckPoint.Builder setChecked(int collected) {
-            mCollected = collected;
+        public CheckPoint.Builder setChecked(int checked) {
+            mChecked = checked;
             return this;
         }
 
@@ -186,7 +186,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
                     mQR,
                     mTimeCreated,
                     mTimeUpdated,
-                    mCollected);
+                    mChecked);
         }
     }
 
@@ -226,8 +226,8 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         return mArtist;
     }
 
-    public void setCollected(int collected) {
-        mChecked = collected;
+    public void setChecked(int checked) {
+        mChecked = checked;
     }
 
     public String getDescription() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,8 +14,8 @@
         android:id="@+id/fragment_event_fab"
         android:layout_gravity="bottom|right"
         android:layout_margin="8dp"
-        app:menu_shadowColor="@color/light_gray"
-        app:menu_shadowRadius="4dp"
+        tools:menu_shadowColor="@color/light_gray"
+        tools:menu_shadowRadius="4dp"
         fab:menu_colorNormal="@color/white"
         fab:menu_colorPressed="@color/light_gray"
         fab:menu_colorRipple="@color/light_gray"

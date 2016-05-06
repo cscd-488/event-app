@@ -37,7 +37,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
     /**
      * Check point we are representing and handling in the fragment
      */
-    private CheckPoint mCheckPoint;
+    private int mCheckPointID;
 
     /**
      * Checkpoint event callback listener.
@@ -52,11 +52,11 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
      * Factory method for creating or getting new singleton
      * getInstance of the fragment
      *
-     * @param checkPoint The checkpoint to display
+     * @param checkPointID The checkpoint to display
      *
      * @return A new getInstance of fragment CheckPointFragment.
      */
-    public static CheckPointFragment newInstance(CheckPoint checkPoint) {
+    public static CheckPointFragment newInstance(int checkPointID) {
 
         // create check points fragment
         if(mInstance == null) {
@@ -65,7 +65,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
         // set check point arguments on fragment
         Bundle args = new Bundle();
-        args.putSerializable(CHECK_POINT_KEY, checkPoint);
+        args.putInt(CHECK_POINT_KEY, checkPointID);
         mInstance.setArguments(args);
 
         return mInstance;
@@ -79,7 +79,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
         int eventID = -1;
         if (getArguments() != null) {
             // get Event ID
-            mCheckPoint = (CheckPoint) getArguments().getSerializable(CHECK_POINT_KEY);
+            mCheckPointID =  getArguments().getInt(CHECK_POINT_KEY);
         }
         else {
             throw new NullPointerException("Check point must be set using Key CheckPointFragment.CHECK_POINT_KEY");
@@ -90,6 +90,11 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_point, container, false);
+
+        // get the data
+        CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
+
+        Log.i(TAG, "Getting checkpoint from data manager: " + checkPoint.toString());
 
         // get views
         ImageView image = (ImageView) view.findViewById(R.id.fragment_check_point_title_image);
@@ -102,18 +107,20 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
         // load data into views
         Picasso.with(getContext())
-                .load(mCheckPoint.getImageSrc())
+                .load(checkPoint.getImageSrc())
                 .into(image);
-        title.setText(mCheckPoint.getTitle());
-        artist.setText(mCheckPoint.getArtist());
-        description.setText(mCheckPoint.getDescription());
+        title.setText(checkPoint.getTitle());
+        artist.setText(checkPoint.getArtist());
+        description.setText(checkPoint.getDescription());
 
-        if(mCheckPoint.getChecked() == 1) {
+        if(checkPoint.getChecked() == 1) {
             checkIn.setImageResource(R.drawable.ic_cloud_done_black_24dp);
         }
-
+        else {
+            // set click listeners
+            checkIn.setOnClickListener(this);
+        }
         // set click listeners
-        checkIn.setOnClickListener(this);
         share.setOnClickListener(this);
         map.setOnClickListener(this);
 
@@ -129,21 +136,32 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View view) {
 
+        // get the checkpoint from the data manager
+        CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
+
         switch (view.getId()) {
 
             case R.id.fragment_check_point_check_in_button:
 
                 Log.i(TAG, "Check point check in button clicked");
 
-                // store that user checked in. Note: click should only ever check in, never un-check
-                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+                // todo only launch validation if not already checked
 
-                if(checkSaved) {
+                // todo if in gps range, check in
 
-                    // update image button
-                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
-                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
-                }
+
+                // todo otherwise launch qr code scanner
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_check_in_button, checkPoint.getID());
+
+//                // store that user checked in. Note: click should only ever check in, never un-check
+//                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+//
+//                if(checkSaved) {
+//
+//                    // update image button
+//                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
+//                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+//                }
 
                 break;
             case R.id.fragment_check_point_card_share_button:
@@ -157,7 +175,8 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
                 Log.i(TAG, "Check Point Map button clicked");
 
                 // call callback with check point button id, and current checkpoint id
-                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, mCheckPoint.getID());
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, checkPoint.getID());
+
                 break;
         }
     }
