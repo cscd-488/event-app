@@ -513,24 +513,24 @@ public class DataHelper extends SQLiteOpenHelper {
                 String timeUpdated;
                 int checked;
 
-                for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 
                     Log.i(TAG, "Getting checkpoint from cursor");
 
                     int pos = 0;
 
                     // get elements from cursor
-                    checkpoint_id = cursor.getInt(pos ++);
-                    event_id = cursor.getInt(pos ++);
-                    title = cursor.getString(pos ++);
-                    artist = cursor.getString(pos ++);
-                    description = cursor.getString(pos ++);
-                    imageSrc = cursor.getString(pos ++);
-                    lat = cursor.getDouble(pos ++);
-                    lon = cursor.getDouble(pos ++);
-                    qr = cursor.getString(pos ++);
-                    timeCreated = cursor.getString(pos ++);
-                    timeUpdated = cursor.getString(pos ++);
+                    checkpoint_id = cursor.getInt(pos++);
+                    event_id = cursor.getInt(pos++);
+                    title = cursor.getString(pos++);
+                    artist = cursor.getString(pos++);
+                    description = cursor.getString(pos++);
+                    imageSrc = cursor.getString(pos++);
+                    lat = cursor.getDouble(pos++);
+                    lon = cursor.getDouble(pos++);
+                    qr = cursor.getString(pos++);
+                    timeCreated = cursor.getString(pos++);
+                    timeUpdated = cursor.getString(pos++);
                     checked = cursor.getInt(pos);
 
                     // create new checkpoint and add it to the list
@@ -552,8 +552,9 @@ public class DataHelper extends SQLiteOpenHelper {
                     Log.i(TAG, String.format("%d %s %s %s %s", checkpoint_id, title, artist, description, imageSrc));
                 }
 
-            // close the cursor
-            cursor.close();
+                // close the cursor
+                cursor.close();
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "error getting checkpoint from database");
