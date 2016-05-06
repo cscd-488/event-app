@@ -2,11 +2,11 @@ package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -193,8 +193,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-        // todo finish implementing this
+    public void onMapFragmentInteraction(CheckPoint checkPoint) {
+        Log.d("Map", "Checkpoint Clicked From Map");
     }
 }

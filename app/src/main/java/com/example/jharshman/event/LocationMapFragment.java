@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -25,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -199,6 +197,9 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
             distance = distanceFromUserMiles(hovered);
             timeToLocation(hovered);
 
+            if(getView() == null)
+                return;
+
             if((distanceView = (TextView) getView().findViewById(R.id.distanceTextView)) == null)
                 return;
 
@@ -338,13 +339,6 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         mapView.getMapAsync(this);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     public static float distanceFromUserKilometers(CheckPoint checkPoint) {
         return distanceFromUserMeter(checkPoint) / METERS_TO_KILO;
     }
@@ -463,7 +457,10 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Not yet implemented", Toast.LENGTH_SHORT).show();
+                if (mListener != null) {
+                    mListener.onMapFragmentInteraction(coordinates[displayIndex]);
+                }
+                //Toast.makeText(getContext(), "Not yet implemented", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -512,7 +509,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
 
         view.setText(mw.location.getTitle());
         view = (TextView)getActivity().findViewById(R.id.descriptionTextView);
-        view.setText("Not implemented");
+        view.setText(mw.location.getDescription());
     }
 
     private void centerToLocation(double[] coords){
@@ -546,6 +543,6 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
+        void onMapFragmentInteraction(CheckPoint checkPoint);
     }
 }
