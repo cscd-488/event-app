@@ -7,6 +7,25 @@
     <string name="swipe_to_learn">Swipe to Learn More ></string>
     <string name="Continue">Continue</string>
 
+    <!-- Paginated Usage Screen -->
+    <string name="how_it_works">HOW IT WORKS</string>
+    <string name="how_it_works_body">
+        With Magpie, you can find tours, events, and more, known on Magpie
+        as "collections", around you.  Collect badges along the way and
+        score real prizes and discounts for completing collections!
+    </string>
+    <string name="add_collections">ADD COLLECTIONS</string>
+    <string name="add_collections_body">
+        Find tours, events and more around you.
+        Add your favorites and start collecting badges!
+    </string>
+    <string name="win_prizes">WIN REAL PRIZES</string>
+    <string name="win_prizes_body">
+        Win awesome prizes for completing collections.
+        We partner up with some of the best local business
+        we can find to provide prizes and exclusive discounts!
+    </string>
+
     <!-- Server and OAuth2 information -->
     <string name="OAuth_client_ID">170378995036-99ob67o6p5871kn02omq6bh5blb25070.apps.googleusercontent.com</string>
     <string name="magpie_server_event_data">http://magpieserver.com/events</string>
