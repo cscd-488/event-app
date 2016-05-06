@@ -144,8 +144,8 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
             return this;
         }
 
-        public CheckPoint.Builder setChecked(int collected) {
-            mCollected = collected;
+        public CheckPoint.Builder setChecked(int checked) {
+            mChecked = checked;
             return this;
         }
 
