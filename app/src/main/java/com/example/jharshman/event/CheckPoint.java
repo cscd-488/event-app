@@ -145,7 +145,7 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         }
 
         public CheckPoint.Builder setChecked(int collected) {
-            mChecked = collected;
+            mCollected = collected;
             return this;
         }
 
@@ -190,6 +190,22 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
         }
     }
 
+    public CheckPoint(int mEventID) {
+
+        mCheckPointID = 1;
+        mEventID = 1;
+        mTitle = "default title";
+        mArtist = "default artist";
+        mDescription = "default description";
+        mImageSrc = "http://jessicauelmen.com/wp-content/uploads/2016/02/android-logo-featured.jpeg";
+        mLat = 0.0;
+        mLon = 0.0;
+        mQR = "default qr";
+        mTimeCreated = "2016-01-01 01:01:01";
+        mTimeUpdated = "2016-01-01 01:01:01";
+        mChecked = 0;
+    }
+
     public void setDisplayed() {
         mWasDisplayed = true;
     }
@@ -223,12 +239,10 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     }
 
     public double getLat() {
-
         return mLat;
     }
 
     public double getLon() {
-
         return mLon;
     }
 

@@ -2,6 +2,7 @@
  * @file DataHelper.java
  * @author Bruce Emehiser
  * @date 2016 03 15
+ * @date 2016 04 26
  *
  * This contains functionality to store data locally
  * in a SQLite database
@@ -11,7 +12,6 @@ package com.example.jharshman.event;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -32,7 +32,6 @@ public class DataHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "magpie.db";
 
     // table names
-    private static final String SUBSCRIPTIONS_TABLE = "subscriptions";
     private static final String EVENT_TABLE = "events";
     private static final String CHECK_POINT_TABLE = "check_points";
 
@@ -166,7 +165,6 @@ public class DataHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
 
         // drop the old table
-        database.execSQL("DROP TABLE IF EXISTS " + SUBSCRIPTIONS_TABLE);
         database.execSQL("DROP TABLE IF EXISTS " + EVENT_TABLE);
         database.execSQL("DROP TABLE IF EXISTS " + CHECK_POINT_TABLE);
 
@@ -245,117 +243,12 @@ public class DataHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Get a list of all Events from the database
-     *
-     * @return The list of Events
-     */
-    public List<Event> getEvents() {
-
-        Log.i(TAG, "Getting events...");
-
-        ArrayList<Event> events = new ArrayList<>();
-
-        // try statement in case of database errors
-        try {
-
-            // get the database from SQLiteOpenHelper.this
-            SQLiteDatabase database = this.getReadableDatabase();
-
-            // send query database for all events
-
-            Cursor cursor = database.query(EVENT_TABLE, null, null, null, null, null, null);
-
-            Log.i(TAG, "Cursor Created");
-            if (cursor == null) {
-                Log.i(TAG, "Cursor is null!");
-            }
-
-            // get the data from the cursor
-            if(cursor != null) {
-
-                Log.i(TAG, "Cursor wasn't null!");
-
-                // add items to the list
-                int event_id;
-                String title;
-                String shortTitle;
-                String author;
-                String description;
-                String imageSrc;
-                double lat;
-                double lon;
-                String qr;
-                String timeCreated;
-                String timeUpdated;
-                boolean subscribed;
-                List<CheckPoint> checkPoints;
-                Event event;
-
-                for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
-
-                    Log.i(TAG, "Getting event from cursor");
-
-                    int pos = 0;
-
-                    // get elements from cursor
-                    event_id = cursor.getInt(pos ++);
-                    title = cursor.getString(pos ++);
-                    shortTitle = cursor.getString(pos ++);
-                    author = cursor.getString(pos ++);
-                    description = cursor.getString(pos ++);
-                    imageSrc = cursor.getString(pos ++);
-                    lat = cursor.getDouble(pos ++);
-                    lon = cursor.getDouble(pos ++);
-                    qr = cursor.getString(pos ++);
-                    timeCreated = cursor.getString(pos ++);
-                    timeUpdated = cursor.getString(pos);
-                    subscribed = getSubscribed(event_id);
-                    checkPoints = this.getCheckpoints(event_id);
-
-                    // create new event and add it to the list
-                    event = new Event.Builder()
-                            .setID(event_id)
-                            .setTitle(title)
-                            .setShortTitle(shortTitle)
-                            .setAuthor(author)
-                            .setDescription(description)
-                            .setImageSrc(imageSrc)
-                            .setLat(lat)
-                            .setLon(lon)
-                            .setQR(qr)
-                            .setTimeCreated(timeCreated)
-                            .setTimeUpdated(timeUpdated)
-                            .setCheckPoints(checkPoints)
-                            .setSubscribed(subscribed)
-                            .build();
-
-                    Log.i(TAG, String.format("%d %s %s %s %s %b", event_id, title, author, description, imageSrc, subscribed));
-
-                    events.add(event);
-                }
-
-                // close the cursor
-                cursor.close();
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "error getting events from database");
-            e.printStackTrace();
-        }
-
-        // return events (which may be an empty list)
-        return events;
-    }
-
-    /**
      * Get subscription status based on event_id.
      *
      * @param event_id The id of the event to find the subscription status of.
      * @return The boolean subscription status.
      */
     public boolean getSubscribed(int event_id) {
-
-        // todo change this to work with the EVENT TABLE
 
         Log.i(TAG, "Getting events...");
 
@@ -441,7 +334,44 @@ public class DataHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Get all the checkpoints for the given eventID.
+     * Get a list of all Events from the database
+     *
+     * @return The list of Events
+     */
+    public List<Event> getEvents() {
+
+        Log.i(TAG, "Getting events...");
+
+        List<Event> events;
+
+        // try statement in case of database errors
+        try {
+
+            // get the database from SQLiteOpenHelper.this
+            SQLiteDatabase database = this.getReadableDatabase();
+
+            // send query database for all events
+
+            Cursor cursor = database.query(EVENT_TABLE, null, null, null, null, null, null);
+
+            // build result set
+            events = buildEventResultSet(cursor);
+
+            // close the cursor
+            cursor.close();
+
+        } catch (Exception e) {
+            events = new ArrayList<>();
+
+            Log.e(TAG, "error getting events from database");
+        }
+
+        // return events (which may be an empty list)
+        return events;
+    }
+
+    /**
+     * Get all the checkpoints for the given event id.
      *
      * @param eventID The event ID correlating with the checkpoints we want.
      * @return The list of checkpoint ids.
@@ -450,7 +380,7 @@ public class DataHelper extends SQLiteOpenHelper {
 
         Log.i(TAG, "Getting checkpoints...");
 
-        ArrayList<CheckPoint> checkPoints = new ArrayList<>();
+        List<CheckPoint> checkPoints;
 
         // try statement in case of database errors
         try {
@@ -460,9 +390,9 @@ public class DataHelper extends SQLiteOpenHelper {
 
             // send query database for all checkpoints
             Cursor cursor = database.query(CHECK_POINT_TABLE, null, CHECK_POINT_COLUMNT_EVENT_ID + "=?", new String[] {String.valueOf(eventID)}, null, null, null);
-//            Cursor cursor = database.query(CHECK_POINT_TABLE, null, null, null, null, null, null);
 
-            Log.i(TAG, "Cursor Created");
+            // build query result set
+            checkPoints = buildCheckpointResultSet(cursor);
 
             // get the data from the cursor
             if(cursor != null) {
@@ -534,14 +464,12 @@ public class DataHelper extends SQLiteOpenHelper {
 
         } catch (Exception e) {
             Log.e(TAG, "error getting checkpoints from database");
-            e.printStackTrace();
+
+            // initialize checkpoints to a new empty array list
+            checkPoints = new ArrayList<>();
         }
 
-        if(checkPoints.size() == 0) {
-            Log.i(TAG, "No checkpoints were found for event_id: " + eventID);
-        }
-
-        // return events (which may be an empty list)
+        // return events
         return checkPoints;
     }
 
@@ -550,12 +478,10 @@ public class DataHelper extends SQLiteOpenHelper {
      *
      * @param checkpointID The id of the checkpoint to get.
      * @return The new checkpoint if it exists.
-     * @throws android.content.res.Resources.NotFoundException If the checkpoint was not found.
      */
     public CheckPoint getCheckpoint(int checkpointID) {
 
-
-        Log.i(TAG, "Getting checkpoints...");
+        Log.i(TAG, "Getting checkpoint from database.");
 
         CheckPoint checkPoint = null;
 
@@ -626,26 +552,187 @@ public class DataHelper extends SQLiteOpenHelper {
                     Log.i(TAG, String.format("%d %s %s %s %s", checkpoint_id, title, artist, description, imageSrc));
                 }
 
-                // close the cursor
-                cursor.close();
-            }
-            else {
-                Log.i(TAG, "No checkpoints were found for Event with " + checkpointID);
-                throw new Resources.NotFoundException("No checkpoint was found with id: " + checkpointID);
-            }
+            // close the cursor
+            cursor.close();
 
         } catch (Exception e) {
             Log.e(TAG, "error getting checkpoint from database");
-            e.printStackTrace();
-            throw new Resources.NotFoundException("No checkpoint was found with id: " + checkpointID);
         }
 
-        // return events (which may be an empty list)
+        // return events
         return checkPoint;
     }
 
     /**
-     * todo create methods to insert and update existing Events in the table
-     * http://www.perfectapk.com/sqliteopenhelper-example.html
+     * Build list of event objects by reading from cursor.
+     *
+     * @param cursor The cursor to read from.
+     * @return The list of events.
      */
+    private List<Event> buildEventResultSet(Cursor cursor) {
+
+        Log.i(TAG, "Building event result set");
+
+        List<Event> events = new ArrayList<>();
+
+        // try statement in case of database errors
+        try {
+
+            // add items to the list
+            int event_id;
+            String title;
+            String shortTitle;
+            String author;
+            String description;
+            String imageSrc;
+            double lat;
+            double lon;
+            String qr;
+            String timeCreated;
+            String timeUpdated;
+            boolean subscribed;
+            List<CheckPoint> checkPoints;
+            Event event;
+
+            for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
+
+                Log.i(TAG, "Getting event from cursor");
+
+                int pos = 0;
+
+                // get elements from cursor
+                event_id = cursor.getInt(pos ++);
+                title = cursor.getString(pos ++);
+                shortTitle = cursor.getString(pos ++);
+                author = cursor.getString(pos ++);
+                description = cursor.getString(pos ++);
+                imageSrc = cursor.getString(pos ++);
+                lat = cursor.getDouble(pos ++);
+                lon = cursor.getDouble(pos ++);
+                qr = cursor.getString(pos ++);
+                timeCreated = cursor.getString(pos ++);
+                timeUpdated = cursor.getString(pos);
+                subscribed = getSubscribed(event_id);
+                checkPoints = this.getCheckpoints(event_id);
+
+                // create new event and add it to the list
+                event = new Event.Builder()
+                        .setID(event_id)
+                        .setTitle(title)
+                        .setShortTitle(shortTitle)
+                        .setAuthor(author)
+                        .setDescription(description)
+                        .setImageSrc(imageSrc)
+                        .setLat(lat)
+                        .setLon(lon)
+                        .setQR(qr)
+                        .setTimeCreated(timeCreated)
+                        .setTimeUpdated(timeUpdated)
+                        .setCheckPoints(checkPoints)
+                        .setSubscribed(subscribed)
+                        .build();
+
+                Log.i(TAG, String.format("%d %s %s %s %s %b", event_id, title, author, description, imageSrc, subscribed));
+
+                events.add(event);
+            }
+
+            // close the cursor
+            cursor.close();
+
+        } catch (Exception e) {
+            Log.e(TAG, "error getting events from database");
+        }
+
+        // return events (which may be an empty list)
+        return events;
+    }
+
+    /**
+     * Build list of checkpoint objects by reading from an open cursor
+     *
+     * @param cursor The cursor to read from.
+     * @return The list of checkpoints.
+     */
+    private List<CheckPoint> buildCheckpointResultSet(Cursor cursor) {
+
+        // check incoming parameters
+        if(cursor == null) {
+            throw new NullPointerException("Parameters cannot be null");
+        }
+
+        Log.i(TAG, "Getting checkpoints...");
+
+        ArrayList<CheckPoint> checkPoints = new ArrayList<>();
+
+        // try statement in case of database errors
+        try {
+            // get the data from the cursor
+
+            // add items to the list
+            int checkpoint_id;
+            int event_id;
+            String title;
+            String artist;
+            String description;
+            String imageSrc;
+            double lat;
+            double lon;
+            String qr;
+            String timeCreated;
+            String timeUpdated;
+            int checked;
+            CheckPoint checkpoint;
+
+            for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
+
+                Log.i(TAG, "Getting event from cursor");
+
+                int pos = 0;
+
+                // get elements from cursor
+                checkpoint_id = cursor.getInt(pos ++);
+                event_id = cursor.getInt(pos ++);
+                title = cursor.getString(pos ++);
+                artist = cursor.getString(pos ++);
+                description = cursor.getString(pos ++);
+                imageSrc = cursor.getString(pos ++);
+                lat = cursor.getDouble(pos ++);
+                lon = cursor.getDouble(pos ++);
+                qr = cursor.getString(pos ++);
+                timeCreated = cursor.getString(pos ++);
+                timeUpdated = cursor.getString(pos ++);
+                checked = cursor.getInt(pos);
+
+                // create new checkpoint and add it to the list
+                checkpoint = new CheckPoint.Builder()
+                        .setID(checkpoint_id)
+                        .setEventID(event_id)
+                        .setTitle(title)
+                        .setArtist(artist)
+                        .setDescription(description)
+                        .setImageSrc(imageSrc)
+                        .setLat(lat)
+                        .setLon(lon)
+                        .setQR(qr)
+                        .setTimeCreated(timeCreated)
+                        .setTimeUpdated(timeUpdated)
+                        .setChecked(checked)
+                        .build();
+
+                Log.i(TAG, String.format("%d %s %s %s %s", checkpoint_id, title, artist, description, imageSrc));
+
+                checkPoints.add(checkpoint);
+            }
+
+            // close the cursor
+            cursor.close();
+
+        } catch (Exception e) {
+            Log.e(TAG, "error getting checkpoints from database");
+        }
+
+        // return events (which may be an empty list)
+        return checkPoints;
+    }
 }
