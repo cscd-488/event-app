@@ -10,20 +10,23 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
-import java.util.ArrayList;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements
         CheckPointListFragment.OnFragmentInteractionListener,
         EventFragment.OnFragmentInteractionListener,
         CheckPointFragment.OnFragmentInteractionListener,
-        LocationMapFragment.OnFragmentInteractionListener {
+        LocationMapFragment.OnFragmentInteractionListener,
+        ScanFragment.OnScanFragmentInteraction {
+
+    private static final String TAG = "MainActivity";
 
     public static final String PAGER_FRAGMENT = "PAGER_FRAGMENT";
     public static final String EVENT_FRAGMENT = "EVENT_FRAGMENT";
     public static final String CHECK_POINT_LIST_FRAGMENT = "CHECK_POINT_LIST_FRAGMENT";
     public static final String CHECK_POINT_FRAGMENT = "CHECK_POINT_FRAGMENT";
     public static final String LOCATION_MAP_FRAGMENT = "LOCATION_MAP_FRAGMENT";
+    public static final String SCAN_FRAGMENT = "SCAN_FRAGMENT";
 
     private Fragment mPagerFragment;
     SharedPreferences mSharedPreferences;
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements
     // private Fragment mCollectionsFragment;
 
 
-    ArrayList<CheckPoint> mCheckPoints;
+    private int mCurrentCheckpointID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,14 +142,14 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Check Point was clicked
      *
-     * @param checkPoint The check point which was clicked
+     * @param checkPointID The id of the check point which was clicked
      */
     @Override
-    public void onCheckPointListInteraction(CheckPoint checkPoint) {
+    public void onCheckPointListInteraction(int checkPointID) {
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(CHECK_POINT_LIST_FRAGMENT);
         if(fragment == null) {
-            fragment = CheckPointFragment.newInstance(checkPoint);
+            fragment = CheckPointFragment.newInstance(checkPointID);
         }
 
         getSupportFragmentManager().beginTransaction()
@@ -189,11 +192,66 @@ public class MainActivity extends AppCompatActivity implements
                 // todo launch the share fragment
 
                 break;
+
+            case R.id.fragment_check_point_check_in_button:
+
+                // todo authenticate the check in, and relaunch the checkpoint fragment
+
+                ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
+
+                if(scanFragment == null) {
+                    scanFragment = new ScanFragment();
+                }
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
+                        .addToBackStack(SCAN_FRAGMENT)
+                        .commit();
+
+                // save the current checkpoint so we know which checkpoint to test scan result against
+                mCurrentCheckpointID = checkpoint_id;
+
+                break;
         }
     }
 
     @Override
     public void onMapFragmentInteraction(CheckPoint checkPoint) {
         Log.d("Map", "Checkpoint Clicked From Map");
+    }
+
+    /**
+     * Scan Fragment Interaction will be called with the
+     * String representation of the decoded QR code
+     *
+     * @param code The String representation of the QR code
+     */
+    @Override
+    public void onScanFragmentInteraction(String code) {
+
+        // todo implement scan fragment interaction
+
+        DataManager dataManager = DataManager.instance(this);
+
+        // get the current checkpoint
+        CheckPoint checkpoint = dataManager.getCheckpoint(mCurrentCheckpointID);
+        String checkpoint_code = checkpoint.getQR();
+
+        Log.i(TAG, "Scan completed: " + code);
+        Log.i(TAG, "Checkpoint QR code: " + checkpoint.getQR());
+
+        // check to see if the codes match
+        if(checkpoint_code.compareTo(code) == 0) {
+            // updated checked
+            dataManager.updateChecked(checkpoint.getID(), true);
+            Toast.makeText(this, "Check In Successful", Toast.LENGTH_LONG).show();
+        }
+        else {
+            // notify user of failure
+            Toast.makeText(this, "Code Does Not Match", Toast.LENGTH_LONG).show();
+        }
+
+        // launch checkpoint fragment again
+        getSupportFragmentManager().popBackStack();
+
     }
 }

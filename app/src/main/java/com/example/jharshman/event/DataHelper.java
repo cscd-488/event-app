@@ -394,8 +394,73 @@ public class DataHelper extends SQLiteOpenHelper {
             // build query result set
             checkPoints = buildCheckpointResultSet(cursor);
 
-            // close the cursor
-            cursor.close();
+            // get the data from the cursor
+            if(cursor != null) {
+
+                Log.i(TAG, "Cursor wasn't null!");
+
+                // add items to the list
+                int checkpoint_id;
+                int event_id;
+                String title;
+                String artist;
+                String description;
+                String imageSrc;
+                double lat;
+                double lon;
+                String qr;
+                String timeCreated;
+                String timeUpdated;
+                int checked;
+                CheckPoint checkpoint;
+
+                for(cursor.moveToFirst(); ! cursor.isAfterLast(); cursor.moveToNext()) {
+
+                    Log.i(TAG, "Getting event from cursor");
+
+                    int pos = 0;
+
+                    // get elements from cursor
+                    checkpoint_id = cursor.getInt(pos ++);
+                    event_id = cursor.getInt(pos ++);
+                    title = cursor.getString(pos ++);
+                    artist = cursor.getString(pos ++);
+                    description = cursor.getString(pos ++);
+                    imageSrc = cursor.getString(pos ++);
+                    lat = cursor.getDouble(pos ++);
+                    lon = cursor.getDouble(pos ++);
+                    qr = cursor.getString(pos ++);
+                    timeCreated = cursor.getString(pos ++);
+                    timeUpdated = cursor.getString(pos ++);
+                    checked = cursor.getInt(pos);
+
+                    // create new checkpoint and add it to the list
+                    checkpoint = new CheckPoint.Builder()
+                            .setID(checkpoint_id)
+                            .setEventID(event_id)
+                            .setTitle(title)
+                            .setArtist(artist)
+                            .setDescription(description)
+                            .setImageSrc(imageSrc)
+                            .setLat(lat)
+                            .setLon(lon)
+                            .setQR(qr)
+                            .setTimeCreated(timeCreated)
+                            .setTimeUpdated(timeUpdated)
+                            .setChecked(checked)
+                            .build();
+
+                    Log.i(TAG, String.format("%d %s %s %s %s", checkpoint_id, title, artist, description, imageSrc));
+
+                    checkPoints.add(checkpoint);
+                }
+
+                // close the cursor
+                cursor.close();
+            }
+            else {
+                Log.i(TAG, "Cursor is null!");
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "error getting checkpoints from database");
@@ -429,12 +494,67 @@ public class DataHelper extends SQLiteOpenHelper {
             // send query database for all checkpoints
             Cursor cursor = database.query(CHECK_POINT_TABLE, null, CHECK_POINT_COLUMN_ID + "=?", new String[] {String.valueOf(checkpointID)}, null, null, "1");
 
-            // build the result set from the cursor query
-            // get only the first element from the list. List should be of size 1, based on query.
-            checkPoint = buildCheckpointResultSet(cursor).get(0);
+            // get the data from the cursor
+            if(cursor != null) {
 
-            // close the cursor
-            cursor.close();
+                Log.i(TAG, "Cursor wasn't null!");
+
+                // add items to the list
+                int checkpoint_id;
+                int event_id;
+                String title;
+                String artist;
+                String description;
+                String imageSrc;
+                double lat;
+                double lon;
+                String qr;
+                String timeCreated;
+                String timeUpdated;
+                int checked;
+
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+
+                    Log.i(TAG, "Getting checkpoint from cursor");
+
+                    int pos = 0;
+
+                    // get elements from cursor
+                    checkpoint_id = cursor.getInt(pos++);
+                    event_id = cursor.getInt(pos++);
+                    title = cursor.getString(pos++);
+                    artist = cursor.getString(pos++);
+                    description = cursor.getString(pos++);
+                    imageSrc = cursor.getString(pos++);
+                    lat = cursor.getDouble(pos++);
+                    lon = cursor.getDouble(pos++);
+                    qr = cursor.getString(pos++);
+                    timeCreated = cursor.getString(pos++);
+                    timeUpdated = cursor.getString(pos++);
+                    checked = cursor.getInt(pos);
+
+                    // create new checkpoint and add it to the list
+                    checkPoint = new CheckPoint.Builder()
+                            .setID(checkpoint_id)
+                            .setEventID(event_id)
+                            .setTitle(title)
+                            .setArtist(artist)
+                            .setDescription(description)
+                            .setImageSrc(imageSrc)
+                            .setLat(lat)
+                            .setLon(lon)
+                            .setQR(qr)
+                            .setTimeCreated(timeCreated)
+                            .setTimeUpdated(timeUpdated)
+                            .setChecked(checked)
+                            .build();
+
+                    Log.i(TAG, String.format("%d %s %s %s %s", checkpoint_id, title, artist, description, imageSrc));
+                }
+
+                // close the cursor
+                cursor.close();
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "error getting checkpoint from database");
