@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 public class ViewPagerFragment extends Fragment {
 
 
-    private static final int NUM_PAGES = 5;
+    private static final int NUM_PAGES = 4;
     private ViewPager mPager;
     private PagerAdapter mAdapter;
 
