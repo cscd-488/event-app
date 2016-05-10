@@ -7,6 +7,25 @@
     <string name="swipe_to_learn">Swipe to Learn More ></string>
     <string name="Continue">Continue</string>
 
+    <!-- Paginated Usage Screen -->
+    <string name="how_it_works">HOW IT WORKS</string>
+    <string name="how_it_works_body">
+        Use Magpie to find tours, events, and more, in your area.
+        You can participate in these events to collect digital badges
+        which in turn can be exchangeable for real prizes!
+    </string>
+    <string name="add_collections">ADD COLLECTIONS</string>
+    <string name="add_collections_body">
+        Every concert, art show, event, and gathering that register with Magpie is
+        shown as a collection.  Magpie will only show you events relevant to your location.
+    </string>
+    <string name="win_prizes">WIN REAL PRIZES</string>
+    <string name="win_prizes_body">
+        Win awesome prizes for completing collections.
+        We partner up with some of the best local business
+        to provide our users with some awesome rewards!
+    </string>
+
     <!-- Server and OAuth2 information -->
     <string name="OAuth_client_ID">170378995036-99ob67o6p5871kn02omq6bh5blb25070.apps.googleusercontent.com</string>
     <string name="magpie_server_event_data">http://magpieserver.com/events</string>
