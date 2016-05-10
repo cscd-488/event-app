@@ -63,8 +63,6 @@ public class ViewPagerFragment extends Fragment {
                     return new UsageTwo();
                 case 3:
                     return new UsageThree();
-                default:
-                    return new UsageFour();
             }
         }
 

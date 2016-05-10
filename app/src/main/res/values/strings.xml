@@ -10,20 +10,20 @@
     <!-- Paginated Usage Screen -->
     <string name="how_it_works">HOW IT WORKS</string>
     <string name="how_it_works_body">
-        With Magpie, you can find tours, events, and more, known on Magpie
-        as "collections", around you.  Collect badges along the way and
-        score real prizes and discounts for completing collections!
+        Use Magpie to find tours, events, and more, in your area.
+        You can participate in these events to collect digital badges
+        which in turn can be exchangeable for real prizes!
     </string>
     <string name="add_collections">ADD COLLECTIONS</string>
     <string name="add_collections_body">
-        Find tours, events and more around you.
-        Add your favorites and start collecting badges!
+        Every concert, art show, event, and gathering that register with Magpie is
+        shown as a collection.  Magpie will only show you events relevant to your location.
     </string>
     <string name="win_prizes">WIN REAL PRIZES</string>
     <string name="win_prizes_body">
         Win awesome prizes for completing collections.
         We partner up with some of the best local business
-        we can find to provide prizes and exclusive discounts!
+        to provide our users with some awesome rewards!
     </string>
 
     <!-- Server and OAuth2 information -->
