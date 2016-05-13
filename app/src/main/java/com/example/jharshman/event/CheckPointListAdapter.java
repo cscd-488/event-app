@@ -2,6 +2,7 @@
  * @file CheckPointListAdapter.java
  * @author Bruce Emehiser
  * @date 2016 02 23
+ * @date 2016 05 12
  *
  * This is a simple array adapter for holding
  * event and waypoint cards. It provides a clean
@@ -11,6 +12,7 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,8 +84,13 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
                 .load(checkPoint.getImageSrc())
                 .into(holder.mImage);
 
-        // todo set time text
-        // todo set distance text
+        try {
+            holder.mTime.setText(LocationMapFragment.timeToLocation(checkPoint));
+            holder.mDistance.setText(String.valueOf(LocationMapFragment.distanceFromUserFeet(checkPoint)));
+
+        } catch (NullPointerException e) {
+            Log.e(TAG, "Error getting time or distance from LocationMapFragment static methods.");
+        }
 
         return convertView;
     }

@@ -195,25 +195,23 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
                 return;
             CheckPoint hovered = coordinates[displayIndex];
 
-            TextView distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
-            TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
-
             distance = distanceFromUserMiles(hovered);
 
             timeToLocation(hovered);
 
-            try {
+            // check for existence of location map fragment before trying to set its views
+            if(getView() != null) {
+
+                TextView distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
+                TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
 
                 timeView.setText(timeToLocation);
                 if (distance >= 0) {
-                    distanceView.setText(String.format("%.2f", distance) + "miles");
+                    distanceView.setText(String.format("%.2f %s", distance, "miles"));
                 } else {
                     distanceView.setText("No user location");
                 }
-            }catch(NullPointerException e){
-                e.printStackTrace();
             }
-
         }
     };
 
