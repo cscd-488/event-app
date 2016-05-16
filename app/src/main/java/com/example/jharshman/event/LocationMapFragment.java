@@ -10,13 +10,16 @@
 package com.example.jharshman.event;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.net.Uri;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -27,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -57,7 +61,7 @@ import java.util.List;
  * Use the {@link LocationMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
+public class LocationMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static class DownloadTask extends AsyncTask<String, Void, String> {
 
@@ -65,17 +69,17 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         protected String doInBackground(String... params) {
             String data = "";
 
-            try{
+            try {
                 data = downloadUrl(params[0]);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
             }
 
             return data;
         }
 
         @Override
-        protected void onPostExecute(String results){
+        protected void onPostExecute(String results) {
             super.onPostExecute(results);
 
             ParserTask parserTask = new ParserTask();
@@ -90,12 +94,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
             JSONObject jsonObject;
             List<List<HashMap<String, String>>> routes = null;
 
-            try{
+            try {
                 jsonObject = new JSONObject(params[0]);
                 DirectionsJSONParser parser = new DirectionsJSONParser();
 
                 routes = parser.parse(jsonObject);
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -108,30 +112,31 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
             PolylineOptions polylineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
             String distance = "";
-            String duration = "";
+            String duration = "No Path Available";
 
             try {
                 if (results.size() < 1) {
+                    listener.onMapTimedDistance(duration);
                     return;
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 return;
             }
 
-            for(int i = 0; i < results.size(); i++){
+            for (int i = 0; i < results.size(); i++) {
                 points = new ArrayList<>();
                 polylineOptions = new PolylineOptions();
                 List<HashMap<String, String>> path = results.get(i);
 
-                for(int j = 0; j < path.size(); j++){
+                for (int j = 0; j < path.size(); j++) {
                     HashMap<String, String> point = path.get(j);
 
-                    if(j==0){
-                        distance = (String)point.get("distance");
+                    if (j == 0) {
+                        distance = (String) point.get("distance");
                         continue;
-                    }else if(j==1){
-                        duration = (String)point.get("duration");
+                    } else if (j == 1) {
+                        duration = (String) point.get("duration");
                         continue;
                     }
 
@@ -146,128 +151,63 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
                 polylineOptions.width(2f);
                 polylineOptions.color(Color.RED);
             }
-            timeToLocation = duration;
+            listener.onMapTimedDistance(duration);
         }
     }
 
-    private class MarkerWrapper{
+    private class MarkerWrapper {
         public CheckPoint location;
         public Marker marker;
 
-        public MarkerWrapper(CheckPoint location, Marker marker){
+        public MarkerWrapper(CheckPoint location, Marker marker) {
             this.location = location;
             this.marker = marker;
         }
     }
 
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+
     // the fragment initialization parameters
     private static final String ARG_CHECKPOINT_ID = "arg_checkpoint_id";
-
     private static final float METERS_TO_FEET = 3.28084f;
     private static final float METERS_TO_KILO = 1000f;
     private static final float FEET_TO_MILES = 5280f;
     private static final int DEFAULT_ZOOM = 17;
 
-    private static Location mLocation;
-    private static String timeToLocation = "No Data";
+    private static Location mLocation = null;
+    private static TimedDistanceCallbackListener listener;
 
     private MapView mapView;
-    private int displayIndex = 0;
     private GoogleMap map;
+    private int displayIndex = 0;
     private MarkerWrapper[] markers = new MarkerWrapper[0];
     private OnFragmentInteractionListener mListener;
     private CheckPoint[] coordinates = new CheckPoint[0];
     private boolean zoomed = false;
+    private GoogleApiClient mGoogleApiClient;
 
     /**
      * The event id to display checkpoints for.
      */
     private int eventID;
 
-    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
+    private LocationMapFragment.TimedDistanceCallbackListener callbackListener = new LocationMapFragment.TimedDistanceCallbackListener() {
         @Override
-        public void onMyLocationChange(Location location) {
-            float distance;
-            mLocation = location;
-            if(!zoomed)
-                centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
-            if(coordinates == null || coordinates.length == 0)
+        public void onMapTimedDistance(String time) {
+            TextView timeView;
+
+            if ((timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView)) == null)
                 return;
-            CheckPoint hovered = coordinates[displayIndex];
 
-            TextView distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
-            TextView timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
-
-            distance = distanceFromUserMiles(hovered);
-
-            timeToLocation(hovered);
-
-            try {
-
-                timeView.setText(timeToLocation);
-                if (distance >= 0) {
-                    distanceView.setText(String.format("%.2f", distance) + "miles");
-                } else {
-                    distanceView.setText("No user location");
-                }
-            }catch(NullPointerException e){
-                e.printStackTrace();
-            }
-
+            timeView.setText(time);
         }
     };
-
-    private static String downloadUrl(String strUrl) throws IOException{
-        String data = "";
-        InputStream inputStream = null;
-        HttpURLConnection urlConnection = null;
-
-        try{
-
-            URL url = new URL(strUrl);
-            urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.connect();
-            inputStream = urlConnection.getInputStream();
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuffer sb = new StringBuffer();
-
-            String line = "";
-
-            while((line = br.readLine())!= null){
-                sb.append(line);
-            }
-
-            data = sb.toString();
-
-            br.close();
-
-        }catch(Exception e){
-            Log.d("Exception downloading", e.toString());
-        }finally {
-            inputStream.close();
-            urlConnection.disconnect();
-        }
-        return data;
-    }
-
-    private static String getDirectionsUrl(LatLng start, LatLng dest){
-        String strOrigin = "origin="+start.latitude+","+start.longitude;
-        String strDest = "destination="+dest.latitude+","+dest.longitude;
-        String sensor = "sensor=false";
-        String mode = "mode=walking";
-        String params = strOrigin+"&"+strDest+"&"+sensor+"&"+mode;
-        String output = "json";
-        String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+params;
-
-        return url;
-    }
 
     private GoogleMap.OnMarkerClickListener myMarkerClickListener = new GoogleMap.OnMarkerClickListener() {
         @Override
         public boolean onMarkerClick(Marker marker) {
-            for(int i = 0; i < markers.length; i++){
-                if(markers[i].marker.equals(marker)){
+            for (int i = 0; i < markers.length; i++) {
+                if (markers[i].marker.equals(marker)) {
                     displayIndex = i;
 
                     fillText(markers[i]);
@@ -277,6 +217,87 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
             return true;
         }
     };
+
+    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
+        @Override
+        public void onMyLocationChange(Location location) {
+            mLocation = location;
+
+            if (getView() == null)
+                return;
+            if (!zoomed)
+                centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
+            if (coordinates == null || coordinates.length == 0)
+                return;
+
+            CheckPoint hovered = coordinates[displayIndex];
+
+            distanceFromUser(hovered.getEventID(), getContext(), measuredCallbackListener, MeasuredDistanceCallbackListener.Measurement.MILES);
+            timeToLocation(hovered.getEventID(), getContext(), callbackListener);
+        }
+    };
+
+    private MeasuredDistanceCallbackListener measuredCallbackListener = new MeasuredDistanceCallbackListener() {
+        @Override
+        public void onMapMeasuredDistance(String distance) {
+            TextView distanceView;
+
+            if ((distanceView = (TextView) getView().findViewById(R.id.distanceTextView)) == null)
+                return;
+
+            try {
+                distanceView.setText(distance);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private static String downloadUrl(String strUrl) throws IOException {
+        String data = "";
+        InputStream inputStream = null;
+        HttpURLConnection urlConnection = null;
+
+        try {
+
+            URL url = new URL(strUrl);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.connect();
+            inputStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuffer sb = new StringBuffer();
+
+            String line = "";
+
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+
+        } catch (Exception e) {
+            Log.d("Exception downloading", e.toString());
+        } finally {
+            inputStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    private static String getDirectionsUrl(LatLng start, LatLng dest) {
+        String strOrigin = "origin=" + start.latitude + "," + start.longitude;
+        String strDest = "destination=" + dest.latitude + "," + dest.longitude;
+        String sensor = "sensor=false";
+        String mode = "mode=walking";
+        String params = strOrigin + "&" + strDest + "&" + sensor + "&" + mode;
+        String output = "json";
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + params;
+
+        return url;
+    }
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -316,12 +337,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
 
         View v = inflater.inflate(R.layout.fragment_location_map, container, false);
 
-       this.buildMap(v, savedInstanceState);
+        this.buildMap(v, savedInstanceState);
 
         return v;
     }
 
-    private void buildMap(View v, Bundle savedInstanceState){
+    private void buildMap(View v, Bundle savedInstanceState) {
         mapView = (MapView) v.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
@@ -335,68 +356,88 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         mapView.getMapAsync(this);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    /**
+     * Returns the distance in the requested measurement from the last known user location
+     *
+     * @param  checkPoint  the coordinate to compare from
+     */
+    public static void distanceFromUser(int checkPoint, Context context, MeasuredDistanceCallbackListener callBack, MeasuredDistanceCallbackListener.Measurement returnFormat){
+        String format = "m";
+        double[] coords = DataManager.instance(context).getCheckpoint(checkPoint).getCoordinates();
+        float[] results = new float[1];
+        Location location = mLocation;
+
+        if(location == null){
+            LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                callBack.onMapMeasuredDistance("Location Services Disabled");
+                return;
+            }
+            location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if(location == null) {
+                callBack.onMapMeasuredDistance("No Last Known Location");
+                return;
+            }
         }
-    }
 
-    public static float distanceFromUserKilometers(CheckPoint checkPoint) {
-        return distanceFromUserMeter(checkPoint) / METERS_TO_KILO;
-    }
+        Location.distanceBetween(location.getLatitude(), location.getLongitude(), coords[0], coords[1], results);
 
-    public static float distanceFromUserMiles(CheckPoint checkPoint) {
-        return distanceFromUserFeet(checkPoint) / FEET_TO_MILES;
+        switch(returnFormat){
+            case FEET:
+                results[0] *= METERS_TO_FEET;
+                format = "ft";
+                break;
+            case MILES:
+                results[0] *= METERS_TO_FEET;
+                results[0] /= FEET_TO_MILES;
+                format = "mi";
+                break;
+            case KILOMETERS:
+                results[0] /= METERS_TO_KILO;
+                format = "km";
+                break;
+        }
+
+        callBack.onMapMeasuredDistance(String.format("%.2f", results[0]) + " " + format);
     }
 
     /**
      * Returns the walking time from the users last known location to the passed checkpoint
      *
      * @param  checkPoint  the coordinate to compare from
-     * @return      the walking time in days/hrs/min/sec from the last known location. "No Data" if no known location
      */
-    public static String timeToLocation(CheckPoint checkPoint){
-        double[] coords = checkPoint.getCoordinates();
+    public static void timeToLocation(int checkPoint, Context context, TimedDistanceCallbackListener callback) {
+        double[] location = new double[2];
+        listener = callback;
+        if (listener != null) {
+            if (mLocation != null) {
+                location[0] = mLocation.getLatitude();
+                location[1] = mLocation.getLongitude();
+            } else {
+                LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    callback.onMapTimedDistance("Location Services Disabled");
+                    return;
+                }
+                Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        String url = getDirectionsUrl(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()),
-                new LatLng(coords[0], coords[1]));
+                if(lastLocation != null){
+                    location[0] = lastLocation.getLatitude();
+                    location[1] = lastLocation.getLongitude();
+                }else {
+                    callback.onMapTimedDistance("No Last Known Location");
+                    return;
+                }
+            }
+            double[] coords = DataManager.instance(context).getCheckpoint(checkPoint).getCoordinates();
 
-        DownloadTask downloadTask = new DownloadTask();
-        downloadTask.execute(url);
+            String url = getDirectionsUrl(new LatLng(location[0], location[1]),
+                    new LatLng(coords[0], coords[1]));
 
-        return timeToLocation;
-    }
-
-    /**
-     * Returns the distance in meters from the last known user location
-     *
-     * @param  checkPoint  the coordinate to compare from
-     * @return      the distance in meters from the last known location. -1 if no known location
-     */
-    public static float distanceFromUserMeter(CheckPoint checkPoint){
-        if(mLocation == null)
-            return -1f;
-
-        float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
-        return results[0];
-    }
-
-    /**
-     * Returns the distance in feet from the last known user location
-     *
-     * @param  checkPoint  the coordinate to compare from
-     * @return      the distance in feet from the last known location. -1 if no known location
-     */
-    public static float distanceFromUserFeet(CheckPoint checkPoint){
-        if(mLocation == null)
-            return -1f;
-
-        float[] results = new float[1];
-        Location.distanceBetween(mLocation.getLatitude(), mLocation.getLongitude(), checkPoint.getCoordinates()[0], checkPoint.getCoordinates()[1], results);
-        results[0] *= METERS_TO_FEET;
-        return results[0];
+            DownloadTask downloadTask = new DownloadTask();
+            downloadTask.execute(url);
+        }
     }
 
     @Override
@@ -434,16 +475,29 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
-
+        try {
+            int off = Settings.Secure.getInt(getContext().getContentResolver(), Settings.Secure.LOCATION_MODE);
+            if (off == 0) {
+                Toast.makeText(getContext(), "Please enable GPS", Toast.LENGTH_SHORT).show();
+                Intent onGPS = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(onGPS);
+            }
+        }catch(Settings.SettingNotFoundException e) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return;
+        }
+        this.setupCheckPoints();
+        this.populateFunctionality();
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) getContext(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
         }
         this.map.setMyLocationEnabled(true);
-
-        this.setupCheckPoints();
         this.map.setOnMarkerClickListener(this.myMarkerClickListener);
         this.map.setOnMyLocationChangeListener(this.myLocationChangeListener);
-        this.populateFunctionality();
     }
 
     private void populateFunctionality(){
@@ -460,7 +514,9 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Not yet implemented", Toast.LENGTH_SHORT).show();
+                if (mListener != null) {
+                    mListener.onMapFragmentInteraction(coordinates[displayIndex]);
+                }
             }
         });
 
@@ -509,7 +565,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
 
         view.setText(mw.location.getTitle());
         view = (TextView)getActivity().findViewById(R.id.descriptionTextView);
-        view.setText("Not implemented");
+        view.setText(mw.location.getDescription());
     }
 
     private void centerToLocation(double[] coords){
@@ -542,7 +598,19 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
+    public interface MeasuredDistanceCallbackListener{
+        public static enum Measurement{
+            FEET,
+            MILES,
+            METERS,
+            KILOMETERS;
+        }
+        void onMapMeasuredDistance(String distance);
+    }
+    public interface TimedDistanceCallbackListener{
+        void onMapTimedDistance(String time);
+    }
     public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
+        void onMapFragmentInteraction(CheckPoint checkPoint);
     }
 }

@@ -23,25 +23,24 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-import java.util.ArrayList;
-
 /**
  * Created by Aaron on 1/24/2016.
  */
 public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final double buffer = 0.00065000;
     private static GpsTracker gpsTracker = null;
     private static Context context;
     private static GoogleApiClient googleApiClient;
-    private static boolean notificationsEnabled = false;
 
-    private ArrayList<CheckPoint> locations;
-    private CheckPoint inRange;
+    private Location location = null;
 
-    private GpsTracker(){
-        this.inRange = null;
-        this.locations = new ArrayList<>();
+    private GpsTracker(){}
+
+    public static GpsTracker instanceOf(Context _context){
+        if(gpsTracker == null){
+            return create(_context);
+        }
+        return gpsTracker;
     }
 
     public static GpsTracker create(Context _context){
@@ -56,9 +55,6 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
 
         return gpsTracker;
     }
-
-    public static void enableNotifications(){notificationsEnabled = true;}
-    public static void disableNotifications(){notificationsEnabled = false;}
 
     private static void setupGps(){
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -123,52 +119,14 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         }
     }
 
-    public static void addLocation(CheckPoint ... location){
-        for(CheckPoint loc : location)
-            gpsTracker.locations.add(loc);
+    public Location getLocation(){return location;}
+
+    public void connect(){
+        googleApiClient.connect();
     }
 
-    public static void addLocation(CheckPoint location){
-        gpsTracker.locations.add(location);
-    }
-
-    public static void removeLocation(CheckPoint ... locations) {
-        for(CheckPoint loc : locations)
-            removeLocation(loc);
-    }
-    public static boolean removeLocation(CheckPoint location){
-        CheckPoint toRemove = null;
-
-        for(CheckPoint loc : gpsTracker.locations){
-            if(loc.compareTo(location) == 0) {
-                toRemove = loc;
-                break;
-            }
-        }
-
-        gpsTracker.locations.remove(toRemove);
-        return (toRemove != null);
-    }
-
-    public static CheckPoint getCheckPointInRange(){return gpsTracker.inRange;}
-
-    private static CheckPoint inRange(double _lat, double _longi){
-        double[] coord = {};
-
-        for(CheckPoint CheckPoint : gpsTracker.locations){
-            coord = CheckPoint.getCoordinates();
-
-            if(_lat - buffer < coord[0] && coord[0] < _lat + buffer && _longi - buffer < coord[1] && coord[1] < _longi + buffer) {
-                gpsTracker.inRange = CheckPoint;
-                return CheckPoint;
-            }
-        }
-
-        return null;
-    }
-
-    private void sendNotification(Context context){
-        Notification.create(context, -1, inRange.getTitle(), inRange.getDescription(), 1000, 1000, 1000, 1000);
+    public void disconnect(){
+        googleApiClient.disconnect();
     }
 
     @Override
@@ -183,16 +141,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
 
     @Override
     public void onLocationChanged(Location location) {
-        double latitude = (location.getLatitude());
-        double longitude = (location.getLongitude());
-        CheckPoint CheckPoint = inRange(latitude, longitude);
-
-        if(CheckPoint != null){
-            if(notificationsEnabled && !CheckPoint.wasDisplayed()) {
-                sendNotification(context);
-                CheckPoint.setDisplayed();
-            }
-        }
+        this.location = location;
     }
 
     @Override

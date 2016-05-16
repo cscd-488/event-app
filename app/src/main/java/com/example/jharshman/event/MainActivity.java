@@ -2,7 +2,6 @@ package com.example.jharshman.event;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements
         EventFragment.OnFragmentInteractionListener,
         CheckPointFragment.OnFragmentInteractionListener,
         LocationMapFragment.OnFragmentInteractionListener,
-        ScanFragment.OnScanFragmentInteraction {
+        ScanFragment.OnScanFragmentInteraction{
 
     private static final String TAG = "MainActivity";
 
@@ -28,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements
     public static final String CHECK_POINT_FRAGMENT = "CHECK_POINT_FRAGMENT";
     public static final String LOCATION_MAP_FRAGMENT = "LOCATION_MAP_FRAGMENT";
     public static final String SCAN_FRAGMENT = "SCAN_FRAGMENT";
+
+    private static GpsTracker tracker;
 
     private Fragment mPagerFragment;
     SharedPreferences mSharedPreferences;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        tracker = GpsTracker.create(this);
 
         if(findViewById(R.id.FragmentContainer)!=null) {
             if (savedInstanceState != null)
@@ -75,6 +77,24 @@ public class MainActivity extends AppCompatActivity implements
 
             mSharedPreferences.edit().putBoolean(getString(R.string.first_use), false).apply();
         }
+    }
+
+    public static GpsTracker getTracker(){
+        return tracker;
+    }
+
+    @Override
+    protected void onStart(){
+        if(tracker != null)
+            tracker.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop(){
+        if(tracker != null)
+            tracker.disconnect();
+        super.onStop();
     }
 
     @Override
@@ -216,9 +236,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
-        // todo finish implementing this
+    public void onMapFragmentInteraction(CheckPoint checkPoint) {
+        Log.d("Map", "Checkpoint Clicked From Map");
     }
 
     /**
