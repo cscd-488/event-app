@@ -112,10 +112,11 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             PolylineOptions polylineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
             String distance = "";
-            String duration = "";
+            String duration = "No Path Available";
 
             try {
                 if (results.size() < 1) {
+                    listener.onMapTimedDistance(duration);
                     return;
                 }
             } catch (Exception e) {

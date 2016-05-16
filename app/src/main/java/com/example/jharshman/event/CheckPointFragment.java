@@ -77,13 +77,6 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LocationMapFragment.timeToLocation(1, getContext(), new LocationMapFragment.TimedDistanceCallbackListener() {
-            @Override
-            public void onMapTimedDistance(String time) {
-                Toast.makeText(getContext(), time, Toast.LENGTH_SHORT).show();
-            }
-        });
-
         int eventID = -1;
         if (getArguments() != null) {
             // get Event ID
