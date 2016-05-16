@@ -125,7 +125,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="No Location"
+        android:text="No Time Known"
         android:id="@+id/timeToTargetTextView"
         android:layout_alignTop="@+id/descriptionTextView"
         android:layout_toRightOf="@+id/locationImageView"

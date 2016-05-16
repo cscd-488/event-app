@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -75,6 +76,13 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
     @SuppressWarnings("unchecked")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        LocationMapFragment.timeToLocation(1, getContext(), new LocationMapFragment.TimedDistanceCallbackListener() {
+            @Override
+            public void onMapTimedDistance(String time) {
+                Toast.makeText(getContext(), time, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         int eventID = -1;
         if (getArguments() != null) {
