@@ -368,16 +368,14 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         Location location = mLocation;
 
         if(location == null){
-            location = GpsTracker.instanceOf(context).getLocation();
-        }else{
             LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 callBack.onMapMeasuredDistance("Location Services Disabled");
                 return;
             }
-            Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            if(lastLocation == null) {
+            if(location == null) {
                 callBack.onMapMeasuredDistance("No Last Known Location");
                 return;
             }
