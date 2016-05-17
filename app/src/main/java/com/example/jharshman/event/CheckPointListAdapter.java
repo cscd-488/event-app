@@ -53,7 +53,7 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        CheckPointListViewHolder holder;
+        final CheckPointListViewHolder holder;
         if(convertView == null) {
             // inflate layout for card view
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -83,10 +83,23 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
         Picasso.with(getContext())
                 .load(checkPoint.getImageSrc())
                 .into(holder.mImage);
-
+        holder.mTime.setText(R.string.ui_calculating);
+        holder.mDistance.setText(R.string.ui_calculating);
         try {
-            holder.mTime.setText(LocationMapFragment.timeToLocation(checkPoint));
-            holder.mDistance.setText(String.valueOf(LocationMapFragment.distanceFromUserFeet(checkPoint)));
+            LocationMapFragment.timeToLocation(checkPoint.getID(), getContext(), new LocationMapFragment.TimedDistanceCallbackListener() {
+                @Override
+                public void onMapTimedDistance(String time) {
+                    Log.i(TAG, "Time to location callback " + time);
+                    holder.mTime.setText(time);
+                }
+            });
+            LocationMapFragment.distanceFromUser(checkPoint.getID(), getContext(), new LocationMapFragment.MeasuredDistanceCallbackListener() {
+                @Override
+                public void onMapMeasuredDistance(String distance) {
+                    Log.i(TAG, "Measurement Distance from user callback " + distance);
+                    holder.mDistance.setText(distance);
+                }
+            }, LocationMapFragment.MeasuredDistanceCallbackListener.Measurement.MILES);
 
         } catch (NullPointerException e) {
             Log.e(TAG, "Error getting time or distance from LocationMapFragment static methods.");
