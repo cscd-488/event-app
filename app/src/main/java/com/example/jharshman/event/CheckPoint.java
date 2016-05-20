@@ -49,7 +49,8 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private String mTimeCreated;
     @SerializedName("updated_at")
     private String mTimeUpdated;
-    @SerializedName("status")
+    // todo get the data from the server
+//    @SerializedName("status")
     private int mChecked;
     private boolean mWasDisplayed;
 
