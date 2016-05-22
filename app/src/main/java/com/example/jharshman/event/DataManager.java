@@ -253,7 +253,7 @@ public class DataManager implements Callback {
      * @param subscribed The subscription status.
      * @return True if event updated, otherwise false.
      */
-    public boolean updateSubscribed(int eventID, boolean subscribed) {
+    public boolean updateSubscribed(int eventID, int subscribed) {
 
         long updated = mDataHelper.updateSubscribed(eventID, subscribed);
 

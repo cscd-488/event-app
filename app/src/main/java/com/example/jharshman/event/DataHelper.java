@@ -197,8 +197,8 @@ public class DataHelper extends SQLiteOpenHelper {
         contentValues.put(EVENT_COLUMN_QR, event.getQR());
         contentValues.put(EVENT_COLUMN_TIME_CREATED, event.getTimeCreated());
         contentValues.put(EVENT_COLUMN_TIME_UPDATED, event.getTimeUpdated());
-        contentValues.put(EVENT_COLUMN_SUBSCRIBED, event.getSubscribed() ? 1 : 0); // Note: SQLite doesn't contain BOOL, so I'm using INTEGER
-        contentValues.put(EVENT_COLUMN_REDEEMED, event.isRedeemed() ? 1 : 0);
+        contentValues.put(EVENT_COLUMN_SUBSCRIBED, event.getSubscribed()); // Note: SQLite doesn't contain BOOL, so I'm using INTEGER
+        contentValues.put(EVENT_COLUMN_REDEEMED, event.isRedeemed());
 
         // insert row into the database Note: no exception should be thrown todo make events update with whichever data is newest
         long inserted = database.insertWithOnConflict(EVENT_TABLE, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
@@ -295,13 +295,13 @@ public class DataHelper extends SQLiteOpenHelper {
      * @param subscribed The boolean subscription status.
      * @return The number of rows affected by update, or -1 if no rows affected.
      */
-    public long updateSubscribed(int eventID, boolean subscribed) {
+    public long updateSubscribed(int eventID, int subscribed) {
 
         SQLiteDatabase database = getWritableDatabase();
 
         // set up the row
         ContentValues contentValues = new ContentValues();
-        contentValues.put(EVENT_COLUMN_SUBSCRIBED, subscribed ? 1 : 0);
+        contentValues.put(EVENT_COLUMN_SUBSCRIBED, subscribed);
 
         // insert row into the database Note: no exception should be thrown
         long updated = database.update(EVENT_TABLE, contentValues, EVENT_COLUMN_ID + "=?", new String[]{String.valueOf(eventID)});
@@ -504,7 +504,8 @@ public class DataHelper extends SQLiteOpenHelper {
             String qr;
             String timeCreated;
             String timeUpdated;
-            boolean subscribed;
+            int subscribed;
+            int redeemed;
             List<CheckPoint> checkPoints;
             Event event;
 
@@ -525,8 +526,10 @@ public class DataHelper extends SQLiteOpenHelper {
                 lon = cursor.getDouble(pos ++);
                 qr = cursor.getString(pos ++);
                 timeCreated = cursor.getString(pos ++);
-                timeUpdated = cursor.getString(pos);
-                subscribed = getSubscribed(event_id);
+                timeUpdated = cursor.getString(pos ++);
+                subscribed = cursor.getInt(pos ++);
+                redeemed = cursor.getInt(pos);
+
                 checkPoints = this.getCheckpoints(event_id);
 
                 // create new event and add it to the list
@@ -544,6 +547,7 @@ public class DataHelper extends SQLiteOpenHelper {
                         .setTimeUpdated(timeUpdated)
                         .setCheckPoints(checkPoints)
                         .setSubscribed(subscribed)
+                        .setRedeemed(redeemed)
                         .build();
 
                 Log.i(TAG, String.format("%d %s %s %s %s %b", event_id, title, author, description, imageSrc, subscribed));
