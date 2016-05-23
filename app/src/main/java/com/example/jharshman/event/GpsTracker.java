@@ -32,8 +32,6 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     private static Context context;
     private static GoogleApiClient googleApiClient;
 
-    private Location location = null;
-
     private GpsTracker(){}
 
     public static GpsTracker instanceOf(Context _context){
@@ -76,7 +74,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
             googleApiClient.connect();
 
             LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
             locationRequest.setInterval(30 * 1000);
             locationRequest.setFastestInterval(15 * 1000);
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -119,48 +117,25 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         }
     }
 
-    public Location getLocation(){return location;}
-
     public void connect(){
         googleApiClient.connect();
     }
-
     public void disconnect(){
         googleApiClient.disconnect();
     }
 
     @Override
-    public void onConnected(Bundle bundle) {
-
-    }
-
+    public void onConnected(Bundle bundle) {}
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
+    public void onConnectionSuspended(int i) {}
     @Override
-    public void onLocationChanged(Location location) {
-        this.location = location;
-    }
-
+    public void onLocationChanged(Location location) {}
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
     @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
+    public void onProviderEnabled(String provider) {}
     @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
+    public void onProviderDisabled(String provider) {}
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 }

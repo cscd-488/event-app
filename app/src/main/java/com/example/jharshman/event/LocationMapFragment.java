@@ -515,7 +515,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    mListener.onMapFragmentInteraction(coordinates[displayIndex]);
+                    mListener.onMapFragmentInteraction(coordinates[displayIndex].getID());
                 }
             }
         });
@@ -611,6 +611,6 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         void onMapTimedDistance(String time);
     }
     public interface OnFragmentInteractionListener {
-        void onMapFragmentInteraction(CheckPoint checkPoint);
+        void onMapFragmentInteraction(int checkPoint);
     }
 }
