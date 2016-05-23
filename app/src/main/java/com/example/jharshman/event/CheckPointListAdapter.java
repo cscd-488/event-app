@@ -2,6 +2,7 @@
  * @file CheckPointListAdapter.java
  * @author Bruce Emehiser
  * @date 2016 02 23
+ * @date 2016 05 12
  *
  * This is a simple array adapter for holding
  * event and waypoint cards. It provides a clean
@@ -11,6 +12,7 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +53,7 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        CheckPointListViewHolder holder;
+        final CheckPointListViewHolder holder;
         if(convertView == null) {
             // inflate layout for card view
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -81,9 +83,27 @@ public class CheckPointListAdapter extends ArrayAdapter<CheckPoint> {
         Picasso.with(getContext())
                 .load(checkPoint.getImageSrc())
                 .into(holder.mImage);
+        holder.mTime.setText(R.string.ui_calculating);
+        holder.mDistance.setText(R.string.ui_calculating);
+        try {
+            LocationMapFragment.timeToLocation(checkPoint.getID(), getContext(), new LocationMapFragment.TimedDistanceCallbackListener() {
+                @Override
+                public void onMapTimedDistance(String time) {
+                    Log.i(TAG, "Time to location callback " + time);
+                    holder.mTime.setText(time);
+                }
+            });
+            LocationMapFragment.distanceFromUser(checkPoint.getID(), getContext(), new LocationMapFragment.MeasuredDistanceCallbackListener() {
+                @Override
+                public void onMapMeasuredDistance(String distance) {
+                    Log.i(TAG, "Measurement Distance from user callback " + distance);
+                    holder.mDistance.setText(distance);
+                }
+            }, LocationMapFragment.MeasuredDistanceCallbackListener.Measurement.MILES);
 
-        // todo set time text
-        // todo set distance text
+        } catch (NullPointerException e) {
+            Log.e(TAG, "Error getting time or distance from LocationMapFragment static methods.");
+        }
 
         return convertView;
     }

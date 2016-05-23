@@ -194,12 +194,14 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private LocationMapFragment.TimedDistanceCallbackListener callbackListener = new LocationMapFragment.TimedDistanceCallbackListener() {
         @Override
         public void onMapTimedDistance(String time) {
+
             TextView timeView;
 
-            if ((timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView)) == null)
-                return;
+            if(getView() != null) {
 
-            timeView.setText(time);
+                timeView = (TextView) getView().findViewById(R.id.timeToTargetTextView);
+                timeView.setText(time);
+            }
         }
     };
 
@@ -240,15 +242,13 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private MeasuredDistanceCallbackListener measuredCallbackListener = new MeasuredDistanceCallbackListener() {
         @Override
         public void onMapMeasuredDistance(String distance) {
+
             TextView distanceView;
 
-            if ((distanceView = (TextView) getView().findViewById(R.id.distanceTextView)) == null)
-                return;
+            if(getView() != null) {
 
-            try {
+                distanceView = (TextView) getView().findViewById(R.id.distanceTextView);
                 distanceView.setText(distance);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
             }
         }
     };
