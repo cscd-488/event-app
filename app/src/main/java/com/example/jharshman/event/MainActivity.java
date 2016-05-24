@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements
         EventFragment.OnFragmentInteractionListener,
         CheckPointFragment.OnFragmentInteractionListener,
         LocationMapFragment.OnFragmentInteractionListener,
-        ScanFragment.OnScanFragmentInteraction{
+        ScanFragment.OnScanFragmentInteraction {
 
     private static final String TAG = "MainActivity";
 
@@ -170,11 +170,11 @@ public class MainActivity extends AppCompatActivity implements
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(CHECK_POINT_LIST_FRAGMENT);
         if(fragment == null) {
-            fragment = CheckPointFragment.newInstance(checkPointID);
+            fragment = CheckPointFragment.instance(checkPointID);
         }
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.FragmentContainer, fragment)
+                .replace(R.id.FragmentContainer, fragment, CHECK_POINT_FRAGMENT)
                 .addToBackStack(CHECK_POINT_FRAGMENT)
                 .commit();
     }
@@ -237,7 +237,29 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onMapFragmentInteraction(CheckPoint checkPoint) {
+
         Log.d("Map", "Checkpoint Clicked From Map");
+
+        // get the fragment and set the arguments on it
+        CheckPointFragment fragment = null;
+        try {
+            fragment = (CheckPointFragment) getSupportFragmentManager().findFragmentByTag(CHECK_POINT_FRAGMENT);
+        } catch (ClassCastException e) {
+            Log.e(TAG, "Error casting fragment to checkpoint fragment");
+            return;
+        }
+
+        if (fragment != null) {
+            fragment.setCheckPointID(checkPoint.getID());
+            getSupportFragmentManager().popBackStack();
+        }
+        else {
+            fragment = CheckPointFragment.instance(checkPoint.getID());
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.FragmentContainer, fragment, CHECK_POINT_FRAGMENT)
+                    .addToBackStack(CHECK_POINT_FRAGMENT)
+                    .commit();
+        }
     }
 
     /**
