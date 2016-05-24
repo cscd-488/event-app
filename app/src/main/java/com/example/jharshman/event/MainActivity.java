@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -237,29 +236,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMapFragmentInteraction(int checkPoint) {
+    public void onMapFragmentInteraction(CheckPoint checkPoint) {
         Log.d("Map", "Checkpoint Clicked From Map");
-
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(CHECK_POINT_FRAGMENT);
-        if(fragment == null) {
-            fragment = CheckPointFragment.newInstance(checkPoint);
-        }
-
-        getSupportFragmentManager().beginTransaction().replace(R.id.FragmentContainer, fragment).commit();
-        getSupportFragmentManager().beginTransaction().addToBackStack(null);
-
-        int id = getSupportFragmentManager().beginTransaction().commit();
-
-        getSupportFragmentManager().popBackStack(id, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-
-        Bundle args = new Bundle();
-        args.putInt(CheckPointFragment.CHECK_POINT_KEY, checkPoint);
-
-        fragment.setArguments(args);
-
-        getSupportFragmentManager().beginTransaction()
-                .addToBackStack(CHECK_POINT_FRAGMENT)
-                .commit();
     }
 
     /**
