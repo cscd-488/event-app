@@ -194,9 +194,13 @@ public class DataManager implements Callback {
         // this parses out the json array. the Events and Checkpoints must have @SerializedName("id") notation
         for(JsonElement obj : jArray )
         {
-            Event event = mGson.fromJson(obj , Event.class);
-            events.add(event);
-            Log.i(TAG, "Event: " + event.toString());
+            try {
+                Event event = mGson.fromJson(obj, Event.class);
+                events.add(event);
+                Log.i(TAG, "Event: " + event.toString());
+            }catch (NumberFormatException e) {
+                Log.i(TAG, "Error parsing json. Number Format Exception.");
+            }
         }
 
         // update the local database
@@ -230,16 +234,16 @@ public class DataManager implements Callback {
      */
     public List<Event> getSubscribedEvents() {
 
-        List<Event> subscribedEvents = new ArrayList<>();
-        List<Event> allEvents = mDataHelper.getEvents();
+//        List<Event> subscribedEvents = new ArrayList<>();
+//        List<Event> allEvents = mDataHelper.getEvents();
+//
+//        for(Event event : allEvents) {
+//            if(event.getSubscribed()) {
+//                subscribedEvents.add(event);
+//            }
+//        }
 
-        for(Event event : allEvents) {
-            if(event.getSubscribed()) {
-                subscribedEvents.add(event);
-            }
-        }
-
-        return subscribedEvents;
+        return mDataHelper.getSubscribedEvents();
     }
 
     /**
@@ -249,7 +253,7 @@ public class DataManager implements Callback {
      * @param subscribed The subscription status.
      * @return True if event updated, otherwise false.
      */
-    public boolean updateSubscribed(int eventID, boolean subscribed) {
+    public boolean updateSubscribed(int eventID, int subscribed) {
 
         long updated = mDataHelper.updateSubscribed(eventID, subscribed);
 

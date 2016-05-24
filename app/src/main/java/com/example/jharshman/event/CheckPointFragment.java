@@ -30,11 +30,6 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
     public static final String CHECK_POINT_KEY = "check_point_key";
 
     /**
-     * Singleton getInstance of fragment
-     */
-    private static CheckPointFragment mInstance;
-
-    /**
      * Check point we are representing and handling in the fragment
      */
     private int mCheckPointID;
@@ -56,19 +51,17 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
      *
      * @return A new getInstance of fragment CheckPointFragment.
      */
-    public static CheckPointFragment newInstance(int checkPointID) {
+    public static CheckPointFragment instance(int checkPointID) {
 
         // create check points fragment
-        if(mInstance == null) {
-             mInstance = new CheckPointFragment();
-        }
+        CheckPointFragment fragment = new CheckPointFragment();
 
         // set check point arguments on fragment
         Bundle args = new Bundle();
         args.putInt(CHECK_POINT_KEY, checkPointID);
-        mInstance.setArguments(args);
+        fragment.setArguments(args);
 
-        return mInstance;
+        return fragment;
     }
 
     @Override
@@ -84,6 +77,16 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
         else {
             throw new NullPointerException("Check point must be set using Key CheckPointFragment.CHECK_POINT_KEY");
         }
+    }
+
+    /**
+     * Set the checkpoint id to be displayed the next time the checkpoint is launched
+     *
+     * @param checkPointID The checkpoint id to set.
+     */
+    public void setCheckPointID(int checkPointID) {
+
+        mCheckPointID = checkPointID;
     }
 
     @Override

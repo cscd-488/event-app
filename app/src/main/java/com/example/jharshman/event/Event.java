@@ -41,8 +41,8 @@ public class Event implements Serializable {
     @SerializedName("updated_at")
     private String mTimeUpdated;
 
-    private boolean mRedeemed;
-    private boolean mSubscribed;
+    private int mSubscribed;
+    private int mRedeemed;
 
     @SerializedName("checkpoints")
     private CheckPoint[] mCheckPoints;
@@ -58,8 +58,8 @@ public class Event implements Serializable {
                   String qr,
                   String timeCreated,
                   String timeUpdated,
-                  boolean subscribed,
-                  boolean redeemed,
+                  int subscribed,
+                  int redeemed,
                   CheckPoint[] checkPoints) {
 
         // check parameters
@@ -133,8 +133,8 @@ public class Event implements Serializable {
         private String mQR;
         private String mTimeCreated;
         private String mTimeUpdated;
-        private boolean mSubscribed;
-        private boolean mRedeemed;
+        private int mSubscribed;
+        private int mRedeemed;
         private CheckPoint[] mCheckPoints;
 
         public Event.Builder setID(int id) {
@@ -192,12 +192,12 @@ public class Event implements Serializable {
             return this;
         }
 
-        public Event.Builder setSubscribed(boolean subscribed) {
+        public Event.Builder setSubscribed(int subscribed) {
             mSubscribed = subscribed;
             return this;
         }
 
-        public Event.Builder setRedeemed(boolean redeemed) {
+        public Event.Builder setRedeemed(int redeemed) {
             mRedeemed = redeemed;
             return this;
         }
@@ -261,11 +261,11 @@ public class Event implements Serializable {
         }
     }
 
-    public void setRedeemed(boolean redeemed) {
+    public void setRedeemed(int redeemed) {
         mRedeemed = redeemed;
     }
 
-    public void setSubscribed(boolean subscribed) {
+    public void setSubscribed(int subscribed) {
         mSubscribed = subscribed;
     }
 
@@ -318,11 +318,11 @@ public class Event implements Serializable {
         return mTimeUpdated;
     }
 
-    public boolean isRedeemed() {
+    public int isRedeemed() {
         return mRedeemed;
     }
 
-    public boolean getSubscribed() {
+    public int getSubscribed() {
         return mSubscribed;
     }
 
