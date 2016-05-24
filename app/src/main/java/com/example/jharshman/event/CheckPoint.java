@@ -9,6 +9,7 @@ package com.example.jharshman.event;
  * @date 2016 02 23
  * @date 2016 03 02
  * @date 2016 05 05
+ * @date 2016 05 23
  *
  * Check points for events
  */
@@ -38,12 +39,9 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
     private String mDescription;
     @SerializedName("image_src")
     private String mImageSrc;
-    // todo lat and lon from String to double
     @SerializedName("lat")
-    private String lat;
-    @SerializedName("lon")
-    private String lon;
     private double mLat;
+    @SerializedName("lon")
     private double mLon;
     @SerializedName("qr")
     private String mQR;
@@ -188,22 +186,6 @@ public class CheckPoint implements Comparable<CheckPoint>, Serializable {
                     mTimeUpdated,
                     mChecked);
         }
-    }
-
-    public CheckPoint(int mEventID) {
-
-        mCheckPointID = 1;
-        mEventID = 1;
-        mTitle = "default title";
-        mArtist = "default artist";
-        mDescription = "default description";
-        mImageSrc = "http://jessicauelmen.com/wp-content/uploads/2016/02/android-logo-featured.jpeg";
-        mLat = 0.0;
-        mLon = 0.0;
-        mQR = "default qr";
-        mTimeCreated = "2016-01-01 01:01:01";
-        mTimeUpdated = "2016-01-01 01:01:01";
-        mChecked = 0;
     }
 
     public void setDisplayed() {

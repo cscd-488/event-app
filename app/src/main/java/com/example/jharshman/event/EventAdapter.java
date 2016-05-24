@@ -83,6 +83,7 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         holder.mFloatingActionButton.setTag(R.layout.fragment_event, event);
 
         // set up floating action button
+        Log.i(TAG, "Event " + event.getID() + " Subscribed " + event.getSubscribed());
         setFAB(event, holder);
 
         holder.mFloatingActionButton.setOnClickListener(this);
@@ -106,7 +107,7 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
 
         // if we want to see the add/delete button
         if(mShowEditButtons) {
-            if (!event.getSubscribed()) {
+            if (event.getSubscribed() == 0) {
                 drawableID = R.drawable.ic_add_24dp;
                 tintColor = R.color.green;
             } else {
@@ -116,7 +117,7 @@ class EventAdapter extends ArrayAdapter<Event> implements View.OnClickListener {
         }
         // else we want to see the link button
         else {
-            if(event.isRedeemed()) {
+            if(event.isRedeemed() != 0) {
                 drawableID = R.drawable.ic_autorenew_24dp;
                 tintColor = R.color.light_gray;
             }

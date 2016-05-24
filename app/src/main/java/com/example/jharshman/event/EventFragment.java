@@ -116,11 +116,13 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
 
             if(mInEditMode) {
                 // update subscription state
-                event.setSubscribed(!event.getSubscribed());
+                event.setSubscribed(event.getSubscribed() == 0 ? 1 : 0);
                 // update the database to match
                 DataManager.instance(getContext()).updateSubscribed(event.getID(), event.getSubscribed());
 
                 // update the view
+//                mEvents.clear();
+//                mEvents.addAll(DataManager.instance(getContext()).getEvents());
                 mEventAdapter.notifyDataSetChanged();
             }
             else {
