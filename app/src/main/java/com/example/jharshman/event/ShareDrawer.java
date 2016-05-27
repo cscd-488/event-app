@@ -222,15 +222,12 @@ public class ShareDrawer {
     private static void shareWithGooglePlus(){
         Intent shareIntent = new PlusShare.Builder(mActivity)
                 .setText(mMediaContent.getTitle() + " - " + mMediaContent.getDescription())
-                .getIntent()
-                .setPackage("com.google.android.apps.plus");
-
-        try {
-            mActivity.startActivity(shareIntent);
-        } catch (ActivityNotFoundException e){
-            Toast.makeText(mActivity, "Google+ Not Installed",
-                    Toast.LENGTH_SHORT).show();
-        }
+                .setContentDeepLinkId("TEXT_WITH_NOSPACE",
+                        mMediaContent.getTitle(),
+                        mMediaContent.getDescription(),
+                        Uri.parse(mMediaContent.getImageSrc()))
+                .getIntent();
+        mActivity.startActivityForResult(shareIntent, 0);
     }
 
     private static void tweet(){
