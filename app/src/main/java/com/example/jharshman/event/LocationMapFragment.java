@@ -356,11 +356,67 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         mapView.getMapAsync(this);
     }
 
+    public static float conversion(float inMeters, MeasuredDistanceCallbackListener.Measurement measurement){
+        switch(measurement){
+            case FEET:
+                inMeters *= METERS_TO_FEET;
+                break;
+            case MILES:
+                inMeters *= METERS_TO_FEET;
+                inMeters /= FEET_TO_MILES;
+                break;
+            case KILOMETERS:
+                inMeters /= METERS_TO_KILO;
+                break;
+        }
+
+        return inMeters;
+    }
+
     /**
-     * Returns the distance in the requested measurement from the last known user location
+     * Returns true if location services are enabled
+     * @SuppressWarnings({"MissingPermission"}) may be required if using permission calls
+     *
+     * @param context
+     * @return True if location services enabled
+     */
+    public static boolean isLocationEnabled(Context context){
+        return (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED);
+    }
+
+    @SuppressWarnings({"MissingPermission"})
+    public static void isUserInRange(int checkPoint, Context context, float distance, UserInRange inRange, MeasuredDistanceCallbackListener.Measurement measurement){
+        float[] results = new float[1];
+        double[] coords = DataManager.instance(context).getCheckpoint(checkPoint).getCoordinates();
+        Location location = mLocation;
+
+        if(location == null){
+            LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            if (isLocationEnabled(context)) {
+                inRange.userInRange(false, "Location Services Disabled");
+                return;
+            }
+            location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if(location == null) {
+                inRange.userInRange(false, "Location Services Disabled");
+                return;
+            }
+        }
+
+        Location.distanceBetween(location.getLatitude(), location.getLongitude(), coords[0], coords[1], results);
+
+        results[0] = conversion(results[0], measurement);
+
+        inRange.userInRange(results[0] <= distance, "");
+    }
+
+    /**
+     * Calls the callback method with the distance in the requested measurement from the last known user location
      *
      * @param  checkPoint  the coordinate to compare from
      */
+    @SuppressWarnings({"MissingPermission"})
     public static void distanceFromUser(int checkPoint, Context context, MeasuredDistanceCallbackListener callBack, MeasuredDistanceCallbackListener.Measurement returnFormat){
         String format = "m";
         double[] coords = DataManager.instance(context).getCheckpoint(checkPoint).getCoordinates();
@@ -369,7 +425,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         if(location == null){
             LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (isLocationEnabled(context)) {
                 callBack.onMapMeasuredDistance("Location Services Disabled");
                 return;
             }
@@ -383,30 +439,17 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), coords[0], coords[1], results);
 
-        switch(returnFormat){
-            case FEET:
-                results[0] *= METERS_TO_FEET;
-                format = "ft";
-                break;
-            case MILES:
-                results[0] *= METERS_TO_FEET;
-                results[0] /= FEET_TO_MILES;
-                format = "mi";
-                break;
-            case KILOMETERS:
-                results[0] /= METERS_TO_KILO;
-                format = "km";
-                break;
-        }
+        results[0] = conversion(results[0], returnFormat);
 
         callBack.onMapMeasuredDistance(String.format("%.2f", results[0]) + " " + format);
     }
 
     /**
-     * Returns the walking time from the users last known location to the passed checkpoint
+     * Calls the callback method with the walking time from the users last known location to the passed checkpoint
      *
      * @param  checkPoint  the coordinate to compare from
      */
+    @SuppressWarnings({"MissingPermission"})
     public static void timeToLocation(int checkPoint, Context context, TimedDistanceCallbackListener callback) {
         double[] location = new double[2];
         listener = callback;
@@ -416,7 +459,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
                 location[1] = mLocation.getLongitude();
             } else {
                 LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (isLocationEnabled(context)) {
                     callback.onMapTimedDistance("Location Services Disabled");
                     return;
                 }
@@ -606,6 +649,9 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             KILOMETERS;
         }
         void onMapMeasuredDistance(String distance);
+    }
+    public interface UserInRange{
+        void userInRange(boolean inRange, String errorMsg);
     }
     public interface TimedDistanceCallbackListener{
         void onMapTimedDistance(String time);
