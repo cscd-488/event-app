@@ -339,15 +339,15 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
     }
-    @Override
 
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         try {
             if (requestCode == ShareDrawer.LOAD_IMAGE && null != data) {
                 sharePhoto(data);
-            } else {
+            } else if (requestCode == ShareDrawer.LOAD_IMAGE){
                 Toast.makeText(this, "You haven't picked Image",
                         Toast.LENGTH_LONG)
                         .show();
