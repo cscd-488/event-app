@@ -356,7 +356,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         mapView.getMapAsync(this);
     }
 
-    public static float conversion(float inMeters, MeasuredDistanceCallbackListener.Measurement measurement){
+    private static float conversion(float inMeters, MeasuredDistanceCallbackListener.Measurement measurement){
         switch(measurement){
             case FEET:
                 inMeters *= METERS_TO_FEET;
@@ -384,6 +384,18 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         return (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED);
     }
 
+    /**
+     *
+     * Returns back a boolean within a callback that determines if a user
+     * is within a set distance from the provided checkpoint. An error message
+     * is included and will be blank if nothing went wrong.
+     *
+     * @param checkPoint
+     * @param context
+     * @param distance
+     * @param inRange
+     * @param measurement
+     */
     @SuppressWarnings({"MissingPermission"})
     public static void isUserInRange(int checkPoint, Context context, float distance, UserInRange inRange, MeasuredDistanceCallbackListener.Measurement measurement){
         float[] results = new float[1];
@@ -412,9 +424,14 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     }
 
     /**
-     * Calls the callback method with the distance in the requested measurement from the last known user location
      *
-     * @param  checkPoint  the coordinate to compare from
+     * Calls the passed callback function when the distance finishes calculating.
+     * Passes the distance back in units provided on call.
+     *
+     * @param checkPoint
+     * @param context
+     * @param callBack
+     * @param returnFormat
      */
     @SuppressWarnings({"MissingPermission"})
     public static void distanceFromUser(int checkPoint, Context context, MeasuredDistanceCallbackListener callBack, MeasuredDistanceCallbackListener.Measurement returnFormat){
@@ -445,9 +462,10 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     }
 
     /**
-     * Calls the callback method with the walking time from the users last known location to the passed checkpoint
-     *
-     * @param  checkPoint  the coordinate to compare from
+     * 
+     * @param checkPoint
+     * @param context
+     * @param callback
      */
     @SuppressWarnings({"MissingPermission"})
     public static void timeToLocation(int checkPoint, Context context, TimedDistanceCallbackListener callback) {
