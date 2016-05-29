@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.FragmentContainer, fragment, EVENT_FRAGMENT)
+                    .addToBackStack(null)
                     .commit();
         }
 
@@ -217,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements
      * @param checkpoint_id The id of the check point.
      */
     @Override
-    public void onCheckPointInteraction(int button_id, int checkpoint_id) {
+    public void onCheckPointInteraction(int button_id, final int checkpoint_id) {
 
         switch (button_id) {
 
@@ -247,20 +248,46 @@ public class MainActivity extends AppCompatActivity implements
 
                 // todo authenticate the check in, and relaunch the checkpoint fragment
 
-                ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
+                final DataManager dataManager = DataManager.instance(this);
+                CheckPoint checkPoint = dataManager.getCheckpoint(checkpoint_id);
 
-                if(scanFragment == null) {
-                    scanFragment = new ScanFragment();
+                if(checkPoint.getQR().compareTo("") == 0) {
+                    // check in using gps
+                    // todo change the method call to be one which gets a double of distance, so this won't blow up every time
+                    LocationMapFragment.distanceFromUser(checkpoint_id, this,
+                            new LocationMapFragment.MeasuredDistanceCallbackListener() {
+                                @Override
+                                public void onMapMeasuredDistance(String distance) {
+
+                                    // set check in status
+                                    try {
+                                        double dist = Double.valueOf(distance);
+
+                                        if (dist < 1.0) {
+                                            dataManager.updateChecked(checkpoint_id, true);
+                                        }
+                                    } catch (NumberFormatException e) {
+
+                                        Log.e(TAG, "Error parsing check in distance string to double");
+                                    }
+                                }
+                            }, LocationMapFragment.MeasuredDistanceCallbackListener.Measurement.MILES);
                 }
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
-                        .addToBackStack(SCAN_FRAGMENT)
-                        .commit();
+                else {
+                    // check in using qr code
+                    ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
 
-                // save the current checkpoint so we know which checkpoint to test scan result against
-                mCurrentCheckpointID = checkpoint_id;
+                    if (scanFragment == null) {
+                        scanFragment = new ScanFragment();
+                    }
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
+                            .addToBackStack(SCAN_FRAGMENT)
+                            .commit();
 
-
+                    // save the current checkpoint so we know which checkpoint to test scan result against
+                    mCurrentCheckpointID = checkpoint_id;
+                }
                 break;
         }
     }
