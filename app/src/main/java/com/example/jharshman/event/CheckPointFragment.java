@@ -137,10 +137,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
      * @param view The view that was clicked.
      */
     @Override
-    public void onClick(View view) {
-
-        // get the checkpoint from the data manager
-        CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
+    public void onClick(final View view) {
 
         switch (view.getId()) {
 
@@ -148,16 +145,22 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
                 Log.i(TAG, "Check point check in button clicked");
 
-                // todo only launch validation if not already checked
+                CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
 
-                // todo if in gps range, check in
+                if(checkPoint.getChecked() == 0) {
+                    if(checkPoint.getQR().compareTo("") == 0) {
+                        // todo if gps check in enabled, use it
 
+                    }
+                    else {
+                        // otherwise launch qr code scanner
+                        mListener.onCheckPointInteraction(R.id.fragment_check_point_check_in_button, mCheckPointID);
+                    }
+                }
 
-                // todo otherwise launch qr code scanner
-                mListener.onCheckPointInteraction(R.id.fragment_check_point_check_in_button, checkPoint.getID());
 
 //                // store that user checked in. Note: click should only ever check in, never un-check
-//                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
+//                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPointID, true);
 //
 //                if(checkSaved) {
 //
@@ -178,7 +181,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
                 Log.i(TAG, "Check Point Map button clicked");
 
                 // call callback with check point button id, and current checkpoint id
-                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, checkPoint.getID());
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, mCheckPointID);
 
                 break;
         }
