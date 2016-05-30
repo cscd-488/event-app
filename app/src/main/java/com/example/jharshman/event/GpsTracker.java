@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 /**
  * Created by Aaron on 1/24/2016.
+ * Edited 5/24/2016
  */
 public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -59,8 +60,8 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     private static void setupGps(){
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
             return;
         }
 
@@ -76,7 +77,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
             googleApiClient.connect();
 
             LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
             locationRequest.setInterval(30 * 1000);
             locationRequest.setFastestInterval(15 * 1000);
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -120,47 +121,26 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     }
 
     public Location getLocation(){return location;}
-
     public void connect(){
         googleApiClient.connect();
     }
-
     public void disconnect(){
         googleApiClient.disconnect();
     }
-
     @Override
-    public void onConnected(Bundle bundle) {
-
-    }
-
+    public void onConnected(Bundle bundle) { }
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
+    public void onConnectionSuspended(int i) {}
     @Override
     public void onLocationChanged(Location location) {
         this.location = location;
     }
-
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
+    public void onStatusChanged(String provider, int status, Bundle extras) {    }
     @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
+    public void onProviderEnabled(String provider) {    }
     @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
+    public void onProviderDisabled(String provider) {    }
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {    }
 }
