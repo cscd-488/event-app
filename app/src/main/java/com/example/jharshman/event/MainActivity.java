@@ -1,7 +1,10 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -12,12 +15,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.FacebookSdk;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import io.fabric.sdk.android.Fabric;
+
 public class MainActivity extends AppCompatActivity implements
         CheckPointListFragment.OnFragmentInteractionListener,
         EventFragment.OnFragmentInteractionListener,
         CheckPointFragment.OnFragmentInteractionListener,
         LocationMapFragment.OnFragmentInteractionListener,
         ScanFragment.OnScanFragmentInteraction {
+
+    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
+    private static final String TWITTER_KEY = "9x1IkXxYkHIo9cu90EISCRBDJ";
+    private static final String TWITTER_SECRET = "J2CVrrG8m9rZkiTjmJWLa0PKb8BQ5Li3rWFi8S4Na0NQBtUxEA";
+
 
     private static final String TAG = "MainActivity";
 
@@ -42,6 +55,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(this, new Twitter(authConfig));
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -122,7 +140,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         int count = getFragmentManager().getBackStackEntryCount();
-        if(count == 0) {
+
+        if(ShareDrawer.isOpen()){
+            ShareDrawer.exit();
+        } else if(count == 0) {
             super.onBackPressed();
         } else {
             getFragmentManager().popBackStack();
@@ -296,5 +317,59 @@ public class MainActivity extends AppCompatActivity implements
         // launch checkpoint fragment again
         getSupportFragmentManager().popBackStack();
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case ShareDrawer.DEFAULT_SHARE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ShareDrawer.shareImageURL();
+                    ShareDrawer.exit();
+                } else {
+                    Toast.makeText(this, "External storage permission denied.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case ShareDrawer.CAMERA_SHARE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ShareDrawer.takePicture();
+                    ShareDrawer.exit();
+                }
+                else{
+                    Toast.makeText(this, "Camera permission denied.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        try {
+            if (requestCode == ShareDrawer.LOAD_IMAGE && null != data) {
+                sharePhoto(data);
+                ShareDrawer.exit();
+            } else if (requestCode == ShareDrawer.LOAD_IMAGE){
+                Toast.makeText(this, "You haven't picked Image",
+                        Toast.LENGTH_LONG)
+                        .show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Something went wrong",
+                    Toast.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    private void sharePhoto(Intent data){
+        Uri image = data.getData();
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/*");
+        share.putExtra(Intent.EXTRA_STREAM, image);
+        startActivity(Intent.createChooser(share , "Share to:"));
     }
 }
