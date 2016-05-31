@@ -252,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements
                 // save the current checkpoint so we know which checkpoint to test scan result against
                 mCurrentCheckpointID = checkpoint_id;
 
+
                 break;
         }
     }
