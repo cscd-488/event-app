@@ -27,6 +27,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,6 +88,27 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         // set up header
         Button headerDoneButton = (Button) view.findViewById(R.id.fragment_event_header_done_image_button);
         headerDoneButton.setOnClickListener(this);
+
+        final TextView distance = (TextView) view.findViewById(R.id.fragment_event_header_distance_text_view);
+
+        SeekBar distanceSeekBar = (SeekBar) view.findViewById(R.id.fragment_event_header_distance_seek_bar);
+        distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // update position text view
+
+                distance.setText(String.format("%d Miles", progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // update the locations
+                updateEventsInEditMode(seekBar.getProgress());
+            }
+        });
 
         mHeader = (LinearLayout) view.findViewById(R.id.fragment_event_header);
         mHeader.setVisibility(View.GONE);
@@ -178,51 +201,14 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
             mFab.hide();
             mHeader.setVisibility(View.VISIBLE);
             mEventAdapter.setShowEditButtons(true);
-            mEvents.clear();
-            mEvents.addAll(DataManager.instance(getContext()).getSubscribedEvents());
 
-            int radius = 3;
-
-            LocationManager manager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                Location location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-                if(location != null) {
-
-                    // get the events based on lat, lon, and radius
-                    DataManager.instance(getContext()).getLocalEvents(radius, location.getLatitude(), location.getLongitude(), new DataManager.GetLocalEventsCallback() {
-                        @Override
-                        public void success(List<Event> events) {
-
-                            Log.i(TAG, "Get Local Events Server Connection Successful");
-
-                            for (Event event : events) {
-                                if(! mEvents.contains(event)) {
-                                    mEvents.add(event);
-                                }
-                            }
-
-                            // update list view
-                            onDataUpdated(DataManager.instance(getContext()));
-                        }
-
-                        @Override
-                        public void failure(String message) {
-
-                            // pop toast the long way, because of ui threading stuff
-                            ((Activity) getContext()).runOnUiThread(new Runnable() {
-                                public void run() {
-                                    Toast.makeText(getContext(), "Server Connection Failed", Toast.LENGTH_LONG).show();
-                                }
-                            });
-
-                            Log.e(TAG, "Get Local Events Server Connection Failed");
-                        }
-                    });
-                }
+            int distance = 100;
+            // set the seek bar
+            if(getView() != null) {
+                ((SeekBar) getView().findViewById(R.id.fragment_event_header_distance_seek_bar)).setProgress(distance);
             }
-
-//            mEvents.addAll(DataManager.instance(getContext()).getLocalEvents(radius, lat, lon));
+            // update events
+            updateEventsInEditMode(distance);
         }
         // done button, hide header
         else if(view.getId() == R.id.fragment_event_header_done_image_button) {
@@ -233,6 +219,60 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
             mEventAdapter.setShowEditButtons(false);
             mEvents.clear();
             mEvents.addAll(DataManager.instance(getContext()).getSubscribedEvents());
+        }
+    }
+
+    private void updateEventsInEditMode(int radius) {
+
+        // remove events from list
+        mEvents.clear();
+
+        // add all subscribed events
+        mEvents.addAll(DataManager.instance(getContext()).getSubscribedEvents());
+
+        // also add all the events within a radius
+        getEventsByLocation(radius);
+    }
+
+    private void getEventsByLocation(int radius) {
+
+        LocationManager manager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Location location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if(location != null) {
+
+                // get the events based on lat, lon, and radius
+                DataManager.instance(getContext()).getLocalEvents(radius, location.getLatitude(), location.getLongitude(), new DataManager.GetLocalEventsCallback() {
+                    @Override
+                    public void success(List<Event> events) {
+
+                        Log.i(TAG, "Get Local Events Server Connection Successful");
+
+                        for (Event event : events) {
+                            if(! mEvents.contains(event)) {
+                                mEvents.add(event);
+                            }
+                        }
+
+                        // update list view
+                        onDataUpdated(DataManager.instance(getContext()));
+                    }
+
+                        @Override
+                        public void failure(String message) {
+
+                        // pop toast the long way, because of ui threading stuff
+                        ((Activity) getContext()).runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(getContext(), "Server Connection Failed", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                        Log.e(TAG, "Get Local Events Server Connection Failed");
+                    }
+                });
+            }
         }
     }
 
