@@ -41,6 +41,7 @@ public class ShareDrawer {
     private static CheckPoint mMediaContent;
     private static Activity mActivity;
     private static boolean mSharable;
+    private static boolean mOpen;
 
     private static ListView mDrawerList;
     private static DrawerLayout mDrawerLayout;
@@ -52,16 +53,9 @@ public class ShareDrawer {
         if(isSharable()) {
             setupDrawer();
             mDrawerLayout.openDrawer(mDrawerList);
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+            mOpen = true;
         }
-    }
-
-    public static void exit(){
-        mDrawerLayout.closeDrawers();
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-        mActivity = null;
-        mMediaContent = null;
-        mSharable = false;
     }
 
     private static void setupDrawer(){
@@ -77,7 +71,20 @@ public class ShareDrawer {
                 share(position);
             }
         });
+
     }
+
+    public static void exit(){
+        mDrawerLayout.closeDrawers();
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+        mActivity = null;
+        mMediaContent = null;
+        mSharable = false;
+        mOpen = false;
+    }
+
+    public static boolean isOpen(){ return mOpen; }
 
     private static boolean isSharable(){
         if(mActivity != null && mMediaContent != null) mSharable = true;
@@ -97,6 +104,9 @@ public class ShareDrawer {
             getPhotoOptions();
         else
             Toast.makeText(mActivity, "Share failed.", Toast.LENGTH_SHORT).show();
+
+        if(position != 3)
+            exit();
     }
 
     private static void sharePhoto(int position){
@@ -123,6 +133,7 @@ public class ShareDrawer {
         }
         else
             Toast.makeText(mActivity, "Default photo share failed.", Toast.LENGTH_SHORT).show();
+
     }
 
     public static void shareImageURL(){
@@ -141,10 +152,10 @@ public class ShareDrawer {
                         connection.connect();
 
                         InputStream input = connection.getInputStream();
-                        Bitmap immutableBpm = BitmapFactory.decodeStream(input);
-                        Bitmap mutableBitmap = immutableBpm.copy(Bitmap.Config.ARGB_8888, true);
+                        Bitmap image = BitmapFactory.decodeStream(input);
+                        image = image.copy(Bitmap.Config.ARGB_8888, true);
 
-                        String path = MediaStore.Images.Media.insertImage(mActivity.getContentResolver(), mutableBitmap, "Nur", null);
+                        String path = MediaStore.Images.Media.insertImage(mActivity.getContentResolver(), image, "Nur", null);
 
                         Uri uri = Uri.parse(path);
 
@@ -162,6 +173,13 @@ public class ShareDrawer {
         });
 
         thread.start();
+
+        try {
+            thread.join();
+            exit();
+        } catch(InterruptedException e){
+
+        }
     }
 
 

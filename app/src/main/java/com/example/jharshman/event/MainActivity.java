@@ -140,7 +140,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         int count = getFragmentManager().getBackStackEntryCount();
-        if(count == 0) {
+
+        if(ShareDrawer.isOpen()){
+            ShareDrawer.exit();
+        } else if(count == 0) {
             super.onBackPressed();
         } else {
             getFragmentManager().popBackStack();
@@ -321,20 +324,22 @@ public class MainActivity extends AppCompatActivity implements
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case ShareDrawer.DEFAULT_SHARE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     ShareDrawer.shareImageURL();
-                 else
+                    ShareDrawer.exit();
+                } else {
                     Toast.makeText(this, "External storage permission denied.", Toast.LENGTH_SHORT).show();
-
+                }
                 break;
             }
             case ShareDrawer.CAMERA_SHARE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     ShareDrawer.takePicture();
-                else
+                    ShareDrawer.exit();
+                }
+                else{
                     Toast.makeText(this, "Camera permission denied.", Toast.LENGTH_SHORT).show();
+                }
                 break;
             }
         }
@@ -347,6 +352,7 @@ public class MainActivity extends AppCompatActivity implements
         try {
             if (requestCode == ShareDrawer.LOAD_IMAGE && null != data) {
                 sharePhoto(data);
+                ShareDrawer.exit();
             } else if (requestCode == ShareDrawer.LOAD_IMAGE){
                 Toast.makeText(this, "You haven't picked Image",
                         Toast.LENGTH_LONG)
