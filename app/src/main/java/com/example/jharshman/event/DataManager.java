@@ -41,11 +41,15 @@ public class DataManager implements Callback {
     private static final String HEADER_REQUEST_CODE = "requestcode";
     private static final String HEADER_DATA = "data";
     private static final String HEADER_STATUS = "status";
+    private static final String HEADER_RADIUS = "rad";
+    private static final String HEADER_LAT = "lat";
+    private static final String HEADER_LON = "long";
 
     private static final String REQUEST_CODE_GET_EVENTS_WITH_CHECKPOINTS = "1";
     private static final String REQUEST_CODE_GET_CHECKPOINT_BY_EVENT = "2";
     private static final String REQUEST_CODE_GET_EVENT_BY_CHECKPOINT = "3";
     private static final String REQUEST_CODE_UPDATE_CHECKED_BY_CHECKPOINT = "4";
+    private static final String REQUEST_CODE_GET_EVENT_BY_RADIUS = "5";
 
     private Context mContext;
 
@@ -224,6 +228,104 @@ public class DataManager implements Callback {
 
         // get all events from data helper
         return mDataHelper.getEvents();
+    }
+
+    public interface GetLocalEventsCallback {
+
+        public void success(List<Event> events);
+        public void failure(String message);
+    }
+
+    /**
+     * Given a radius, lat, and lon, get the events in that radius from
+     * that location from the server.
+     * @param radius The radius in miles
+     * @param lat The center lat.
+     * @param lon The center lon.
+     * @param callback The callback method to use when getting data.
+     */
+    public void getLocalEvents(int radius, double lat, double lon, final GetLocalEventsCallback callback) {
+
+        Log.i(TAG, "Getting event data from server");
+
+        Activity activity = (Activity) mContext;
+
+        // body for request
+        FormBody formBody = new FormBody.Builder()
+                .add(HEADER_REQUEST_CODE, REQUEST_CODE_GET_EVENT_BY_RADIUS)
+                .add(HEADER_RADIUS, String.valueOf(radius))
+                .add(HEADER_LAT, String.valueOf(lat))
+                .add(HEADER_LON, String.valueOf(lon))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(activity.getString(R.string.magpie_server_event_data))
+                .post(formBody)
+                .build();
+
+        mClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e(TAG, "Unable to connect to server to pull event by location and radius");
+                callback.failure("Failed to connect to server.");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) {
+
+                Log.i(TAG, "Got response from server with location and radius");
+
+                if(response.isSuccessful()) {
+
+                    try {
+                        List<Event> events = parseResponse(response);
+                        callback.success(events);
+
+                    } catch (IOException e) {
+                        callback.failure("Failed to parse server response JSON");
+                    }
+                }
+                else {
+                    callback.failure("Unexpected server response");
+                }
+            }
+        });
+    }
+
+    /**
+     * Parse JSON OKHttp response data.
+     *
+     * @param response The OKHttp response data.
+     * @return The list of events based on the JSON data.
+     * @throws IOException If there was an error parsing the data.
+     */
+    private static List<Event> parseResponse(Response response) throws IOException {
+
+        Headers responseHeaders = response.headers();
+
+        // todo remove this debugging code
+        for (int i = 0; i < responseHeaders.size(); i++) {
+            Log.i(TAG, responseHeaders.name(i) + ": " + responseHeaders.value(i));
+        }
+
+        ArrayList<Event> events = new ArrayList<>();
+        Gson gson = new Gson();
+
+        JsonParser parser = new JsonParser();
+        JsonArray jArray = parser.parse(response.body().string()).getAsJsonArray();
+
+        // this parses out the json array. the Events and Checkpoints must have @SerializedName("id") notation
+        for (JsonElement obj : jArray) {
+            try {
+                Event event = gson.fromJson(obj, Event.class);
+                events.add(event);
+                Log.i(TAG, "Event: " + event.toString());
+            } catch (NumberFormatException e) {
+                Log.i(TAG, "Error parsing json. Number Format Exception.");
+            }
+        }
+
+        return events;
     }
 
     /**
