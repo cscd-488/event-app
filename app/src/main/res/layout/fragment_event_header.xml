@@ -43,21 +43,21 @@
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/seekBar"
+            android:id="@+id/fragment_event_header_distance_seek_bar"
             android:max="500"
             android:layout_marginLeft="40dp"
             android:layout_marginBottom="10dp"
-            android:layout_toLeftOf="@+id/textView"
-            android:layout_toStartOf="@+id/textView" />
+            android:layout_toLeftOf="@+id/fragment_event_header_distance_text_view"
+            android:layout_toStartOf="@+id/fragment_event_header_distance_text_view" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="x miles"
-            android:layout_alignBottom="@+id/seekBar"
+            android:layout_alignBottom="@+id/fragment_event_header_distance_seek_bar"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:id="@+id/textView"
+            android:id="@+id/fragment_event_header_distance_text_view"
             android:layout_marginRight="30dp" />
     </RelativeLayout>
 
