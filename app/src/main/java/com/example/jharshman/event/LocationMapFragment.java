@@ -544,6 +544,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         mListener = null;
     }
 
+
+    /**
+     * Takes in an event ID and pulls the needed data from the data manager
+     *
+     * @param eventID
+     */
     public void addLocations(int eventID) {
         List<CheckPoint> coordinates = DataManager.instance(getContext()).getCheckpoints(eventID);
 
@@ -675,6 +681,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         for (int i = 0; i < this.coordinates.length; i++){
             coords = this.coordinates[i].getCoordinates();
 
+            Log.d(this.coordinates[i].getTitle(), coords[0] + ", " + coords[1]);
             markers[i] = new MarkerWrapper(this.coordinates[i], map.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
                     .snippet(this.coordinates[i].getDescription())
