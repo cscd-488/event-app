@@ -1,16 +1,29 @@
 package com.example.jharshman.event;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.FacebookSdk;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements
         CheckPointListFragment.OnFragmentInteractionListener,
@@ -18,6 +31,11 @@ public class MainActivity extends AppCompatActivity implements
         CheckPointFragment.OnFragmentInteractionListener,
         LocationMapFragment.OnFragmentInteractionListener,
         ScanFragment.OnScanFragmentInteraction {
+
+    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
+    private static final String TWITTER_KEY = "9x1IkXxYkHIo9cu90EISCRBDJ";
+    private static final String TWITTER_SECRET = "J2CVrrG8m9rZkiTjmJWLa0PKb8BQ5Li3rWFi8S4Na0NQBtUxEA";
+
 
     private static final String TAG = "MainActivity";
 
@@ -42,11 +60,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(this, new Twitter(authConfig));
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         tracker = GpsTracker.create(this);
+
+        setUpHeader();
 
         if(findViewById(R.id.FragmentContainer)!=null) {
             if (savedInstanceState != null)
@@ -122,7 +145,14 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         int count = getFragmentManager().getBackStackEntryCount();
-        if(count == 0) {
+
+        android.app.Fragment fragment = getFragmentManager().findFragmentByTag(EVENT_FRAGMENT);
+
+        if(ShareDrawer.isOpen()){
+            ShareDrawer.exit();
+        } else if(false){
+
+        } else if(count == 0) {
             super.onBackPressed();
         } else {
             getFragmentManager().popBackStack();
@@ -188,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements
      * @param checkpoint_id The id of the check point.
      */
     @Override
-    public void onCheckPointInteraction(int button_id, int checkpoint_id) {
+    public void onCheckPointInteraction(int button_id, final int checkpoint_id) {
 
         switch (button_id) {
 
@@ -218,19 +248,34 @@ public class MainActivity extends AppCompatActivity implements
 
                 // todo authenticate the check in, and relaunch the checkpoint fragment
 
-                ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
+                final DataManager dataManager = DataManager.instance(this);
 
-                if(scanFragment == null) {
-                    scanFragment = new ScanFragment();
-                }
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
-                        .addToBackStack(SCAN_FRAGMENT)
-                        .commit();
+                // check in using gps
+                // todo change to be 100 meters instead of 10000 meters
+                LocationMapFragment.isUserInRange(checkpoint_id, this, 100000, new LocationMapFragment.UserInRange() {
+                    @Override
+                    public void userInRange(boolean inRange, String errorMsg) {
+                        if(! inRange) {
+                            // check in using qr code
+                            ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
 
-                // save the current checkpoint so we know which checkpoint to test scan result against
-                mCurrentCheckpointID = checkpoint_id;
+                            if (scanFragment == null) {
+                                scanFragment = new ScanFragment();
+                            }
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
+                                    .addToBackStack(SCAN_FRAGMENT)
+                                    .commit();
 
+                            // save the current checkpoint so we know which checkpoint to test scan result against
+                            mCurrentCheckpointID = checkpoint_id;
+                        }
+                        else {
+                            // gps check in was valid, so update the status
+                            dataManager.updateChecked(checkpoint_id, true);
+                        }
+                    }
+                }, LocationMapFragment.MeasuredDistanceCallbackListener.Measurement.METERS);
                 break;
         }
     }
@@ -296,5 +341,73 @@ public class MainActivity extends AppCompatActivity implements
         // launch checkpoint fragment again
         getSupportFragmentManager().popBackStack();
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case ShareDrawer.DEFAULT_SHARE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ShareDrawer.shareImageURL();
+                    ShareDrawer.exit();
+                } else {
+                    Toast.makeText(this, "External storage permission denied.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case ShareDrawer.CAMERA_SHARE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ShareDrawer.takePicture();
+                    ShareDrawer.exit();
+                }
+                else{
+                    Toast.makeText(this, "Camera permission denied.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        try {
+            if (requestCode == ShareDrawer.LOAD_IMAGE && null != data) {
+                sharePhoto(data);
+                ShareDrawer.exit();
+            } else if (requestCode == ShareDrawer.LOAD_IMAGE){
+                Toast.makeText(this, "You haven't picked Image",
+                        Toast.LENGTH_LONG)
+                        .show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Something went wrong",
+                    Toast.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    private void sharePhoto(Intent data){
+        Uri image = data.getData();
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/*");
+        share.putExtra(Intent.EXTRA_STREAM, image);
+        startActivity(Intent.createChooser(share , "Share to:"));
+    }
+
+    private void setUpHeader(){
+        TextView header = (TextView) findViewById(R.id.headerTitle);
+        GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{ Color.parseColor("#3FA9F5"), Color.parseColor("#55D883")});
+        header.setBackground(gradient);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.parseColor("#3FA9F5"));
+        }
     }
 }

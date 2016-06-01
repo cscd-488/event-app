@@ -143,6 +143,8 @@ public class login extends Fragment implements
 
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
+        setHeader();
+
         // request user id, email address, and basic profile
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.PLUS_LOGIN))
@@ -172,6 +174,11 @@ public class login extends Fragment implements
         view.findViewById(R.id.loginButton).setOnClickListener(this);
 
         return view;
+    }
+
+    private void setHeader() {
+        TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+        header.setText("  Magpie");
     }
 
     /**
