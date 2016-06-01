@@ -36,4 +36,4 @@ notifications:
 
 # Execute Build
 script:
-  - ./gradlew build
+  - ./gradlew clean build
