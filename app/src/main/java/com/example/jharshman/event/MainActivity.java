@@ -1,15 +1,19 @@
 package com.example.jharshman.event;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +27,10 @@ import android.widget.Toast;
 import com.facebook.FacebookSdk;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements
@@ -334,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements
         switch (requestCode) {
             case ShareDrawer.DEFAULT_SHARE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ShareDrawer.shareImageURL();
+                    ShareDrawer.defaultShare();
                     ShareDrawer.exit();
                 } else {
                     Toast.makeText(this, "External storage permission denied.", Toast.LENGTH_SHORT).show();
@@ -362,6 +370,9 @@ public class MainActivity extends AppCompatActivity implements
             if (requestCode == ShareDrawer.LOAD_IMAGE && null != data) {
                 sharePhoto(data);
                 ShareDrawer.exit();
+            } else if(requestCode == ShareDrawer.CAMERA_LOAD && null != data){
+                shareCameraPhoto(data);
+                ShareDrawer.exit();
             } else if (requestCode == ShareDrawer.LOAD_IMAGE){
                 Toast.makeText(this, "You haven't picked Image",
                         Toast.LENGTH_LONG)
@@ -380,6 +391,37 @@ public class MainActivity extends AppCompatActivity implements
         share.setType("image/*");
         share.putExtra(Intent.EXTRA_STREAM, image);
         startActivity(Intent.createChooser(share , "Share to:"));
+    }
+
+    public void shareCameraPhoto(Intent data){
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if(PackageManager.PERMISSION_GRANTED == permissionCheck){
+            try {
+
+                Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                File file = new File(this.getCacheDir(), "tmp.png");
+                FileOutputStream fOut = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                fOut.flush();
+                fOut.close();
+                file.setReadable(true, false);
+
+                final Intent intent = new Intent(     android.content.Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                intent.setType("image/*");
+                startActivity(intent);
+
+            } catch (Exception e) {
+
+            }
+        } else if(PackageManager.PERMISSION_DENIED == permissionCheck){
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    ShareDrawer.CAMERA_SHARE);
+        }
     }
 
     private void setUpHeader(){
