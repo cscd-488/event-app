@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BinaryBitmap;
@@ -69,6 +70,7 @@ public class ScanFragment extends Fragment implements Camera.AutoFocusCallback, 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        setHeader();
         return inflater.inflate(R.layout.fragment_scan, container, false);
     }
 
@@ -154,6 +156,12 @@ public class ScanFragment extends Fragment implements Camera.AutoFocusCallback, 
             mCamera.release();
             mCamera = null;
         }
+    }
+
+
+    private void setHeader() {
+        TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+        header.setText("  QR Scanner");
     }
 
     /**

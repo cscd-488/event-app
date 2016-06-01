@@ -337,9 +337,15 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         View v = inflater.inflate(R.layout.fragment_location_map, container, false);
 
+        setHeader();
         this.buildMap(v, savedInstanceState);
 
         return v;
+    }
+
+    private void setHeader() {
+        TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+        header.setText("  Map");
     }
 
     private void buildMap(View v, Bundle savedInstanceState) {

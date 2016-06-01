@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,8 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event, container, false);
+
+        setHeader();
 
         // get the event data
         DataManager dataManager = DataManager.instance(getContext());
@@ -83,6 +86,11 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         mInEditMode = false;
 
         return view;
+    }
+
+    private void setHeader() {
+        TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+        header.setText("  My Events");
     }
 
     @Override

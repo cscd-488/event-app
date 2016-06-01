@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 
 /**
@@ -32,14 +33,21 @@ public class ViewPagerFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
+
         ViewGroup viewGroup = (ViewGroup)inflater.inflate(R.layout.fragment_view_pager, container, false);
         mPager = (ViewPager)viewGroup.findViewById(R.id.pager);
         mAdapter = new ViewPagerAdapter(getFragmentManager());
         mPager.setPageTransformer(true, new ZoomOutPageTransformer());
         mPager.setAdapter(mAdapter);
 
+        setHeader();
 
         return viewGroup;
+    }
+
+    private void setHeader() {
+        TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+        header.setText("  Magpie");
     }
 
     /**

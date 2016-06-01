@@ -9,10 +9,21 @@
     tools:context="com.example.jharshman.event.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="45dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/magpieTitle"
+        android:id="@+id/headerTitle"
+        android:layout_alignParentTop="true"
+        android:textColor="#ffffff"
+        android:background="#3FA9F5"
+        android:textSize="30dp" />
+
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/FragmentContainer"/>
+        android:id="@+id/FragmentContainer"
+        android:layout_below="@+id/headerTitle" />
 </RelativeLayout>
