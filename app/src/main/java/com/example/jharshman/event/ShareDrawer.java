@@ -79,7 +79,7 @@ public class ShareDrawer {
     public static void exit(){
         mDrawerLayout.closeDrawers();
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        resetHeader();
+        CheckPointListFragment.setHeader(mActivity);
 
         mActivity = null;
         mMediaContent = null;
@@ -181,7 +181,7 @@ public class ShareDrawer {
             thread.join();
             exit();
         } catch(InterruptedException e){
-
+            // failure to wait and exit
         }
     }
 
@@ -262,8 +262,4 @@ public class ShareDrawer {
         header.setText("  Share to:");
     }
 
-    private static void resetHeader(){
-        TextView header = (TextView) mActivity.findViewById(R.id.headerTitle);
-        header.setText("  " + mMediaContent.getTitle());
-    }
 }

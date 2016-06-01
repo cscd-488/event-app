@@ -94,6 +94,8 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_point, container, false);
 
+        CheckPointListFragment.setHeader(getActivity());
+
         // get the data
         CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
 

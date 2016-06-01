@@ -9,6 +9,7 @@
 
 package com.example.jharshman.event;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -124,7 +125,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_point_list, container, false);
 
-        setHeader();
+        CheckPointListFragment.setHeader(getActivity());
 
         // set up list and list adapter
         mListAdapter = new CheckPointListAdapter(getContext(), R.layout.fragment_check_point_card, mCheckPoints);
@@ -168,8 +169,9 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
         }
     }
 
-    private void setHeader(){
-        List<Event> events = DataManager.instance(getActivity()).getEvents();
+    public static void setHeader(Activity activity){
+
+        List<Event> events = DataManager.instance((activity)).getEvents();
         Event event = null;
 
         for(Event it: events){
@@ -178,7 +180,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
         }
 
         if(event != null){
-            TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+            TextView header = (TextView) activity.findViewById(R.id.headerTitle);
             header.setText("  " + event.getTitle());
         }
     }
