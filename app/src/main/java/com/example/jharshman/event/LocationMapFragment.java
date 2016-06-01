@@ -65,6 +65,13 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
     private static class DownloadTask extends AsyncTask<String, Void, String> {
 
+        private TimedDistanceCallbackListener listener;
+
+        public DownloadTask(TimedDistanceCallbackListener listener){
+            super();
+            this.listener = listener;
+        }
+
         @Override
         protected String doInBackground(String... params) {
             String data = "";
@@ -82,12 +89,19 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         protected void onPostExecute(String results) {
             super.onPostExecute(results);
 
-            ParserTask parserTask = new ParserTask();
+            ParserTask parserTask = new ParserTask(this.listener);
             parserTask.execute(results);
         }
     }
 
     private static class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        private TimedDistanceCallbackListener listener;
+
+        public ParserTask(TimedDistanceCallbackListener listener){
+            super();
+            this.listener = listener;
+        }
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... params) {
@@ -173,9 +187,9 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private static final float METERS_TO_KILO = 1000f;
     private static final float FEET_TO_MILES = 5280f;
     private static final int DEFAULT_ZOOM = 17;
+    private static final int LENGTH = 16;
 
     private static Location mLocation = null;
-    private static TimedDistanceCallbackListener listener;
 
     private MapView mapView;
     private GoogleMap map;
@@ -476,8 +490,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     @SuppressWarnings({"MissingPermission"})
     public static void timeToLocation(int checkPoint, Context context, TimedDistanceCallbackListener callback) {
         double[] location = new double[2];
-        listener = callback;
-        if (listener != null) {
+
+        if (callback != null) {
             if (mLocation != null) {
                 location[0] = mLocation.getLatitude();
                 location[1] = mLocation.getLongitude();
@@ -502,7 +516,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             String url = getDirectionsUrl(new LatLng(location[0], location[1]),
                     new LatLng(coords[0], coords[1]));
 
-            DownloadTask downloadTask = new DownloadTask();
+            DownloadTask downloadTask = new DownloadTask(callback);
             downloadTask.execute(url);
         }
     }
@@ -632,7 +646,10 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         view.setText(mw.location.getTitle());
         view = (TextView)getActivity().findViewById(R.id.descriptionTextView);
-        view.setText(mw.location.getDescription());
+        if(mw.location.getDescription().length() > LENGTH)
+            view.setText(mw.location.getDescription().substring(0, 16));
+        else
+            view.setText(mw.location.getDescription());
     }
 
     private void centerToLocation(double[] coords){
