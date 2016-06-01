@@ -94,29 +94,6 @@ public class Event implements Serializable {
         mCheckPoints = checkPoints;
     }
 
-// public Event() {
-//
-//        int defaultID = 1;
-//
-//        mID = defaultID;
-//        mTitle = "default title";
-//        mShortTitle = generateShortTitle("DT");
-//        mAuthor = "default author";
-//        mDescription = "default description";
-//        mImageSrc = "http://jessicauelmen.com/wp-content/uploads/2016/02/android-logo-featured.jpeg";
-//        mLat = 0.0;
-//        mLon = 0.0;
-//        mQR = "default qr";
-//        mTimeCreated = "2016-01-01 01:01:01";
-//        mTimeUpdated = "2016-01-01 01:01:01";
-//
-//        mRedeemed = false;
-//
-//        mSubscribed = false;
-//
-//        mCheckPoints = new CheckPoint[] {new CheckPoint(defaultID)};
-//    }
-
     /**
      * Builder class for Event class.
      */
