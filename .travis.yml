@@ -2,8 +2,7 @@ language: android
 jdk: openjdk7
 sudo: false
 
-# Specify OS environment
-os:
+# Specify OS environment os:
     - linux
 
 # blacklist
@@ -34,6 +33,10 @@ android:
 # Setup notifications
 notifications:
     slack: cscd-488:2uwpZGdpikeZyr31e9uozhhK#github
+
+install:
+    - sudo /etc/init.d/mysql stop
+    - sudo /etc/init.d/postgresql stop
 
 # Execute Build
 script:
