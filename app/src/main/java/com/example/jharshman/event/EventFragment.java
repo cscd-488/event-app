@@ -7,21 +7,28 @@
  * and user interactions for event data
  */
 
-
 package com.example.jharshman.event;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +44,7 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
     private ListView mListView;
     private EventAdapter mEventAdapter;
     private FloatingActionButton mFab;
-    private RelativeLayout mHeader;
+    private LinearLayout mHeader;
 
     private boolean mInEditMode;
 
@@ -56,10 +63,9 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         // get the event data
         DataManager dataManager = DataManager.instance(getContext());
         dataManager.setUpdateListener(this);
-        if(mEvents == null) {
+        if (mEvents == null) {
             mEvents = new ArrayList<>();
-        }
-        else {
+        } else {
             mEvents.clear();
         }
         mEvents.addAll(dataManager.getSubscribedEvents());
@@ -80,7 +86,28 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
         Button headerDoneButton = (Button) view.findViewById(R.id.fragment_event_header_done_image_button);
         headerDoneButton.setOnClickListener(this);
 
-        mHeader = (RelativeLayout) view.findViewById(R.id.fragment_event_header);
+        final TextView distance = (TextView) view.findViewById(R.id.fragment_event_header_distance_text_view);
+
+        SeekBar distanceSeekBar = (SeekBar) view.findViewById(R.id.fragment_event_header_distance_seek_bar);
+        distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // update position text view
+
+                distance.setText(String.format("%d Miles", progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // update the locations
+                updateEventsInEditMode(seekBar.getProgress());
+            }
+        });
+
+        mHeader = (LinearLayout) view.findViewById(R.id.fragment_event_header);
         mHeader.setVisibility(View.GONE);
 
         mInEditMode = false;
@@ -120,22 +147,19 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
 
         Log.i(TAG, String.format("onEventClick(%d, %s)", view.getId(), event.getTitle()));
 
-        if(view.getId() == R.id.event_card_fab) {
+        if (view.getId() == R.id.event_card_fab) {
 
-            if(mInEditMode) {
+            if (mInEditMode) {
                 // update subscription state
                 event.setSubscribed(event.getSubscribed() == 0 ? 1 : 0);
                 // update the database to match
                 DataManager.instance(getContext()).updateSubscribed(event.getID(), event.getSubscribed());
 
                 // update the view
-//                mEvents.clear();
-//                mEvents.addAll(DataManager.instance(getContext()).getEvents());
                 mEventAdapter.notifyDataSetChanged();
-            }
-            else {
+            } else {
                 // notify listener of event click
-                if(mListener != null) {
+                if (mListener != null) {
                     mListener.onEventInteraction(event.getID());
                 }
             }
@@ -168,14 +192,20 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
     public void onClick(View view) {
 
         // "add" floating action button, show header
-        if(view.getId() == R.id.fragment_event_fab) {
+        if (view.getId() == R.id.fragment_event_fab) {
             mInEditMode = true;
 
             mFab.hide();
             mHeader.setVisibility(View.VISIBLE);
             mEventAdapter.setShowEditButtons(true);
-            mEvents.clear();
-            mEvents.addAll(DataManager.instance(getContext()).getEvents());
+
+            int distance = 100;
+            // set the seek bar
+            if(getView() != null) {
+                ((SeekBar) getView().findViewById(R.id.fragment_event_header_distance_seek_bar)).setProgress(distance);
+            }
+            // update events
+            updateEventsInEditMode(distance);
         }
         // done button, hide header
         else if(view.getId() == R.id.fragment_event_header_done_image_button) {
@@ -186,6 +216,60 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
             mEventAdapter.setShowEditButtons(false);
             mEvents.clear();
             mEvents.addAll(DataManager.instance(getContext()).getSubscribedEvents());
+        }
+    }
+
+    private void updateEventsInEditMode(int radius) {
+
+        // remove events from list
+        mEvents.clear();
+
+        // add all subscribed events
+        mEvents.addAll(DataManager.instance(getContext()).getSubscribedEvents());
+
+        // also add all the events within a radius
+        getEventsByLocation(radius);
+    }
+
+    private void getEventsByLocation(int radius) {
+
+        LocationManager manager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Location location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if(location != null) {
+
+                // get the events based on lat, lon, and radius
+                DataManager.instance(getContext()).getLocalEvents(radius, location.getLatitude(), location.getLongitude(), new DataManager.GetLocalEventsCallback() {
+                    @Override
+                    public void success(List<Event> events) {
+
+                        Log.i(TAG, "Get Local Events Server Connection Successful");
+
+                        for (Event event : events) {
+                            if(! mEvents.contains(event)) {
+                                mEvents.add(event);
+                            }
+                        }
+
+                        // update list view
+                        onDataUpdated(DataManager.instance(getContext()));
+                    }
+
+                    @Override
+                    public void failure(String message) {
+
+                        // pop toast the long way, because of ui threading stuff
+                        ((Activity) getContext()).runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(getContext(), "Server Connection Failed", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                        Log.e(TAG, "Get Local Events Server Connection Failed");
+                    }
+                });
+            }
         }
     }
 

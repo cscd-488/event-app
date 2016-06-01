@@ -371,6 +371,44 @@ public class DataHelper extends SQLiteOpenHelper {
         return events;
     }
 
+
+    /**
+     * Get an event by id
+     *
+     * @return The Event
+     */
+    public List<Event> getEvent(int event_id) {
+
+        Log.i(TAG, "Getting events...");
+
+        List<Event> events;
+
+        // try statement in case of database errors
+        try {
+
+            // get the database from SQLiteOpenHelper.this
+            SQLiteDatabase database = this.getReadableDatabase();
+
+            // send query database for all events
+
+            Cursor cursor = database.query(EVENT_TABLE, null, EVENT_COLUMN_ID + "=?", new String[] {String.valueOf(event_id)}, null, null, null);
+
+            // build result set
+            events = buildEventResultSet(cursor);
+
+            // close the cursor
+            cursor.close();
+
+        } catch (Exception e) {
+            events = new ArrayList<>();
+
+            Log.e(TAG, "error getting events from database");
+        }
+
+        // return events (which may be an empty list)
+        return events;
+    }
+
     public List<Event> getSubscribedEvents() {
 
         Log.i(TAG, "Getting subscribed events...");

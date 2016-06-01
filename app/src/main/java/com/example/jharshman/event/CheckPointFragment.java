@@ -139,10 +139,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
      * @param view The view that was clicked.
      */
     @Override
-    public void onClick(View view) {
-
-        // get the checkpoint from the data manager
-        CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
+    public void onClick(final View view) {
 
         switch (view.getId()) {
 
@@ -150,28 +147,23 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
 
                 Log.i(TAG, "Check point check in button clicked");
 
-                // todo only launch validation if not already checked
 
-                // todo if in gps range, check in
+                // otherwise launch qr code scanner
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_check_in_button, mCheckPointID);
 
+                CheckPoint checkPoint = DataManager.instance(getContext()).getCheckpoint(mCheckPointID);
 
-                // todo otherwise launch qr code scanner
-                mListener.onCheckPointInteraction(R.id.fragment_check_point_check_in_button, checkPoint.getID());
-
-//                // store that user checked in. Note: click should only ever check in, never un-check
-//                boolean checkSaved = DataManager.instance(getContext()).updateChecked(mCheckPoint.getID(), true);
-//
-//                if(checkSaved) {
-//
-//                    // update image button
-//                    ImageView checkButton = (ImageView) getActivity().findViewById(R.id.fragment_check_point_check_in_button);
-//                    checkButton.setImageResource(R.drawable.ic_cloud_done_black_24dp);
-//                }
+                // update button image
+                ImageView checkIn = (ImageView) view.findViewById(R.id.fragment_check_point_check_in_button);
+                if (checkPoint.getChecked() == 1) {
+                    checkIn.setImageResource(R.drawable.ic_cloud_done_black_24dp);
+                    checkIn.setOnClickListener(null);
+                }
 
                 break;
             case R.id.fragment_check_point_card_share_button:
                 // todo handle share button click
-                ShareDrawer.run(getActivity(), checkPoint);
+                ShareDrawer.run(getActivity(), DataManager.instance(getContext()).getCheckpoint(mCheckPointID));
 
                 Log.i(TAG, "Check Point Share button clicked");
 
@@ -181,7 +173,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
                 Log.i(TAG, "Check Point Map button clicked");
 
                 // call callback with check point button id, and current checkpoint id
-                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, checkPoint.getID());
+                mListener.onCheckPointInteraction(R.id.fragment_check_point_map_button, mCheckPointID);
 
                 break;
         }

@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.FragmentContainer, fragment, EVENT_FRAGMENT)
+                    .addToBackStack(null)
                     .commit();
         }
 
@@ -217,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements
      * @param checkpoint_id The id of the check point.
      */
     @Override
-    public void onCheckPointInteraction(int button_id, int checkpoint_id) {
+    public void onCheckPointInteraction(int button_id, final int checkpoint_id) {
 
         switch (button_id) {
 
@@ -247,20 +248,34 @@ public class MainActivity extends AppCompatActivity implements
 
                 // todo authenticate the check in, and relaunch the checkpoint fragment
 
-                ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
+                final DataManager dataManager = DataManager.instance(this);
 
-                if(scanFragment == null) {
-                    scanFragment = new ScanFragment();
-                }
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
-                        .addToBackStack(SCAN_FRAGMENT)
-                        .commit();
+                // check in using gps
+                // todo change to be 100 meters instead of 10000 meters
+                LocationMapFragment.isUserInRange(checkpoint_id, this, 100000, new LocationMapFragment.UserInRange() {
+                    @Override
+                    public void userInRange(boolean inRange, String errorMsg) {
+                        if(! inRange) {
+                            // check in using qr code
+                            ScanFragment scanFragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(SCAN_FRAGMENT);
 
-                // save the current checkpoint so we know which checkpoint to test scan result against
-                mCurrentCheckpointID = checkpoint_id;
+                            if (scanFragment == null) {
+                                scanFragment = new ScanFragment();
+                            }
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.FragmentContainer, scanFragment, SCAN_FRAGMENT)
+                                    .addToBackStack(SCAN_FRAGMENT)
+                                    .commit();
 
-
+                            // save the current checkpoint so we know which checkpoint to test scan result against
+                            mCurrentCheckpointID = checkpoint_id;
+                        }
+                        else {
+                            // gps check in was valid, so update the status
+                            dataManager.updateChecked(checkpoint_id, true);
+                        }
+                    }
+                }, LocationMapFragment.MeasuredDistanceCallbackListener.Measurement.METERS);
                 break;
         }
     }

@@ -1,72 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:id="@+id/fragment_event_header_location_pin"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:src="@drawable/ic_place_24dp"
-        android:tint="@color/medium_gray"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginBottom="10dp"
-        android:scaleType="fitXY" />
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/fragment_event_header_location_pin"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_place_24dp"
+            android:tint="@color/medium_gray"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginBottom="10dp"
+            android:scaleType="fitXY"
+            android:layout_marginRight="30dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Radius"
+            android:id="@+id/fragment_event_header_location_text"
+            android:textSize="@dimen/medium_text"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="10dp" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Spokane WA"
-        android:id="@+id/fragment_event_header_location_text"
-        android:layout_alignTop="@+id/fragment_event_header_location_pin"
-        android:layout_toRightOf="@+id/fragment_event_header_location_pin"
-        android:layout_toEndOf="@+id/fragment_event_header_location_pin"
-        android:textSize="@dimen/medium_text" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="WITHIN n MILES"
-        android:id="@+id/event_header_distance"
-        android:layout_below="@+id/fragment_event_header_location_text"
-        android:layout_toRightOf="@+id/fragment_event_header_location_pin"
-        android:layout_toEndOf="@+id/fragment_event_header_location_pin"
-        android:textSize="@dimen/tiny_text"
-        android:textColor="@color/light_gray"
-        android:textIsSelectable="true" />
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/fragment_event_header_distance_seek_bar"
+            android:max="500"
+            android:layout_marginLeft="40dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toLeftOf="@+id/fragment_event_header_distance_text_view"
+            android:layout_toStartOf="@+id/fragment_event_header_distance_text_view" />
 
-    <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:id="@+id/fragment_event_header_edit_image_button"
-        android:layout_alignTop="@+id/fragment_event_header_location_text"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_mode_edit_24dp"
-        android:layout_marginRight="30dp"
-        android:tint="@color/medium_gray"
-        android:scaleType="fitXY" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="x miles"
+            android:layout_alignBottom="@+id/fragment_event_header_distance_seek_bar"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/fragment_event_header_distance_text_view"
+            android:layout_marginRight="30dp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/fragment_event_header_done_image_button"
-        android:layout_below="@+id/fragment_event_header_location_pin"
-        android:layout_alignLeft="@+id/fragment_event_header_location_pin"
-        android:layout_alignStart="@+id/fragment_event_header_location_pin"
         android:src="@drawable/placeholder_logo"
         android:background="@drawable/rounded_corner_gradient_button"
-        android:layout_alignRight="@+id/fragment_event_header_edit_image_button"
-        android:layout_alignEnd="@+id/fragment_event_header_edit_image_button"
         android:text="Done"
         android:textColor="#ffffff"
-        android:textSize="@dimen/small_text" />
+        android:textSize="@dimen/small_text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="30dp" />
 
-</RelativeLayout>
+    </LinearLayout>
+</LinearLayout>
