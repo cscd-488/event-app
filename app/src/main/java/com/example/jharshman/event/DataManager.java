@@ -182,38 +182,25 @@ public class DataManager implements Callback {
 
         Log.i(TAG, "Got response from server!");
 
-        if (! response.isSuccessful()) {
-            throw new IOException("Unexpected code " + response);
-        }
+        List<Event> events = new ArrayList<>();
 
-        Headers responseHeaders = response.headers();
-        for (int i = 0; i < responseHeaders.size(); i++) {
-            System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-        }
+        if(response.isSuccessful()) {
 
-        JsonParser parser = new JsonParser();
-        JsonArray jArray = parser.parse(response.body().string()).getAsJsonArray();
-        ArrayList<Event> events = new ArrayList<>();
-
-        // this parses out the json array. the Events and Checkpoints must have @SerializedName("id") notation
-        for(JsonElement obj : jArray )
-        {
             try {
-                Event event = mGson.fromJson(obj, Event.class);
-                events.add(event);
-                Log.i(TAG, "Event: " + event.toString());
-            }catch (NumberFormatException e) {
-                Log.i(TAG, "Error parsing json. Number Format Exception.");
+                events.addAll(parseResponse(response));
+
+            } catch (IOException e) {
+                Log.i(TAG, "Error parsing events");
             }
         }
 
         // update the local database
-        for(Event event : events) {
+        for (Event event : events) {
             // insert event
             mDataHelper.insertEvent(event);
 
             // insert checkpoints
-            for(CheckPoint checkPoint : event.getCheckPoints()) {
+            for (CheckPoint checkPoint : event.getCheckPoints()) {
                 mDataHelper.insertCheckPoint(checkPoint);
             }
         }
@@ -230,10 +217,22 @@ public class DataManager implements Callback {
         return mDataHelper.getEvents();
     }
 
+    /**
+     * Get event by event id
+     *
+     * @param eventID The id of the event.
+     * @return List of all events.
+     */
+    public List<Event> getEvent(int eventID) {
+
+        // get all events from data helper
+        return mDataHelper.getEvent(eventID);
+    }
+
     public interface GetLocalEventsCallback {
 
-        public void success(List<Event> events);
-        public void failure(String message);
+        void success(List<Event> events);
+        void failure(String message);
     }
 
     /**

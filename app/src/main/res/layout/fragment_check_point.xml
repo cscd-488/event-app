@@ -128,15 +128,6 @@
 
     </ScrollView>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fragment_check_point_fab_menu_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_24dp"
-        android:tint="@color/white"/>
-
 </FrameLayout>
     <ListView android:id="@+id/share_drawer"
         android:layout_width="match_parent"
