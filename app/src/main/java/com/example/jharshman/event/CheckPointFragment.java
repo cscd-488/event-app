@@ -163,7 +163,7 @@ public class CheckPointFragment extends Fragment implements View.OnClickListener
                 break;
             case R.id.fragment_check_point_card_share_button:
                 // todo handle share button click
-                ShareDrawer.run(getActivity(), checkPoint);
+                ShareDrawer.run(getActivity(), DataManager.instance(getContext()).getCheckpoint(mCheckPointID));
 
                 Log.i(TAG, "Check Point Share button clicked");
 
