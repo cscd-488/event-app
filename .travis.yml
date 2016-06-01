@@ -34,10 +34,6 @@ android:
 notifications:
     slack: cscd-488:2uwpZGdpikeZyr31e9uozhhK#github
 
-install:
-    - sudo /etc/init.d/mysql stop
-    - sudo /etc/init.d/postgresql stop
-
 # Execute Build
 script:
-  - ./gradlew clean build
+  - ./gradlew build
