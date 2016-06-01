@@ -7,7 +7,6 @@
  * and user interactions for event data
  */
 
-
 package com.example.jharshman.event;
 
 import android.Manifest;
@@ -28,8 +27,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -259,8 +256,8 @@ public class EventFragment extends Fragment implements EventAdapter.OnEventClick
                         onDataUpdated(DataManager.instance(getContext()));
                     }
 
-                        @Override
-                        public void failure(String message) {
+                    @Override
+                    public void failure(String message) {
 
                         // pop toast the long way, because of ui threading stuff
                         ((Activity) getContext()).runOnUiThread(new Runnable() {
