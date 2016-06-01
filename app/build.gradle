@@ -3,6 +3,7 @@ apply plugin: 'io.fabric'
 
 android {
 
+
     lintOptions {
         abortOnError false
     }
