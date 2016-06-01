@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,8 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
      */
     private static CheckPointListFragment mInstance;
 
+    private static int mEventID;
+
     public CheckPointListFragment() {
         // required empty constructor
     }
@@ -94,6 +97,7 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
         super.onCreate(savedInstanceState);
 
         int eventID;
+
         if (getArguments() != null) {
             // get Event ID
             eventID = getArguments().getInt(EVENT_ID_KEY);
@@ -104,6 +108,8 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
         }
 
         Log.i(TAG, "Event ID passed in " + eventID);
+
+        mEventID = eventID;
 
         // get the check points from the data manager.
         if(mCheckPoints == null) {
@@ -117,6 +123,8 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_point_list, container, false);
+
+        setHeader();
 
         // set up list and list adapter
         mListAdapter = new CheckPointListAdapter(getContext(), R.layout.fragment_check_point_card, mCheckPoints);
@@ -157,6 +165,21 @@ public class CheckPointListFragment extends Fragment implements AdapterView.OnIt
 
         if(mListener != null) {
             mListener.onCheckPointListInteraction(mCheckPoints.get(position).getID());
+        }
+    }
+
+    private void setHeader(){
+        List<Event> events = DataManager.instance(getActivity()).getEvents();
+        Event event = null;
+
+        for(Event it: events){
+            if(it.getID() == mEventID)
+                event = it;
+        }
+
+        if(event != null){
+            TextView header = (TextView) getActivity().findViewById(R.id.headerTitle);
+            header.setText("  " + event.getTitle());
         }
     }
 

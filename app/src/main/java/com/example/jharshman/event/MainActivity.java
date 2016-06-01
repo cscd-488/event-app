@@ -4,15 +4,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
@@ -61,10 +66,10 @@ public class MainActivity extends AppCompatActivity implements
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         tracker = GpsTracker.create(this);
+
+        setUpHeader();
 
         if(findViewById(R.id.FragmentContainer)!=null) {
             if (savedInstanceState != null)
@@ -79,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.FragmentContainer, fragment, EVENT_FRAGMENT)
-                    .addToBackStack(null)
                     .commit();
         }
 
@@ -141,8 +145,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onBackPressed() {
         int count = getFragmentManager().getBackStackEntryCount();
 
+        android.app.Fragment fragment = getFragmentManager().findFragmentByTag(EVENT_FRAGMENT);
+
         if(ShareDrawer.isOpen()){
             ShareDrawer.exit();
+        } else if(false){
+
         } else if(count == 0) {
             super.onBackPressed();
         } else {
@@ -372,5 +380,19 @@ public class MainActivity extends AppCompatActivity implements
         share.setType("image/*");
         share.putExtra(Intent.EXTRA_STREAM, image);
         startActivity(Intent.createChooser(share , "Share to:"));
+    }
+
+    private void setUpHeader(){
+        TextView header = (TextView) findViewById(R.id.headerTitle);
+        GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{ Color.parseColor("#3FA9F5"), Color.parseColor("#55D883")});
+        header.setBackground(gradient);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.parseColor("#3FA9F5"));
+        }
     }
 }

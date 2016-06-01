@@ -43,4 +43,5 @@
     <string name="ui_calculating">Calculating...</string>
     <string name="icon">icon</string>
     <string name="facebook_app_id">1599063873746921</string>
+    <string name="magpieTitle">Magpie</string>
 </resources>

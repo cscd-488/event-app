@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.share.model.ShareLinkContent;
@@ -52,6 +53,7 @@ public class ShareDrawer {
 
         if(isSharable()) {
             setupDrawer();
+            setHeader();
             mDrawerLayout.openDrawer(mDrawerList);
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
             mOpen = true;
@@ -77,6 +79,7 @@ public class ShareDrawer {
     public static void exit(){
         mDrawerLayout.closeDrawers();
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        resetHeader();
 
         mActivity = null;
         mMediaContent = null;
@@ -252,5 +255,15 @@ public class ShareDrawer {
         TweetComposer.Builder builder = new TweetComposer.Builder(mActivity)
                 .text(mMediaContent.getTitle() + " - " + mMediaContent.getDescription());
         builder.show();
+    }
+
+    private static void setHeader() {
+        TextView header = (TextView) mActivity.findViewById(R.id.headerTitle);
+        header.setText("  Share to:");
+    }
+
+    private static void resetHeader(){
+        TextView header = (TextView) mActivity.findViewById(R.id.headerTitle);
+        header.setText("  " + mMediaContent.getTitle());
     }
 }
