@@ -30,7 +30,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -54,22 +53,24 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link LocationMapFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link LocationMapFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * @file LocationMapFragment.java
+ * @author Aaron Young
+ * @date 3/2/2016
+ * @date 6/5/2016
+ *
+ * A fragment class created to hold a map display as well as
+ * communicate back various map functionality such as distance
+ * and travel time
  */
 public class LocationMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static class DownloadTask extends AsyncTask<String, Void, String> {
 
-        private TimedDistanceCallbackListener listener;
+        private TimedDistanceCallbackListener mListener;
 
         public DownloadTask(TimedDistanceCallbackListener listener){
             super();
-            this.listener = listener;
+            this.mListener = listener;
         }
 
         @Override
@@ -89,18 +90,18 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         protected void onPostExecute(String results) {
             super.onPostExecute(results);
 
-            ParserTask parserTask = new ParserTask(this.listener);
+            ParserTask parserTask = new ParserTask(this.mListener);
             parserTask.execute(results);
         }
     }
 
     private static class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
-        private TimedDistanceCallbackListener listener;
+        private TimedDistanceCallbackListener mListener;
 
         public ParserTask(TimedDistanceCallbackListener listener){
             super();
-            this.listener = listener;
+            this.mListener = listener;
         }
 
         @Override
@@ -130,7 +131,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
             try {
                 if (results.size() < 1) {
-                    listener.onMapTimedDistance(duration);
+                    mListener.onMapTimedDistance(duration);
                     return;
                 }
             } catch (Exception e) {
@@ -165,17 +166,17 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
                 polylineOptions.width(2f);
                 polylineOptions.color(Color.RED);
             }
-            listener.onMapTimedDistance(duration);
+            mListener.onMapTimedDistance(duration);
         }
     }
 
     private class MarkerWrapper {
-        public CheckPoint location;
-        public Marker marker;
+        public CheckPoint mLocation;
+        public Marker mMarker;
 
         public MarkerWrapper(CheckPoint location, Marker marker) {
-            this.location = location;
-            this.marker = marker;
+            this.mLocation = location;
+            this.mMarker = marker;
         }
     }
 
@@ -191,19 +192,18 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
     private static Location mLocation = null;
 
-    private MapView mapView;
-    private GoogleMap map;
-    private int displayIndex = 0;
-    private MarkerWrapper[] markers = new MarkerWrapper[0];
+    private MapView mMapView;
+    private GoogleMap mMap;
+    private int mDisplayIndex = 0;
+    private MarkerWrapper[] mMarkers = new MarkerWrapper[0];
     private OnFragmentInteractionListener mListener;
-    private CheckPoint[] coordinates = new CheckPoint[0];
-    private boolean zoomed = false;
-    private GoogleApiClient mGoogleApiClient;
+    private CheckPoint[] mCoordinates = new CheckPoint[0];
+    private boolean mZoomed = false;
 
     /**
      * The event id to display checkpoints for.
      */
-    private int eventID;
+    private int mEventID;
 
     private LocationMapFragment.TimedDistanceCallbackListener callbackListener = new LocationMapFragment.TimedDistanceCallbackListener() {
         @Override
@@ -222,11 +222,11 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     private GoogleMap.OnMarkerClickListener myMarkerClickListener = new GoogleMap.OnMarkerClickListener() {
         @Override
         public boolean onMarkerClick(Marker marker) {
-            for (int i = 0; i < markers.length; i++) {
-                if (markers[i].marker.equals(marker)) {
-                    displayIndex = i;
+            for (int i = 0; i < mMarkers.length; i++) {
+                if (mMarkers[i].mMarker.equals(marker)) {
+                    mDisplayIndex = i;
 
-                    fillText(markers[i]);
+                    fillText(mMarkers[i]);
                     return false;
                 }
             }
@@ -241,12 +241,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
             if (getView() == null)
                 return;
-            if (!zoomed)
+            if (!mZoomed)
                 centerToLocation(mLocation.getLatitude(), mLocation.getLongitude());
-            if (coordinates == null || coordinates.length == 0)
+            if (mCoordinates == null || mCoordinates.length == 0)
                 return;
 
-            CheckPoint hovered = coordinates[displayIndex];
+            CheckPoint hovered = mCoordinates[mDisplayIndex];
 
             distanceFromUser(hovered.getEventID(), getContext(), measuredCallbackListener, MeasuredDistanceCallbackListener.Measurement.MILES);
             timeToLocation(hovered.getEventID(), getContext(), callbackListener);
@@ -338,10 +338,10 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         if (getArguments() != null) {
             // get the id of the event
-            eventID = getArguments().getInt(ARG_CHECKPOINT_ID);
+            mEventID = getArguments().getInt(ARG_CHECKPOINT_ID);
 
             // get the checkpoints for the event
-            addLocations(eventID);
+            addLocations(mEventID);
         }
     }
 
@@ -363,9 +363,9 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     }
 
     private void buildMap(View v, Bundle savedInstanceState) {
-        mapView = (MapView) v.findViewById(R.id.mapView);
-        mapView.onCreate(savedInstanceState);
-        mapView.onResume();
+        mMapView = (MapView) v.findViewById(R.id.mapView);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.onResume();
 
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -373,7 +373,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             e.printStackTrace();
         }
 
-        mapView.getMapAsync(this);
+        mMapView.getMapAsync(this);
     }
 
     private static float conversion(float inMeters, MeasuredDistanceCallbackListener.Measurement measurement){
@@ -482,7 +482,8 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     }
 
     /**
-     * 
+     * Calls the callback function with walking time passed as a string
+     *
      * @param checkPoint
      * @param context
      * @param callback
@@ -524,7 +525,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        this.mapView.onLowMemory();
+        this.mMapView.onLowMemory();
     }
 
     @Override
@@ -551,17 +552,23 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
      * @param eventID
      */
     public void addLocations(int eventID) {
-        List<CheckPoint> coordinates = DataManager.instance(getContext()).getCheckpoints(eventID);
+        List<CheckPoint> mCoordinates = DataManager.instance(getContext()).getCheckpoints(eventID);
 
-        if(coordinates == null)
+        if(mCoordinates == null)
             throw new NullPointerException("CoordinateCollection list cannot be null");
 
-        this.coordinates = coordinates.toArray(this.coordinates);
+        this.mCoordinates = mCoordinates.toArray(this.mCoordinates);
     }
 
+    /**
+     * Called internally when the map display is ready
+     * Unknown effects when called externally 
+     *
+     * @param googleMap
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        this.map = googleMap;
+        this.mMap = googleMap;
         try {
             int off = Settings.Secure.getInt(getContext().getContentResolver(), Settings.Secure.LOCATION_MODE);
             if (off == 0) {
@@ -582,15 +589,15 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             ActivityCompat.requestPermissions((Activity) getContext(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
         }
-        this.map.setMyLocationEnabled(true);
-        this.map.setOnMarkerClickListener(this.myMarkerClickListener);
-        this.map.setOnMyLocationChangeListener(this.myLocationChangeListener);
+        this.mMap.setMyLocationEnabled(true);
+        this.mMap.setOnMarkerClickListener(this.myMarkerClickListener);
+        this.mMap.setOnMyLocationChangeListener(this.myLocationChangeListener);
     }
 
     private void populateFunctionality(){
         MarkerWrapper mw = null;
-        if(this.markers.length != 0)
-            mw = this.markers[this.displayIndex];
+        if(this.mMarkers.length != 0)
+            mw = this.mMarkers[this.mDisplayIndex];
 
         ImageButton prevButton = (ImageButton) getActivity().findViewById(R.id.prevButton);
         ImageButton nextButton = (ImageButton) getActivity().findViewById(R.id.nextButton);
@@ -602,7 +609,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    mListener.onMapFragmentInteraction(coordinates[displayIndex]);
+                    mListener.onMapFragmentInteraction(mCoordinates[mDisplayIndex]);
                 }
             }
         });
@@ -610,37 +617,37 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
         centerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(markers.length == 0)return;
+                if(mMarkers.length == 0)return;
 
-                centerToLocation(markers[displayIndex].location.getCoordinates());
+                centerToLocation(mMarkers[mDisplayIndex].mLocation.getCoordinates());
             }
         });
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(markers.length == 0)return;
+                if(mMarkers.length == 0)return;
 
-                displayIndex--;
-                if (displayIndex == -1)
-                    displayIndex = markers.length - 1;
+                mDisplayIndex--;
+                if (mDisplayIndex == -1)
+                    mDisplayIndex = mMarkers.length - 1;
 
-                fillText(markers[displayIndex]);
-                centerToLocation(markers[displayIndex].location.getCoordinates());
+                fillText(mMarkers[mDisplayIndex]);
+                centerToLocation(mMarkers[mDisplayIndex].mLocation.getCoordinates());
             }
         });
 
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(markers.length == 0)return;
+                if(mMarkers.length == 0)return;
 
-                displayIndex++;
-                if (displayIndex == markers.length)
-                    displayIndex = 0;
+                mDisplayIndex++;
+                if (mDisplayIndex == mMarkers.length)
+                    mDisplayIndex = 0;
 
-                fillText(markers[displayIndex]);
-                centerToLocation(markers[displayIndex].location.getCoordinates());
+                fillText(mMarkers[mDisplayIndex]);
+                centerToLocation(mMarkers[mDisplayIndex].mLocation.getCoordinates());
             }
         });
     }
@@ -650,12 +657,12 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
         TextView view = (TextView) getActivity().findViewById(R.id.titleText);
 
-        view.setText(mw.location.getTitle());
+        view.setText(mw.mLocation.getTitle());
         view = (TextView)getActivity().findViewById(R.id.descriptionTextView);
-        if(mw.location.getDescription().length() > LENGTH)
-            view.setText(mw.location.getDescription().substring(0, 16));
+        if(mw.mLocation.getDescription().length() > LENGTH)
+            view.setText(mw.mLocation.getDescription().substring(0, 16));
         else
-            view.setText(mw.location.getDescription());
+            view.setText(mw.mLocation.getDescription());
     }
 
     private void centerToLocation(double[] coords){
@@ -663,29 +670,29 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
     }
 
     private void centerToLocation(double lat, double lon){
-        if(this.map == null)
+        if(this.mMap == null)
             return;
 
         if(mLocation != null){
-            this.map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), DEFAULT_ZOOM));
+            this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), DEFAULT_ZOOM));
         }
-        this.zoomed = true;
+        this.mZoomed = true;
     }
 
     private void setupCheckPoints(){
-        if(this.coordinates == null)
+        if(this.mCoordinates == null)
             return;
         double[] coords;
-        this.markers = new MarkerWrapper[this.coordinates.length];
+        this.mMarkers = new MarkerWrapper[this.mCoordinates.length];
         float hue;
-        for (int i = 0; i < this.coordinates.length; i++){
-            coords = this.coordinates[i].getCoordinates();
+        for (int i = 0; i < this.mCoordinates.length; i++){
+            coords = this.mCoordinates[i].getCoordinates();
 
-            Log.d(this.coordinates[i].getTitle(), coords[0] + ", " + coords[1]);
-            markers[i] = new MarkerWrapper(this.coordinates[i], map.addMarker(new MarkerOptions()
+            Log.d(this.mCoordinates[i].getTitle(), coords[0] + ", " + coords[1]);
+            mMarkers[i] = new MarkerWrapper(this.mCoordinates[i], mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(coords[0], coords[1]))
-                    .snippet(this.coordinates[i].getDescription())
-                    .title(this.coordinates[i].getTitle())));
+                    .snippet(this.mCoordinates[i].getDescription())
+                    .title(this.mCoordinates[i].getTitle())));
         }
     }
 

@@ -29,52 +29,52 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
  */
 public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static GpsTracker gpsTracker = null;
-    private static Context context;
-    private static GoogleApiClient googleApiClient;
+    private static GpsTracker mGpsTracker = null;
+    private static Context mContext;
+    private static GoogleApiClient mGoogleApiClient;
 
-    private Location location = null;
+    private Location mLocation = null;
 
     private GpsTracker(){}
 
     public static GpsTracker instanceOf(Context _context){
-        if(gpsTracker == null){
+        if(mGpsTracker == null){
             return create(_context);
         }
-        return gpsTracker;
+        return mGpsTracker;
     }
 
     public static GpsTracker create(Context _context){
-        context = _context;
-        if(gpsTracker == null)
-            gpsTracker = new GpsTracker();
+        mContext = _context;
+        if(mGpsTracker == null)
+            mGpsTracker = new GpsTracker();
 
-        googleApiClient = null;
+        mGoogleApiClient = null;
 
         locationServicesCheck();
         setupGps();
 
-        return gpsTracker;
+        return mGpsTracker;
     }
 
     private static void setupGps(){
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
             return;
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsTracker);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mGpsTracker);
     }
 
     private static void locationServicesCheck() {
-        if (googleApiClient == null) {
-            googleApiClient = new GoogleApiClient.Builder(context)
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
                     .addApi(LocationServices.API)
-                    .addConnectionCallbacks(gpsTracker)
-                    .addOnConnectionFailedListener(gpsTracker).build();
-            googleApiClient.connect();
+                    .addConnectionCallbacks(mGpsTracker)
+                    .addOnConnectionFailedListener(mGpsTracker).build();
+            mGoogleApiClient.connect();
 
             LocationRequest locationRequest = LocationRequest.create();
             locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
@@ -86,7 +86,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
             builder.setAlwaysShow(true);
 
             PendingResult<LocationSettingsResult> result =
-                    LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+                    LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
 
             result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
                 @Override
@@ -105,7 +105,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
                                 // Show the dialog by calling startResolutionForResult(),
                                 // and check the result in onActivityResult().
                                 status.startResolutionForResult(
-                                        (Activity) context, 1000);
+                                        (Activity) mContext, 1000);
                             } catch (IntentSender.SendIntentException e) {
                                 // Ignore the error.
                             }
@@ -120,12 +120,12 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
         }
     }
 
-    public Location getLocation(){return location;}
+    public Location getLocation(){return mLocation;}
     public void connect(){
-        googleApiClient.connect();
+        mGoogleApiClient.connect();
     }
     public void disconnect(){
-        googleApiClient.disconnect();
+        mGoogleApiClient.disconnect();
     }
     @Override
     public void onConnected(Bundle bundle) { }
@@ -133,7 +133,7 @@ public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionC
     public void onConnectionSuspended(int i) {}
     @Override
     public void onLocationChanged(Location location) {
-        this.location = location;
+        this.mLocation = location;
     }
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {    }
