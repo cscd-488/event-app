@@ -24,8 +24,13 @@ import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 /**
- * Created by Aaron on 1/24/2016.
- * Edited 5/24/2016
+ * @file GpsTracker.java
+ * @author Aaron Young
+ * @date 1/24/2016
+ * @date 5/24/2016
+ * @date 6/5/2016
+ *
+ * A small class to handle the starting and stopping of location services
  */
 public class GpsTracker implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 

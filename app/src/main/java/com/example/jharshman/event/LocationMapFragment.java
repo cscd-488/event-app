@@ -562,7 +562,7 @@ public class LocationMapFragment extends Fragment implements OnMapReadyCallback 
 
     /**
      * Called internally when the map display is ready
-     * Unknown effects when called externally 
+     * Unknown effects when called externally
      *
      * @param googleMap
      */
