@@ -2,8 +2,7 @@ language: android
 jdk: openjdk7
 sudo: false
 
-# Specify OS environment
-os:
+# Specify OS environment os:
     - linux
 
 # blacklist
