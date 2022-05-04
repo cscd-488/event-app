@@ -114,13 +114,6 @@ public class login extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // hide the toolbar
-        try {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
-        } catch(NullPointerException npe) {
-            Log.e("LoginFragment","Hide Action Bar",npe);
-        }
-
     }
 
     /**

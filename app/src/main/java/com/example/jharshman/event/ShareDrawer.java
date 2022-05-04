@@ -2,7 +2,6 @@ package com.example.jharshman.event;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -36,6 +35,7 @@ import java.security.acl.Permission;
 
 public class ShareDrawer {
     public static final int LOAD_IMAGE = 555;
+    public static final int CAMERA_LOAD = 444;
     public static final int DEFAULT_SHARE = 777;
     public static final int CAMERA_SHARE = 888;
 
@@ -123,7 +123,7 @@ public class ShareDrawer {
             Toast.makeText(mActivity, "Photo share failed.", Toast.LENGTH_SHORT).show();
     }
 
-    private static void defaultShare(){
+    public static void defaultShare(){
         int permissionCheck = ContextCompat.checkSelfPermission(mActivity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
@@ -139,7 +139,7 @@ public class ShareDrawer {
 
     }
 
-    public static void shareImageURL(){
+    private static void shareImageURL(){
         Thread thread = new Thread(new Runnable()
         {
             @Override
@@ -213,7 +213,7 @@ public class ShareDrawer {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (takePictureIntent.resolveActivity(mActivity.getPackageManager()) != null) {
-            mActivity.startActivityForResult(takePictureIntent, LOAD_IMAGE);
+            mActivity.startActivityForResult(takePictureIntent, CAMERA_LOAD);
         }
     }
 
